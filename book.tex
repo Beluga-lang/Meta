@@ -1,0 +1,299 @@
+\documentclass[12pt]{book}
+
+%\topmargin 0pt
+%\advance \topmargin by -\headheight
+%\advance \topmargin by -\headsep
+     
+% \ifdefined\INSTRUCTORVERSION
+%   \relax
+% \else
+% % short version:
+% \newcommand{\INSTRUCTORVERSION}[1]{#1}
+% \newcommand{\STUDENTVERSION}[1]{}
+% % % long version:
+% % \newcommand{\LONGVERSION}[1]{#1}
+% % \newcommand{\SHORTVERSION}[1]{}
+% % \newcommand{\SHORTVERSION}[1]{BEGIN~SHORT\ #1 \ END~SHORT}
+% \fi
+% \newtheorem{exercise}{Exercise}[section]
+% \newenvironment{ADDITIONAL}[1]{#1}{}
+% \newenvironment{SOLUTION}[1]{\paragraph*{Solution}\begin{it}#1}{\end{it}}
+     
+%\oddsidemargin 0pt
+%\evensidemargin \oddsidemargin
+%\marginparwidth 0.5in
+     
+
+     
+% \setlength{\topmargin}{15mm}    
+\setlength{\topmargin}{5mm}    
+
+%\setlength{\textwidth}{155mm}    
+\setlength{\textwidth}{155mm}    
+%\setlength{\textwidth}{165mm}    
+\setlength{\textheight}{200mm}
+%\setlength{\textheight}{195mm}
+
+\setlength{\evensidemargin}{5mm}
+\setlength{\oddsidemargin}{5mm}
+
+
+% \usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{srcltx}
+\usepackage{charter}
+\usepackage{euler}
+
+\usepackage{latexsym}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{comment}
+\usepackage{color}
+
+\ifdefined\studentversion
+  \excludecomment{exercise}
+  \excludecomment{solution}
+  \excludecomment{additional}
+\else
+% \excludecomment{additional}
+\includecomment{exercise}
+\includecomment{solution}
+\includecomment{additional}
+\fi
+
+\newtheorem{@problem}{Exercise}[section]
+\newenvironment{problem}{\begin{@problem}\rm}{\end{@problem}}
+
+\newtheorem{@sol}{Solution}[section]
+\newenvironment{sol}{\begin{@sol}\rm}{\end{@sol}}
+
+
+% \input prelude
+
+\usepackage{proof}
+
+\newcommand{\nl}{\overline{n}}
+
+\newtheorem{@axiom}{Axiom}
+\newenvironment{axiom}{\begin{@axiom}\rm}{\end{@axiom}}
+% \newtheorem{@theorem}{Theorem}[section]
+% \newenvironment{theorem}{\begin{@theorem}\rm}{\end{@theorem}}
+
+% \newtheorem{@lemma}{Lemma}[section]
+% \newenvironment{lemma}{\begin{@lemma}\rm}{\end{@lemma}}
+
+
+
+\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
+\newcommand{\dRed}[1]{{\color{dRed}#1}}
+
+\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
+\newcommand{\mygreen}[1]{{\color{dGreen}#1}}
+\newcommand{\emphFact}[1]{{\mygreen{#1}}}
+
+\usepackage{graphics}
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\def\mkPascal#1{
+  \begin{tikzpicture}
+    \def\dx{20pt}
+    \def\dy{30pt}
+    \newcounter{i}
+    \stepcounter{i}
+    \node (\arabic{i}) at (0,0) {1};
+    \foreach [count=\i] \x in {2,...,#1}{
+      \pgfmathsetmacro{\lox}{\x-1}%
+      \pgfmathsetmacro{\loxt}{\x-3}%
+      \foreach [count=\j] \xx in {-\lox,-\loxt,...,\lox}{
+        \pgfmathsetmacro{\jj}{\j-1}%
+        \stepcounter{i}
+        \pgfmathsetmacro{\lbl}{\lox!/(\jj!*(\lox-\jj)!)}
+        \node  (\arabic{i}) at (\xx*\dx, -\lox*\dy) {\pgfmathint{\lbl}\pgfmathresult};
+      }
+    }
+    \newcounter{z}
+    \newcounter{xn}
+    \newcounter{xnn}
+    \pgfmathsetmacro{\maxx}{#1 - 1}
+    \foreach \x in {1,...,\maxx}{
+      \foreach \xx in {1,...,\x}{
+        \stepcounter{z}
+        \setcounter{xn}{\arabic{z}}
+        \addtocounter{xn}{\x}
+        \setcounter{xnn}{\arabic{xn}}
+        \stepcounter{xnn}
+          \draw [->] (\arabic{z}) -- (\arabic{xn});
+          \draw [->] (\arabic{z}) -- (\arabic{xnn});
+      }
+    }
+  \end{tikzpicture}
+}
+
+\usepackage{url}
+
+\usepackage{charter}
+% \usepackage{euler}
+
+ \newtheorem{definition}{Definition}[section]
+ \newtheorem{theorem}{Theorem}[section]
+ \newtheorem{conjecture}[theorem]{Conjecture}
+ \newtheorem{corollary}[theorem]{Corollary}
+ \newtheorem{proposition}[theorem]{Proposition}
+ \newtheorem{lemma}[theorem]{Lemma}
+
+\input prelude-Jan15
+\usepackage{cdsty}
+\usepackage{proof}
+\usepackage{graphics}
+\usepackage{graphicx}
+
+\usepackage{color}
+\usepackage{colortbl}
+% {0.0,0.25,0.6,0} or 0,0.61,0.87,0}
+   \definecolor{orange}{rgb}{0.75,0.5,0.1}
+   \definecolor{myblue}{rgb}{0.8,0.85,1}
+   \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+   \definecolor{myotherblue}{rgb}{0,0.1,0.7}
+   \definecolor{myotherblue}{rgb}{0.5,0,0.5}
+   \definecolor{dimgrey}{rgb}{0.8,0.8,0.8}
+\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
+\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
+% \usepackage{code}
+
+% For listing package to pretty print contextualML 
+\usepackage{srcltx}
+
+\usepackage{listings}
+\lstloadlanguages{ContextualML}
+\lstset{language=ContextualML}  % Added to local lstlang2.sty
+
+\usepackage{natbib}
+\bibpunct{[}{]}{;}{a}{}{,}
+\def\newblock{\hskip .11em plus .33em minus .07em}
+
+
+
+\newcommand{\bred}{\beta{-}\textsf{red}}
+\newcommand{\blam}{\textsf{lam{-}red}}
+\newcommand{\appMred}{\textsf{app{-}red{-}1}}
+\newcommand{\appNred}{\textsf{app{-}red{-}2}}
+
+\newcommand{\bref}{\textsf{reflexive}}
+\newcommand{\bmred}{\textsf{one{-}step}}
+\newcommand{\btrans}{\textsf{transitive}}
+
+% \newcommand{\FV}{\mathsf{FV}}
+\newcommand{\FMV}{\mathsf{FMV}}
+
+\newcommand{\jtype}{\mathit{type}}
+\newcommand{\edot}{\bullet}
+\newcommand{\lb}{{[\![}}
+\newcommand{\rb}{{]\!]}}
+
+% \newcommand{\arrow}{\rightarrow}
+
+% \newcommand{\chk}{\Leftarrow}
+% \newcommand{\syn}{\Rightarrow}
+% \newcommand{\bnfas}{\mathrel{::=}}
+% \newcommand{\bnfalt}{\mathrel{\mid}}
+
+\newcommand{\type}{\textsf{type}}
+\newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
+% --------------------------------------------------------------------------- 
+%
+% Set up listings "literate" keyword stuff (for \lstset below)
+%
+\newdimen\zzlistingsize
+\newdimen\zzlistingsizedefault
+\zzlistingsizedefault=9.5pt
+\zzlistingsize=\zzlistingsizedefault
+\global\def\InsideComment{0}
+\newcommand{\Lstbasicstyle}{\fontsize{\zzlistingsize}{1.05\zzlistingsize}\ttfamily}
+\newcommand{\keywordFmt}{\fontsize{0.9\zzlistingsize}{1.0\zzlistingsize}\bf}
+\newcommand{\smartkeywordFmt}{\if0\InsideComment\keywordFmt\fi}
+\newcommand{\commentFmt}{\def\InsideComment{1}\fontsize{0.95\zzlistingsize}{1.0\zzlistingsize}\rmfamily\slshape}
+
+\newcommand{\LST}{\setlistingsize{\zzlistingsizedefault}}
+
+\newlength{\zzlstwidth}
+\newcommand{\setlistingsize}[1]{\zzlistingsize=#1%
+\settowidth{\zzlstwidth}{{\Lstbasicstyle~}}}
+\setlistingsize{\zzlistingsizedefault}
+
+% The order of the "literate" definitions is significant:
+%   later definitions shadow earlier ones.  The \\Pi definition must come
+%   *after* the \\ definition, or the first part of \\Pi --- that is, \\ --- will
+%   be matched, and instead of $\Pi$ you'll get $\lambda Pi$.
+%
+\lstset{literate={->}{{$\rightarrow~$}}2 %
+                               {=>}{{$\Rightarrow~$}}2 %
+                               {|-}{{$\vdash$}}2 %
+                               {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
+                               {\\}{{$\lambda$}}1 %
+                               {\\Pi}{{$\Pi$}}1 %
+                               {\\gamma}{{$\gamma$}}1 %
+                               {\\psi}{{$\psi$}}1 %
+                               {FN}{{$\Lambda$}}1 %
+%                               {<<}{\color{myotherblue}}1 %
+                               {<<}{\color{dGreen}}1 %
+                               {<<r}{\color{dRed}}1 %
+                               {<*}{\color{dGreen}}1 %
+                               {<dim}{\color{dimgrey}}1 %
+                               {>>}{\color{black}}1 %
+               ,
+               columns=[l]fullflexible,
+               basewidth=\zzlstwidth,
+               basicstyle=\Lstbasicstyle,
+               keywordstyle=\keywordFmt,
+               identifierstyle=\relax,
+%               stringstyle=\relax,
+               commentstyle=\commentFmt,
+               breaklines=true,
+               breakatwhitespace=true,   % doesn't do anything (?!)
+               mathescape=true,   % interprets $...$ in listing as math mode
+%               tabsize=8,
+               texcl=false}
+
+% --------------------------------------------------------------------------- 
+
+
+\newcommand{\INT}{{\sf int}}
+\newcommand{\BOOL}{{\sf bool}}
+
+% \includeonly{intro,assign,unif,memo,index,memo-implement,proving}
+% \includeonly{index} 
+\begin{document}
+
+\include{top}
+
+% \include{abstract}
+
+
+\tableofcontents
+
+% \include{acknowledge}
+
+% \pagestyle{fancyplain}
+
+\chapter{Introduction}
+
+\include{chap-introduction}
+
+\include{chap-minml}
+
+\include{chap-binders-taiko-home}
+
+% \include{appendix}
+\bibliographystyle{abbrvnat}
+% \bibliographystyle{plain} 
+\bibliography{../../../../Projects/fphoas/papers/bibi}
+
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
