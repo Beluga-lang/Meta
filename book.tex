@@ -168,6 +168,26 @@
 \usepackage{srcltx}
 
 \usepackage{listings}
+
+%
+%
+% ContextualML
+%
+%
+\lstdefinelanguage{ContextualML}%
+  { morekeywords={abstype,andalso,as,some,schema,block,case,do,datatype,else,end,%
+       datacon,datasort,exists,indexconstant,indexfun,indexpred,indexsort,primitive,%
+       eqtype,exception,fn,fun,functor,handle,if,in,include,infix,%
+       infixr,let,local,nonfix,of,op,orelse,raise,rec,sharing,sig,%
+       signature,struct,structure,then,type,val,with,withtype,while,%
+       box,sbox,FN,fst,snd,pack},%
+%   otherkeywords={refinement, BRzipper},%
+%
+   sensitive,%
+   morecomment=[n]{(*}{*)},%
+   morestring=[b]"%
+  }[keywords,comments,strings]%
+
 \lstloadlanguages{ContextualML}
 \lstset{language=ContextualML}  % Added to local lstlang2.sty
 
