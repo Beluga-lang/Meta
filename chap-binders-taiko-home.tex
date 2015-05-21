@@ -713,12 +713,12 @@ explicitly using reflexivity.
 \begin{lstlisting}
 datatype term : type = 
 | app : term  -> term  -> term
-| lam : <<tp>>->(term -> term) -> term
+| lam : <<tp>> ->(term -> term) -> term
 ;
 
 datatype hastype: term -> tp -> type =
 | t_lam : ({x:term} hastype x T -> hastype (M x) S)
-	-> hastype (lam<<T>>M) (arr T S)
+	-> hastype (lam <<T>> M) (arr T S)
 | t_app:  hastype M1 (arr T S) -> hastype M2 T
 	-> hastype (app M1 M2) S
 ;  
@@ -940,7 +940,7 @@ The appeal to the induction hypothesis using \lstinline{D1} and \lstinline{F1} i
 on-paper proof 
 corresponds to the recursive call
  \lstinline!unique [\gamma |-D1 $\mdots$] [g |-F1 $\mdots$]!.
-Note that while \lstinline{unique}'s type says it takes a context variable \lstinline!{g:tctx}!,
+Note that while \lstinline!unique!'s type says it takes a context variable \lstinline!{g:tctx}!,
 we do not pass it explicitly; Beluga infers it from the context in the first argument
 passed. 
 The result of the recursive call is a contextual object of type 

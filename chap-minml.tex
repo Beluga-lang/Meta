@@ -128,7 +128,7 @@ hence read the constructor \lstinline!v_s! as follows:
 \begin{tabular}{p{12cm}}
 ``For all terms
 \lstinline$N$, if \lstinline!D! is a derivation for \lstinline!value N!, then we can form a derivation
-\lstinline!(v_s<<N>>D)! for \lstinline!value (succ N)!. ``  
+\lstinline!(v_s <<N>> D)! for \lstinline!value (succ N)!. ``
 \end{tabular}  
 \end{center}
 
@@ -149,7 +149,7 @@ $
  }
 }
 $
-& ~~~~is represented as &  \lstinline!(v_s<<(suc z)>>(v_s<<z>>v_z))!\\[1em]
+& ~~~~is represented as &  \lstinline!(v_s <<(suc z)>> (v_s <<z>> v_z))!\\[1em]
 \end{tabular}
 
 In Beluga, we simply write 
@@ -723,8 +723,8 @@ It might look like we should be able to simply make a recursive call. This is
 however a fallacy, since the type is incorrect. Recall that \lstinline!ref!
 takes in an implicit argument for the term we are actually comparing; therefore
 in the first occurrence \lstinline![|-ref]! stands actually for
-\lstinline![|-ref<<N>>]!, while in the second occurrence it % \lstinline![|-ref]!
-stands for \lstinline![|-ref<<(if_then_else N N1 N2)>>]!.
+\lstinline![|-ref <<N>>]!, while in the second occurrence it % \lstinline![|-ref]!
+stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.
 \end{enumerate}
 
 

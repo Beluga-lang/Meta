@@ -122,12 +122,13 @@
        infixr,let,local,nonfix,of,op,orelse,raise,rec,sharing,sig,%
        signature,struct,structure,then,type,val,with,withtype,while,%
        box,sbox,FN,fst,snd,pack},%
+     keepspaces=true,
 %   otherkeywords={refinement, BRzipper},%
 %
-   sensitive,%
-   morecomment=[n]{(*}{*)},%
-   morestring=[b]"%
-  }[keywords,comments,strings]%
+     sensitive,%
+     morecomment=[n]{(*}{*)},%
+     morestring=[b]"%
+   }[keywords,comments,strings]%
 
 \lstloadlanguages{ContextualML}
 \lstset{language=ContextualML} 
@@ -191,42 +192,38 @@
 %   be matched, and instead of $\Pi$ you'll get $\lambda Pi$.
 %
 \lstset{literate={->}{{$\rightarrow~$}}2 %
-                               {=>}{{$\Rightarrow~$}}2 %
-                               {|-}{{$\vdash$}}2 %
-                               {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
-                               {\\}{{$\lambda$}}1 %
-                               {\\Pi}{{$\Pi$}}1 %
-                               {\\gamma}{{$\gamma$}}1 %
-                               {\\psi}{{$\psi$}}1 %
-                               {FN}{{$\Lambda$}}1 %
-%                               {<<}{\color{myotherblue}}1 %
-                               {<<}{\color{dGreen}}1 %
-                               {<<r}{\color{dRed}}1 %
-                               {<*}{\color{dGreen}}1 %
-                               {<dim}{\color{dimgrey}}1 %
-                               {>>}{\color{black}}1 %
-               ,
-               columns=[l]fullflexible,
-               basewidth=\zzlstwidth,
-               basicstyle=\Lstbasicstyle,
-               keywordstyle=\keywordFmt,
-               identifierstyle=\relax,
-%               stringstyle=\relax,
-               commentstyle=\commentFmt,
-               breaklines=true,
-               breakatwhitespace=true,   % doesn't do anything (?!)
-               mathescape=true,   % interprets $...$ in listing as math mode
-%               tabsize=8,
-               texcl=false}
+                 {=>}{{$\Rightarrow~$}}2 %
+                 {|-}{{$\vdash\,$}}2 %
+                 {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
+                 {\\}{{$\lambda$}}1 %
+                 {\\Pi}{{$\Pi$}}1 %
+                 {\\gamma}{{$\gamma$}}1 %
+                 {\\psi}{{$\psi$}}1 %
+                 {FN}{{$\Lambda$}}1 %
+                 % {<<}{\color{myotherblue}}1 %
+                 {<<}{\color{dGreen}}1 %
+                 {<<r}{\color{dRed}}1 %
+                 {<*}{\color{dGreen}}1 %
+                 {<dim}{\color{dimgrey}}1 %
+                 {>>}{\color{black}}1 %
+                 ,
+                 columns=[l]fullflexible,
+                 basewidth=\zzlstwidth,
+                 basicstyle=\Lstbasicstyle,
+                 keywordstyle=\keywordFmt,
+                 identifierstyle=\relax,
+                 % stringstyle=\relax,
+                 commentstyle=\commentFmt,
+                 breaklines=true,
+                 breakatwhitespace=true,   % doesn't do anything (?!)
+                 mathescape=true,   % interprets $...$ in listing as math mode
+                 % tabsize=8,
+                 texcl=false}
 
 % --------------------------------------------------------------------------- 
 
+\renewcommand{\t}[1]{\lstinline{#1}}
 
-\newcommand{\INT}{{\sf int}}
-\newcommand{\BOOL}{{\sf bool}}
-
-% \includeonly{intro,assign,unif,memo,index,memo-implement,proving}
-% \includeonly{index} 
 \begin{document}
 
 \input{top}
