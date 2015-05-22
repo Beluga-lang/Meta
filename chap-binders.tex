@@ -854,7 +854,7 @@ contexts.
 \hspace{2cm}Context & \hspace{1.5cm}Is of schema \lstinline!tctx!?\\
 \hline 
 \lstinline!b1:block x:tm.hastype x (arr nat nat), b2:block y:tm.hastype y nat!
-& \mbox{\hspace{6cm} } yes \\ \hline
+& yes \\ \hline
 \lstinline!x:tm, u:hastype x (arr nat nat)! & no (not grouped in blocks)
 \\\hline
 \lstinline!y:tm! & no (typing assumption for \lstinline!y! is
@@ -862,7 +862,7 @@ missing) \\\hline
 \lstinline!b:block x:tm.hastype y nat! & no (\lstinline!y! is free) \\
 \hline
 \lstinline!b1:block x:tm.hastype x (arr nat nat), b2:block y:tm.hastype x nat! 
-& \mbox{\hspace{6cm} } no (wrong binding structure)
+& no (wrong binding structure)
 \end{tabular}  
 \end{center}
 
