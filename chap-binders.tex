@@ -833,9 +833,9 @@ schema tctx = some [t:tp] block (x:exp, _t:type_of x t);
 \end{lstlisting}
 
 The schema \t{tctx} describes a context containing assumptions
-\t{x:tm}, each associated with a typing assumption \t{oft$\;$x$\;$t}
+\t{x:tm}, each associated with a typing assumption \t{oft x t}
 for some type \t{t}.  Formally, we are using a dependent product $\Sigma$
-(used only in contexts) to tie \t{x} to \t{oft$\;$x$\;$t}. 
+(used only in contexts) to tie \t{x} to \t{oft x t}. 
 We thus do not need to establish separately that for every variable there is a
 unique typing assumption: this is inherent in the definition of \t{tctx}.
 The schema classifies well-formed contexts and checking whether a
