@@ -8,7 +8,7 @@ Let's recall our grammar for lambda-terms:
 
 \[
 \begin{array}{llcl}
-\mbox{Terms   } & M, N & := & x \mid \lambda x{:}T.M \mid M\;N 
+\mbox{Terms} & M, N & := & x \mid \lambda x{:}T.M \mid M\;N 
 \end{array}
 \]
 
@@ -16,9 +16,13 @@ The main question we are interested in is the following: How do we
 represent this grammar in an implementation? - Clearly, we need to
 face the issue of how to represent variables.
 
-The first option is to use a standard "named" representation of $\lambda$-terms, where variables are treated as labels or strings. In this approach, one has to
-explicitly handle $\alpha$-conversion when defining any operation on
-the terms. The standard Variable Convention of Barendregt, which is often employed in on-paper proofs, is one such approach where $\alpha$-conversion is applied as needed to ensure that:  
+The first option is to use a standard "named" representation of
+$\lambda$-terms, where variables are treated as labels or strings. In
+this approach, one has to explicitly handle $\alpha$-conversion when
+defining any operation on the terms. The standard Variable Convention
+of Barendregt, which is often employed in on-paper proofs, is one such
+approach where $\alpha$-conversion is applied as needed to ensure
+that:
 
 \begin{enumerate}
 \item bound variables are distinct from free variables, and
@@ -31,14 +35,28 @@ has therefore led to the search for different representations of such terms.
 We will focus on two approaches here:
 
 \begin{itemize}
-\item De Bruijn indices: As the name already indicate, this approach goes back to Nicolaas Govert de Bruijn who used it in the implementation of Automath. Automath was a formal   language in the 60s, for expressing complete mathematical theories in such a way that an included automated proof checker can verify their correctness. De Bruijn indices are also fundamental to more advanced techniques such   as \emph{explicit substitutions} \cite{Abadi:POPL90}. 
+\item De Bruijn indices: As the name already indicate, this approach
+  goes back to Nicolaas Govert de Bruijn who used it in the
+  implementation of Automath. Automath was a formal language in the
+  60s, for expressing complete mathematical theories in such a way
+  that an included automated proof checker can verify their
+  correctness. De Bruijn indices are also fundamental to more advanced
+  techniques such as \emph{explicit substitutions}
+  \cite{Abadi:POPL90}.
 
 \item Higher-order abstract syntax \cite{Pfenning88pldi}: an appeal to
-  higher-order representations where the binder is treated as a true function. In such representations, the issues of $\alpha$-equivalence, substitution, etc. are identified with the same operations in a   meta-logic. 
+  higher-order representations where the binder is treated as a true
+  function. In such representations, the issues of
+  $\alpha$-equivalence, substitution, etc. are identified with the
+  same operations in a meta-logic.
 \end{itemize}
 
 It is worth pointing out that although we may prefer one of these two
-representations for internally working with binders, the named representation of $\lambda$-terms is more pervasive and can be more immediately understandable by others because the variables can be given descriptive names. Thus, even if a system uses De Bruijn indexes internally, it will present a user interface with names.
+representations for internally working with binders, the named
+representation of $\lambda$-terms is more pervasive and can be more
+immediately understandable by others because the variables can be
+given descriptive names. Thus, even if a system uses De Bruijn indexes
+internally, it will present a user interface with names.
 
 
 \paragraph{Alternative name representations:}

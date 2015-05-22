@@ -112,7 +112,7 @@ corresponds to a constructor in our data-type definition. A derivation tree then
 corresponds to an expression formed by these constructors.
 
 \begin{lstlisting}
-datatype value     : term -> type = 
+datatype value : term -> type = 
 | v_true : value true
 | v_false: value false
 | v_z    : value z
@@ -355,16 +355,16 @@ to pattern matching on \lstinline!s:[|-step M M']! in our program.
 
 \begin{lstlisting}
 fn d => fn s => case s of
-| [ |-e_if_true]    => ? 
-| [ |-e_if_false]   => ?
-| [ |-e_if_then_else S']      => ?
-| [ |-e_pred_zero]      => ?
-| [ |-e_pred_succ _]    => ?
-| [ |-e_iszero_zero]    => ?
-| [ |-e_iszero_succ _ ] => ?
-| [ |-e_pred S']        => ?
-| [ |-e_succ S']        => ?
-| [ |-e_iszero S']      => ?
+| [ |-e_if_true]         => ? 
+| [ |-e_if_false]        => ?
+| [ |-e_if_then_else S'] => ?
+| [ |-e_pred_zero]       => ?
+| [ |-e_pred_succ _]     => ?
+| [ |-e_iszero_zero]     => ?
+| [ |-e_iszero_succ _ ]  => ?
+| [ |-e_pred S']         => ?
+| [ |-e_succ S']         => ?
+| [ |-e_iszero S']       => ?
 ;
 \end{lstlisting}
 
@@ -406,21 +406,19 @@ We now have learned that \lstinline!T = nat!.
 \begin{lstlisting}
 rec tps: [|-hastype M T] -> [|-step M M'] -> [|-hastype M' T] = 
 fn d => fn s => case s of
-| [ |-e_if_true]    => ? 
-| [ |-e_if_false]   => ?
-| [ |-e_if_then_else S']      => ?
-| [ |-e_pred_zero]      => 
+| [ |-e_if_true]         => ? 
+| [ |-e_if_false]        => ?
+| [ |-e_if_then_else S'] => ?
+| [ |-e_pred_zero]       => 
   let [|-t_pred _ ] = d in ?
-| [ |-e_pred_succ _]    => ?
-| [ |-e_iszero_zero]    => ?
-| [ |-e_iszero_succ _ ] => ?
-| [ |-e_pred S']        => ?
-| [ |-e_succ S']        => ?
-| [ |-e_iszero S']      => ?
+| [ |-e_pred_succ _]     => ?
+| [ |-e_iszero_zero]     => ?
+| [ |-e_iszero_succ _ ]  => ?
+| [ |-e_pred S']         => ?
+| [ |-e_succ S']         => ?
+| [ |-e_iszero S']       => ?
 ;
 \end{lstlisting}
-
-
 
 Beluga will compile this partial program and print for the hole 
 
@@ -429,7 +427,7 @@ ________________________________________________________________________________
 - Meta-Context: .
 ________________________________________________________________________________
 - Context: 
-tps:    [ |-hastype M T] -> [ |-step M M'] -> [ |-hastype M' T]
+tps: [ |-hastype M T] -> [ |-step M M'] -> [ |-hastype M' T]
 d: [ |-hastype (pred z) nat]
 s: [ |-step (pred z) z]
                                             
@@ -464,25 +462,24 @@ derivation \lstinline![|-F]!. Finally, we construct our derivation
 \begin{lstlisting}
 rec tps: [ |-hastype M T] -> [ |-step M M'] -> [ |-hastype M' T] = 
 fn d => fn s => case s of
-| [ |-e_if_true]    => ? 
-| [ |-e_if_false]   => ?
-| [ |-e_if_then_else S']      => ?
-| [ |-e_pred_zero]      => 
+| [ |-e_if_true]         => ? 
+| [ |-e_if_false]        => ?
+| [ |-e_if_then_else S'] => ?
+| [ |-e_pred_zero]       => 
   let [ |-t_pred _ ] = d in [ |-t_zero]
-| [ |-e_pred_succ _]    => ?
-| [ |-e_iszero_zero]    => ?
-| [ |-e_iszero_succ _ ] => ?
-| [ |-e_pred S']        => 
+| [ |-e_pred_succ _]     => ?
+| [ |-e_iszero_zero]     => ?
+| [ |-e_iszero_succ _ ]  => ?
+| [ |-e_pred S']         => 
   let [ |-t_pred D'] = d in 
   let [ |-F] = tps [ |-D'] [ |-S'] in 
     [ |-t_pred F]
-| [ |-e_succ S']        => ?
-| [ |-e_iszero S']      => ?
+| [ |-e_succ S']         => ?
+| [ |-e_iszero S']       => ?
 ;
 \end{lstlisting}
 
 The full proof can be found in the attached file \lstinline!evaluation.bel!.
-
 
 \paragraph{When is a program a proof?} So far we have just written a
 functional program; for it to be a proof it needs to be a total
