@@ -115,20 +115,16 @@
 % ContextualML
 %
 %
-\lstdefinelanguage{ContextualML}%
-  { morekeywords={abstype,andalso,as,some,schema,block,case,do,datatype,else,end,%
-       datacon,datasort,exists,indexconstant,indexfun,indexpred,indexsort,primitive,%
-       eqtype,exception,fn,fun,functor,handle,if,in,include,infix,%
-       infixr,let,local,nonfix,of,op,orelse,raise,rec,sharing,sig,%
-       signature,struct,structure,then,type,val,with,withtype,while,%
-       box,sbox,FN,fst,snd,pack},%
-     keepspaces=true,
-%   otherkeywords={refinement, BRzipper},%
-%
-     sensitive,%
-     morecomment=[n]{(*}{*)},%
-     morestring=[b]"%
-   }[keywords,comments,strings]%
+\lstdefinelanguage{ContextualML}
+{ 
+  morekeywords={and, block, case, of, mlam, fn, impossible, let, in, schema,
+    some, rec, type, ctype, prop, stratified, inductive, coinductive, LF, if, then, 
+    else, total},
+  keepspaces=true,
+  sensitive,
+  morecomment=[n]{(*}{*)},
+  morestring=[b]"
+}[keywords,comments,strings]
 
 \lstloadlanguages{ContextualML}
 \lstset{language=ContextualML} 
@@ -205,6 +201,7 @@
                  {<*}{\color{dGreen}}1 %
                  {<dim}{\color{dimgrey}}1 %
                  {>>}{\color{black}}1 %
+                 {?}{\bf{?}}1
                  ,
                  columns=[l]fullflexible,
                  basewidth=\zzlstwidth,
