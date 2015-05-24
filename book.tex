@@ -1,30 +1,14 @@
 \documentclass[12pt]{book}
 \input{prelude}
 
-% \ifdefined\INSTRUCTORVERSION
-%   \relax
-% \else
-% % short version:
-% \newcommand{\INSTRUCTORVERSION}[1]{#1}
-% \newcommand{\STUDENTVERSION}[1]{}
-% % % long version:
-% % \newcommand{\LONGVERSION}[1]{#1}
-% % \newcommand{\SHORTVERSION}[1]{}
-% % \newcommand{\SHORTVERSION}[1]{BEGIN~SHORT\ #1 \ END~SHORT}
-% \fi
-% \newtheorem{exercise}{Exercise}[section]
-% \newenvironment{ADDITIONAL}[1]{#1}{}
-% \newenvironment{SOLUTION}[1]{\paragraph*{Solution}\begin{it}#1}{\end{it}}
-
 \ifdefined\studentversion
   \excludecomment{exercise}
   \excludecomment{solution}
   \excludecomment{additional}
 \else
-% \excludecomment{additional}
-\includecomment{exercise}
-\includecomment{solution}
-\includecomment{additional}
+  \includecomment{exercise}
+  \includecomment{solution}
+  \includecomment{additional}
 \fi
 
 \begin{document}

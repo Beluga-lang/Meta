@@ -1,27 +1,6 @@
-%\topmargin 0pt
-%\advance \topmargin by -\headheight
-%\advance \topmargin by -\headsep
-
-
-
-%\oddsidemargin 0pt
-%\evensidemargin \oddsidemargin
-%\marginparwidth 0.5in
-
-
-
-% \setlength{\topmargin}{15mm}
-\setlength{\topmargin}{5mm}
-
-%\setlength{\textwidth}{155mm}
-\setlength{\textwidth}{155mm}
-%\setlength{\textwidth}{165mm}
-\setlength{\textheight}{200mm}
-%\setlength{\textheight}{195mm}
-
-\setlength{\evensidemargin}{5mm}
-\setlength{\oddsidemargin}{5mm}
-
+\usepackage[total={155mm,200mm},
+            top=40mm,
+            left=30mm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{fix-cm}
 \usepackage{amsmath}
@@ -30,48 +9,32 @@
 \usepackage{srcltx}
 \usepackage{charter}
 \usepackage{euler}
-
 \usepackage{latexsym}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{comment}
 \usepackage{color}
+\usepackage{proof}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{cdsty}
+\usepackage{listings}
+\usepackage{natbib}
+
+
+% ---------------------------------------------------------------------------
+% ------------------------ Theorems and environments ------------------------
+% ---------------------------------------------------------------------------
 
 \newtheorem{@problem}{Exercise}[section]
 \newenvironment{problem}{\begin{@problem}\rm}{\end{@problem}}
-
 \newtheorem{@sol}{Solution}[section]
 \newenvironment{sol}{\begin{@sol}\rm}{\end{@sol}}
-
-
-% \input prelude
-
-\usepackage{proof}
-
-\newcommand{\nl}{\overline{n}}
-
 \newtheorem{@axiom}{Axiom}
 \newenvironment{axiom}{\begin{@axiom}\rm}{\end{@axiom}}
-% \newtheorem{@theorem}{Theorem}[section]
-% \newenvironment{theorem}{\begin{@theorem}\rm}{\end{@theorem}}
-
-% \newtheorem{@lemma}{Lemma}[section]
-% \newenvironment{lemma}{\begin{@lemma}\rm}{\end{@lemma}}
-
-
-
-\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
-\newcommand{\dRed}[1]{{\color{dRed}#1}}
-
-\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
-\newcommand{\mygreen}[1]{{\color{dGreen}#1}}
-\newcommand{\emphFact}[1]{{\mygreen{#1}}}
-
-\usepackage{graphics}
-\usepackage{graphicx}
-
-\usepackage{url}
 
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
@@ -80,31 +43,93 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 
-\usepackage{xspace}
+
+% ---------------------------------------------------------------------------
+% ------------------------------ Contextual ML ------------------------------
+% ---------------------------------------------------------------------------
+
+\lstdefinelanguage{ContextualML}
+{
+  morekeywords={and, block, case, of, mlam, fn, impossible, let, in, schema,
+    some, rec, type, ctype, prop, stratified, inductive, coinductive, LF, if, then,
+    else, total},
+  keepspaces=true,
+  sensitive,
+  morecomment=[n]{(*}{*)},
+  morestring=[b]"
+}[keywords,comments,strings]
+
+\lstloadlanguages{ContextualML}
+\lstset{language=ContextualML}
+
+\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
+\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
+
+%
+% Set up listings "literate" keyword stuff (for \lstset below)
+%
+\newdimen\zzlistingsize
+\newdimen\zzlistingsizedefault
+\zzlistingsizedefault=9.5pt
+\zzlistingsize=\zzlistingsizedefault
+\global\def\InsideComment{0}
+\newcommand{\Lstbasicstyle}{\fontsize{\zzlistingsize}{1.05\zzlistingsize}\ttfamily}
+\newcommand{\keywordFmt}{\fontsize{0.9\zzlistingsize}{1.0\zzlistingsize}\bf}
+\newcommand{\smartkeywordFmt}{\if0\InsideComment\keywordFmt\fi}
+\newcommand{\commentFmt}{\def\InsideComment{1}\fontsize{0.95\zzlistingsize}{1.0\zzlistingsize}\rmfamily\slshape}
+
+\newcommand{\LST}{\setlistingsize{\zzlistingsizedefault}}
+\newlength{\zzlstwidth}
+
+\newcommand{\setlistingsize}[1]{
+  \zzlistingsize=#1%
+  \settowidth{\zzlstwidth}{{\Lstbasicstyle~}}}
+\setlistingsize{\zzlistingsizedefault}
+
+% The order of the "literate" definitions is significant:
+%   later definitions shadow earlier ones.  The \\Pi definition must come
+%   *after* the \\ definition, or the first part of \\Pi --- that is, \\ --- will
+%   be matched, and instead of $\Pi$ you'll get $\lambda Pi$.
+%
+\lstset{literate={->}{{$\rightarrow~$}}2 %
+                 {=>}{{$\Rightarrow~$}}2 %
+                 {|-}{{$\vdash\,$}}2 %
+                 {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
+                 {\\}{{$\lambda$}}1 %
+                 {\\Pi}{{$\Pi$}}1 %
+                 {\\gamma}{{$\gamma$}}1 %
+                 {\\psi}{{$\psi$}}1 %
+                 {FN}{{$\Lambda$}}1 %
+                 % {<<}{\color{myotherblue}}1 %
+                 {<<}{\color{dGreen}}1 %
+                 {<<r}{\color{dRed}}1 %
+                 {<*}{\color{dGreen}}1 %
+                 {<dim}{\color{dimgrey}}1 %
+                 {>>}{\color{black}}1 %
+                 {?}{\bf{?}}1
+                 ,
+                 columns=[l]fullflexible,
+                 basewidth=\zzlstwidth,
+                 basicstyle=\Lstbasicstyle,
+                 keywordstyle=\keywordFmt,
+                 identifierstyle=\relax,
+                 % stringstyle=\relax,
+                 commentstyle=\commentFmt,
+                 breaklines=true,
+                 breakatwhitespace=true,   % doesn't do anything (?!)
+                 mathescape=true,   % interprets $...$ in listing as math mode
+                 % tabsize=8,
+                 texcl=false}
 
 
-% \newtheorem{definition}{Definition}[section]
-% \newtheorem{theorem}{Theorem}[section]
-% \newtheorem{conjecture}[theorem]{Conjecture}
-% \newtheorem{corollary}[theorem]{Corollary}
-% \newtheorem{proposition}[theorem]{Proposition}
-% \newtheorem{lemma}[theorem]{Lemma}
-
-\renewcommand{\Tilde}{\textsf{\char"7E}}
-
-\newcommand{\arrayenv}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvc}[1]{\renewcommand{\arraystretch}{1} \begin{array}[c]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}r@{}}#1\end{array}}
-\newcommand{\arrayenvbr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[b]{@{}r@{}}#1\end{array}}
-\newcommand{\arrayenvl}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}l@{}}#1\end{array}}
-\newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
+% ---------------------------------------------------------------------------
+% ----------------------- Standard math/CS notations ------------------------
+% ---------------------------------------------------------------------------
 
 \newcommand{\subtype}{\leq}
 
 \newcommand{\union}{\mathrel{\cup}}
 \newcommand{\sect}{\mathrel{\cap}}
-
 \newcommand{\unit}{\texttt{()}}
 \newcommand{\Unit}{\textsf{unit}}
 \newcommand{\bang}{\texttt{!}}
@@ -115,8 +140,107 @@
 \newcommand{\steps}{\mathrel{\,\longrightarrow\,}}
 \newcommand{\mstep}{\longrightarrow^*}
 
-\newcommand{\Rsectintro}{\textsc{$\sectty$intro}\xspace}
-\newcommand{\Rsectelim}[1]{\textsc{$\sectty$elim{#1}}\xspace}
+% \newcommand{\syn}{\mathrel{\,\uparrow\,}}
+% \newcommand{\chk}{\mathrel{\,\downarrow\,}}
+\newcommand{\syn}{\mathrel{\,\Rightarrow\,}}
+\newcommand{\chk}{\mathrel{\,\Leftarrow\,}}
+\newcommand{\arr}{\mathrel{\texttt{->}}}
+\newcommand{\entails}{\vdash}
+\newcommand{\such}{~|~}
+
+\newcommand{\unif}{\doteq}
+\newcommand{\totp}{\Rightarrow}
+\newcommand{\emp}{\emptyset}
+
+\newcommand{\sectty}{\mathrel{\text{\&}}}
+
+\newcommand{\D}{{\mathcal{D}}}
+\newcommand{\C}{{\mathcal{C}}}
+\newcommand{\E}{{\mathcal{E}}}
+\newcommand{\F}{{\mathcal{F}}}
+\newcommand{\V}{{\mathcal{V}}}
+\newcommand{\W}{{\mathcal{W}}}
+\newcommand{\St}{{\mathcal{S}}}
+
+\newcommand{\edot}{\bullet}
+
+% \newcommand{\arrow}{\rightarrow}
+
+% \newcommand{\chk}{\Leftarrow}
+% \newcommand{\syn}{\Rightarrow}
+% \newcommand{\bnfas}{\mathrel{::=}}
+% \newcommand{\bnfalt}{\mathrel{\mid}}
+
+%\newcommand{\shift}{\textsf{shift}\;}
+\newcommand{\shift}{\uparrow\!}
+% \newcommand{\lam}{\lambda}
+% \newcommand{\lam}{\textsf{lam}\;}
+% \newcommand{\app}{\textsf{app}\;}
+\newcommand{\app}{}
+% \newcommand{\lam}{\lambda}
+
+\newcommand{\shiftby}{\textsf{shift}\;}
+
+
+% ---------------------------------------------------------------------------
+% ------------------------ Judgments, properties, types ---------------------
+% ---------------------------------------------------------------------------
+
+\newcommand{\isv}{~\textsf{value}}
+\newcommand{\Int}{\textsf{int}}
+\newcommand{\Float}{\textsf{float}}
+\newcommand{\Bool}{\textsf{bool}}
+\newcommand{\Real}{\textsf{real}}
+\newcommand{\String}{\textsf{string}}
+\newcommand{\Char}{\textsf{char}}
+\newcommand{\Ref}{~\textsf{ref}}
+\newcommand{\Array}{~\textsf{array}}
+\newcommand{\nat}{\textsf{nat}}
+
+\newcommand{\TT}{\textsf{tt}}
+\newcommand{\FV}{\mathsf{FV}}
+% \newcommand{\FV}{\mathsf{FV}}
+\newcommand{\FMV}{\mathsf{FMV}}
+
+
+% ---------------------------------------------------------------------------
+% ------------------------ Terms for object languages -----------------------
+% ---------------------------------------------------------------------------
+
+\newcommand{\tmtrue}{\textsf{true}}
+\newcommand{\tmfalse}{\textsf{false}}
+\newcommand{\tmif}[3]{\textsf{if\;} #1 \textsf{\;then\;} #2 \textsf{\;else\;} #3}
+\newcommand{\tmfun}[3]{\textsf{fun } #1 (#2) = #3}
+\newcommand{\tmfn}[2]{\textsf{fn } #1\;\texttt{=>}\;#2}
+\newcommand{\tmapp}[2]{#1\;#2}
+\newcommand{\tmrectyp}[3]{\textsf{rec } {#1}\,:\,{#2}\;\texttt{=>}\;#3}
+\newcommand{\tmrec}[2]{\textsf{rec } {#1}\texttt{=>}\;#2}
+\newcommand{\tmlet}[3]{\textsf{let } #1 = #2 \textsf{\;in\;} #3\; \textsf{end}}
+
+\newcommand{\tmfst}[1]{\textsf{fst}\;{#1}\xspace}
+\newcommand{\tmsnd}[1]{\textsf{snd}\;{#1}\xspace}
+
+% Numerical expressions
+\newcommand{\tmzero}{\textsf{z}}
+\newcommand{\tmsucc}[1]{\textsf{succ}~#1}
+\newcommand{\tmpred}[1]{\textsf{pred}~#1}
+\newcommand{\tmiszero}[1]{\textsf{iszero}~#1}
+
+\newcommand{\bref}{\textsf{reflexive}}
+\newcommand{\bmred}{\textsf{one{-}step}}
+\newcommand{\btrans}{\textsf{transitive}}
+
+\newcommand{\bred}{\beta{-}\textsf{red}}
+\newcommand{\blam}{\textsf{lam{-}red}}
+\newcommand{\appMred}{\textsf{app{-}red{-}1}}
+\newcommand{\appNred}{\textsf{app{-}red{-}2}}
+
+\newcommand{\type}{\textsf{type}}
+
+
+% ---------------------------------------------------------------------------
+% -------------------------- Inference rules' names -------------------------
+% ---------------------------------------------------------------------------
 
 \newcommand{\TIf}{\textsc{t-if}}
 \newcommand{\TPred}{\textsc{t-pred}}
@@ -168,7 +292,6 @@
 \newcommand{\Vsuc}{\textsc{v-succ}}
 \newcommand{\Vtrue}{\textsc{v-true}}
 \newcommand{\Vfalse}{\textsc{v-false}}
-\newcommand{\isv}{~\textsf{value}}
 
 \newcommand{\BAnno}{\textsc{b-anno}\xspace}
 \newcommand{\BAnnoFn}{\textsc{b-anno-fn}\xspace}
@@ -187,46 +310,6 @@
 \newcommand{\BFun}{\textsc{b-fun}\xspace}
 \newcommand{\BRec}{\textsc{b-rec}\xspace}
 
-\newcommand{\Int}{\textsf{int}}
-\newcommand{\Float}{\textsf{float}}
-\newcommand{\Bool}{\textsf{bool}}
-\newcommand{\Real}{\textsf{real}}
-\newcommand{\String}{\textsf{string}}
-\newcommand{\Char}{\textsf{char}}
-\newcommand{\Ref}{~\textsf{ref}}
-\newcommand{\Array}{~\textsf{array}}
-% \newcommand{\syn}{\mathrel{\,\uparrow\,}}
-% \newcommand{\chk}{\mathrel{\,\downarrow\,}}
-\newcommand{\syn}{\mathrel{\,\Rightarrow\,}}
-\newcommand{\chk}{\mathrel{\,\Leftarrow\,}}
-\newcommand{\arr}{\mathrel{\texttt{->}}}
-\newcommand{\arrow}{\arr}
-\newcommand{\entails}{\vdash}
-\newcommand{\such}{~|~}
-\newcommand{\sectty}{\mathrel{\text{\&}}}
-
-\newcommand{\nat}{\textsf{nat}}
-
-\newcommand{\tmtrue}{\textsf{true}}
-\newcommand{\tmfalse}{\textsf{false}}
-\newcommand{\tmif}[3]{\textsf{if\;} #1 \textsf{\;then\;} #2 \textsf{\;else\;} #3}
-\newcommand{\tmfun}[3]{\textsf{fun } #1 (#2) = #3}
-\newcommand{\tmfn}[2]{\textsf{fn } #1\;\texttt{=>}\;#2}
-\newcommand{\tmapp}[2]{#1\;#2}
-\newcommand{\tmrectyp}[3]{\textsf{rec } {#1}\,:\,{#2}\;\texttt{=>}\;#3}
-\newcommand{\tmrec}[2]{\textsf{rec } {#1}\texttt{=>}\;#2}
-\newcommand{\tmlet}[3]{\textsf{let } #1 = #2 \textsf{\;in\;} #3\; \textsf{end}}
-
- \newcommand{\tmfst}[1]{\textsf{fst}\;{#1}\xspace}
- \newcommand{\tmsnd}[1]{\textsf{snd}\;{#1}\xspace}
-
-% Numerical expressions
-\newcommand{\tmzero}{\textsf{z}}
-\newcommand{\tmsucc}[1]{\textsf{succ}~#1}
-\newcommand{\tmpred}[1]{\textsf{pred}~#1}
-\newcommand{\tmiszero}[1]{\textsf{iszero}~#1}
-
-
 \newcommand{\BLetn}{\textsc{b-letn}\xspace}
 \newcommand{\BLetp}{\textsc{b-letpair}\xspace}
 \newcommand{\BPair}{\textsc{b-pair}\xspace}
@@ -235,152 +318,46 @@
 \newcommand{\BFn}{\textsc{b-fn}\xspace}
 \newcommand{\BApp}{\textsc{b-app}\xspace}
 
-\newcommand{\unif}{\doteq}
-\newcommand{\totp}{\Rightarrow}
-\newcommand{\emp}{\emptyset}
-\newcommand{\TT}{\textsf{tt}}
-
-\newcommand{\D}{{\mathcal{D}}}
-\newcommand{\C}{{\mathcal{C}}}
-\newcommand{\E}{{\mathcal{E}}}
-\newcommand{\F}{{\mathcal{F}}}
-\newcommand{\V}{{\mathcal{V}}}
-\newcommand{\W}{{\mathcal{W}}}
-\newcommand{\St}{{\mathcal{S}}}
-\newcommand{\FV}{\mathsf{FV}}
-
-\usepackage{cdsty}
-
-% For listing package to pretty print contextualML
-\usepackage{listings}
-
-%
-%
-% ContextualML
-%
-%
-\lstdefinelanguage{ContextualML}
-{
-  morekeywords={and, block, case, of, mlam, fn, impossible, let, in, schema,
-    some, rec, type, ctype, prop, stratified, inductive, coinductive, LF, if, then,
-    else, total},
-  keepspaces=true,
-  sensitive,
-  morecomment=[n]{(*}{*)},
-  morestring=[b]"
-}[keywords,comments,strings]
-
-\lstloadlanguages{ContextualML}
-\lstset{language=ContextualML}
-
-\usepackage{natbib}
-\bibpunct{[}{]}{;}{a}{}{,}
-\def\newblock{\hskip .11em plus .33em minus .07em}
+\newcommand{\Rsectintro}{\textsc{$\sectty$intro}\xspace}
+\newcommand{\Rsectelim}[1]{\textsc{$\sectty$elim{#1}}\xspace}
 
 
-\newcommand{\bred}{\beta{-}\textsf{red}}
-\newcommand{\blam}{\textsf{lam{-}red}}
-\newcommand{\appMred}{\textsf{app{-}red{-}1}}
-\newcommand{\appNred}{\textsf{app{-}red{-}2}}
+% ---------------------------------------------------------------------------
+% ----------------------------------- ??? -----------------------------------
+% ---------------------------------------------------------------------------
 
-\newcommand{\bref}{\textsf{reflexive}}
-\newcommand{\bmred}{\textsf{one{-}step}}
-\newcommand{\btrans}{\textsf{transitive}}
-
-% \newcommand{\FV}{\mathsf{FV}}
-\newcommand{\FMV}{\mathsf{FMV}}
-
+\newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
+\newcommand{\oftyp}{\mathtt{hastype}\;}
 \newcommand{\jtype}{\mathit{type}}
-\newcommand{\edot}{\bullet}
-\newcommand{\lb}{{[\![}}
-\newcommand{\rb}{{]\!]}}
 
-% \newcommand{\arrow}{\rightarrow}
 
-% \newcommand{\chk}{\Leftarrow}
-% \newcommand{\syn}{\Rightarrow}
-% \newcommand{\bnfas}{\mathrel{::=}}
-% \newcommand{\bnfalt}{\mathrel{\mid}}
-
-\newcommand{\type}{\textsf{type}}
 \newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
-% ---------------------------------------------------------------------------
-
-%
-% Set up listings "literate" keyword stuff (for \lstset below)
-%
-\newdimen\zzlistingsize
-\newdimen\zzlistingsizedefault
-\zzlistingsizedefault=9.5pt
-\zzlistingsize=\zzlistingsizedefault
-\global\def\InsideComment{0}
-\newcommand{\Lstbasicstyle}{\fontsize{\zzlistingsize}{1.05\zzlistingsize}\ttfamily}
-\newcommand{\keywordFmt}{\fontsize{0.9\zzlistingsize}{1.0\zzlistingsize}\bf}
-\newcommand{\smartkeywordFmt}{\if0\InsideComment\keywordFmt\fi}
-\newcommand{\commentFmt}{\def\InsideComment{1}\fontsize{0.95\zzlistingsize}{1.0\zzlistingsize}\rmfamily\slshape}
-
-\newcommand{\LST}{\setlistingsize{\zzlistingsizedefault}}
-
-\newlength{\zzlstwidth}
-\newcommand{\setlistingsize}[1]{\zzlistingsize=#1%
-\settowidth{\zzlstwidth}{{\Lstbasicstyle~}}}
-\setlistingsize{\zzlistingsizedefault}
-
-% The order of the "literate" definitions is significant:
-%   later definitions shadow earlier ones.  The \\Pi definition must come
-%   *after* the \\ definition, or the first part of \\Pi --- that is, \\ --- will
-%   be matched, and instead of $\Pi$ you'll get $\lambda Pi$.
-%
-\lstset{literate={->}{{$\rightarrow~$}}2 %
-                 {=>}{{$\Rightarrow~$}}2 %
-                 {|-}{{$\vdash\,$}}2 %
-                 {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
-                 {\\}{{$\lambda$}}1 %
-                 {\\Pi}{{$\Pi$}}1 %
-                 {\\gamma}{{$\gamma$}}1 %
-                 {\\psi}{{$\psi$}}1 %
-                 {FN}{{$\Lambda$}}1 %
-                 % {<<}{\color{myotherblue}}1 %
-                 {<<}{\color{dGreen}}1 %
-                 {<<r}{\color{dRed}}1 %
-                 {<*}{\color{dGreen}}1 %
-                 {<dim}{\color{dimgrey}}1 %
-                 {>>}{\color{black}}1 %
-                 {?}{\bf{?}}1
-                 ,
-                 columns=[l]fullflexible,
-                 basewidth=\zzlstwidth,
-                 basicstyle=\Lstbasicstyle,
-                 keywordstyle=\keywordFmt,
-                 identifierstyle=\relax,
-                 % stringstyle=\relax,
-                 commentstyle=\commentFmt,
-                 breaklines=true,
-                 breakatwhitespace=true,   % doesn't do anything (?!)
-                 mathescape=true,   % interprets $...$ in listing as math mode
-                 % tabsize=8,
-                 texcl=false}
-
-% ---------------------------------------------------------------------------
-
-\renewcommand{\t}[1]{\lstinline{#1}}
-
-%%%%%%%%%%%%%%%% Chapter 2 %%%%%%%%%%%%%%%%
 
 \newcommand{\halts}{~\mathsf{halts}}
 
-%%%%%%%%%%%%%%%% Chapter 3 %%%%%%%%%%%%%%%%
-
-%\newcommand{\shift}{\textsf{shift}\;}
-\newcommand{\shift}{\uparrow\!}
-% \newcommand{\lam}{\lambda}
-% \newcommand{\lam}{\textsf{lam}\;}
-% \newcommand{\app}{\textsf{app}\;}
-\newcommand{\app}{}
-% \newcommand{\lam}{\lambda}
-
-\newcommand{\shiftby}{\textsf{shift}\;}
-\newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
-
-\newcommand{\oftyp}{\mathtt{hastype}\;}
 \newcommand{\eq}{\;\mathtt{eq}\;}
+
+\newcommand{\lb}{{[\![}}
+\newcommand{\rb}{{]\!]}}
+
+\newcommand{\nl}{\overline{n}}
+
+\renewcommand{\Tilde}{\textsf{\char"7E}}
+
+\bibpunct{[}{]}{;}{a}{}{,}
+\def\newblock{\hskip .11em plus .33em minus .07em}
+
+\newcommand{\arrayenv}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}c@{}}#1\end{array}}
+\newcommand{\arrayenvc}[1]{\renewcommand{\arraystretch}{1} \begin{array}[c]{@{}c@{}}#1\end{array}}
+\newcommand{\arrayenvr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}r@{}}#1\end{array}}
+\newcommand{\arrayenvbr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[b]{@{}r@{}}#1\end{array}}
+\newcommand{\arrayenvl}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}l@{}}#1\end{array}}
+\newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
+\newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
+
+
+% ---------------------------------------------------------------------------
+% --------------------------------- Other -----------------------------------
+% ---------------------------------------------------------------------------
+
+\newcommand{\emphFact}[1]{{\color{dGreen}{#1}}}
