@@ -2,13 +2,13 @@
 So far we have considered the representation of a simple language with
 arithmetic expressions and booleans together with proofs about it. In this
 chapter, we grow this language to include variables, functions, and function applications,
-or more generally constructs that allow us to abstract over variables. 
+or more generally constructs that allow us to abstract over variables.
 
 Let's recall our grammar for lambda-terms:
 
 \[
 \begin{array}{llcl}
-\mbox{Terms} & M, N & := & x \mid \lambda x{:}T.M \mid M\;N 
+\mbox{Terms} & M, N & := & x \mid \lambda x{:}T.M \mid M\;N
 \end{array}
 \]
 
@@ -30,7 +30,7 @@ that:
 \end{enumerate}
 
 In practice this approach is cumbersome, inefficient, and often error-prone. It
-has therefore led to the search for different representations of such terms. 
+has therefore led to the search for different representations of such terms.
 
 We will focus on two approaches here:
 
@@ -66,7 +66,7 @@ representations, the nominal approaches of Pitts and Gabbay
 \cite{Gabbay:LICS99} is one approach, where the representation of a
 binder is treated as an equivalence class of all terms rewritable to
 it using variable permutations. This approach is taken by the Nominal
-Datatype Package of Isabelle/HOL. 
+Datatype Package of Isabelle/HOL.
 
 When reasoning about the meta-theoretic properties of a deductive
 system in a proof assistant, it is sometimes desirable to limit
@@ -85,7 +85,7 @@ choosing a canonical representation of variables. Variable occurrences
 point directly to their binders rather than referring to them by
 name. This is accomplished by replacing named variables by a natural
 number where the number $k$ stands for ``the variable bound by the
-$k$'th enclosing $\lambda$. 
+$k$'th enclosing $\lambda$.
 
 Here are some examples:
 
@@ -93,7 +93,7 @@ Here are some examples:
 \begin{array}{lcl}
 \lambda x. x  & & \lambda 1 \\
 \lambda x. \lambda y . x\;y & & \lambda 2\; 1\\
-\lambda x. (\lambda y. x \; y)\; x & & \lambda (\lambda 2\;1) \;1 
+\lambda x. (\lambda y. x \; y)\; x & & \lambda (\lambda 2\;1) \;1
 \end{array}
 \]
 
@@ -105,27 +105,19 @@ manipulations extremely challenging.
 
 How can we define more formally a grammar for de Bruijn terms:
 
-%\newcommand{\shift}{\textsf{shift}\;}
-\newcommand{\shift}{\uparrow\!}
-% \newcommand{\lam}{\lambda}
-% \newcommand{\lam}{\textsf{lam}\;}
-% \newcommand{\app}{\textsf{app}\;}
-\newcommand{\app}{}
-
 \[
 \begin{array}{llcl}
 \mbox{Indices}            & I    & ::= & 1 \mid \shift I \\
-\mbox{De Bruijn Terms   } & T, S & := & I \mid \lambda T \mid \app T\;S 
+\mbox{De Bruijn Terms   } & T, S & := & I \mid \lambda T \mid \app T\;S
 \end{array}
 \]
 
 The index $3$ is represented as $\shift (\shift 1)$. The distinction
 between indices and de Bruijn Terms is not really necessary; often we
 see the following definition
-% \newcommand{\lam}{\lambda}
 \[
 \begin{array}{llcl}
-\mbox{De Bruijn Terms   } & T, S & := & 1 \mid \shift T \mid \lam T \mid \app T\;S 
+\mbox{De Bruijn Terms   } & T, S & := & 1 \mid \shift T \mid \lam T \mid \app T\;S
 \end{array}
 \]
 
@@ -144,7 +136,7 @@ corresponding de Bruijn representation.
 \begin{tabular}{lp{9cm}}
 $  \Gamma \vdash M \leadsto T\quad\quad$ & Term $M$ with the free variables
     in $\Gamma$ is translated to the de Bruijn representation $T$
-\end{tabular}  
+\end{tabular}
 \end{center}
 
 We can then define this translation using the following inference rules:
@@ -155,7 +147,7 @@ We can then define this translation using the following inference rules:
 \leadsto S} \quad
 \infer{\Gamma \vdash M\;N \leadsto T\;S}{
 \Gamma \vdash M \leadsto T
-  & 
+  &
 \Gamma \vdash N \leadsto S}
 \\[1em]
 \infer{\Gamma,x \vdash x \;\;\leadsto \;1}{} \quad
@@ -171,12 +163,11 @@ i.e. it does not contain any variables declared from $\Gamma$.
 If we translate a de Bruijn term to a lambda-term, then we do need to
 assume that we have a context where we already accumulated variables,
 i.e. we may have already generated some variable names for indices we
-encountered. 
+encountered.
 
 \subsection*{Substitution} Substitution for de Bruijn terms is tedious
 and crucially relies on properly shifting variables.
 
-\newcommand{\shiftby}{\textsf{shift}\;}
 
 $\shiftby\;n\;c\;T$ means we shift all free variables (i.e. all
 variables greater than $c$) by $n$.
@@ -207,11 +198,11 @@ term $T$ and similarly compute the result of applying $\sigma'$ to
 $S$. If $T$ and $S$ are large terms, this may require us to traverse
 two large terms; yet, if $T$ and $S$ differ with respect to their top
 symbol, we can detect early, before pushing the substitutions through
-that these two terms are different. 
+that these two terms are different.
 
 
 
-\section{Representation of Variables and Binders using Higher-order Abstract Syntax} 
+\section{Representation of Variables and Binders using Higher-order Abstract Syntax}
 In general, managing binders and bound variables is a major pain. So,
 several alternatives have been and are being developed.
 
@@ -221,7 +212,7 @@ For example, we can declare a data-type \lstinline!term! in Beluga,
 which has two constructors.
 
 \begin{lstlisting}
-datatype term : type = 
+datatype term : type =
 | app : term  -> term  -> term
 | lam : (term -> term) -> term
 ;
@@ -231,14 +222,14 @@ The constructor \lstinline!app! takes in two arguments; both of them
 must be expressions. The constructor \lstinline!lam! takes in one
 argument which is in fact a function! Note that for simplicity, we do
 not represent the type annotation on the function which is present in
-our grammar. 
+our grammar.
 
 Let's look at a few examples:
 
 % \begin{center}
 %   \begin{tabular}{lp{0.25cm}l}
 % On Paper (Object language)     & & LF/Beluga (Meta-language)\\
-% $\lambda x{:}\nat.x$ & & \lstinline!lam nat (\x. x)! \\    
+% $\lambda x{:}\nat.x$ & & \lstinline!lam nat (\x. x)! \\
 % $\lambda x{:}\nat \arrow \Bool.\lambda y{:}\nat. x\;y$ & &
 % \lstinline!lam (arrow nat bool) (\x. lam nat \y. app x y)! \\
 % $\lambda w{:}\nat arrow \Bool.\lambda v{:}\nat. w\;v$ & &
@@ -254,7 +245,7 @@ Let's look at a few examples:
 \begin{center}
   \begin{tabular}{lp{0.25cm}l}
 On Paper (Object language)     & & LF/Beluga (Meta-language)\\
-$\lambda x.x$ & & \lstinline!lam \x. x! \\    
+$\lambda x.x$ & & \lstinline!lam \x. x! \\
 $\lambda x.\lambda y. x\;y$ & &
 \lstinline!lam \x. lam \y. app x y! \\
 $\lambda w.\lambda v. w\;v$ & &
@@ -273,12 +264,12 @@ is not the user's business anymore to manipulate indices or
 $\alpha$-convert terms manually; instead, the user inherits these
 properties directly from the meta-language. Of course, Beluga developers and
 implementors have to still battle with de Bruijn indices and all the issues
-around variables.  
+around variables.
 
 Why is this great for the user of Beluga (or any other such system such as Twelf, Delphin, Hybrid, etc): not only does this higher-order representation support $\alpha$-renaming, but we also get substitution for free! Why?  - The meta-language is itself a lambda-calculus, and as every lambda-calculus it comes with some core properties such as $\alpha$-renaming and $\beta$-reduction. So, if we
 have \lstinline!lam \x. lam \y. app x y! and we would like to replace
 \lstinline!x! in \lstinline!lam \y. app x y! with the term
-\lstinline!lam \z.z!, then we simply say 
+\lstinline!lam \z.z!, then we simply say
 \lstinline!(\y. lam \y. app x y) (lam \z.z)!.
 
 This will come in particularly handy when we are representing our small-step
@@ -297,16 +288,16 @@ To represent evaluation, we again revisit our data-type
 the rules in the operational semantics. The representation for $\SAppArgStep$
 and $\SAppFnStep$ follows the previous ideas and is straightforward. For
 representing the rule $\SAppBeta$, we take advantage of the fact that
-LF-functions (i.e. \lstinline!M! in \lstinline!lam M! has type 
+LF-functions (i.e. \lstinline!M! in \lstinline!lam M! has type
 \lstinline!term -> term! and denotes a LF-function!) can be applied to an
 argument. Hence, we can model the substitution $[V/x]M$ by simply writing
 \lstinline!M V!.
 
 \begin{lstlisting}
-datatype step: term -> term -> type = 
+datatype step: term -> term -> type =
 | e_app_1    : step M M'
              -> step (app M N) (app M' N)
-| e_app_2    : step N N' -> value V              
+| e_app_2    : step N N' -> value V
               -> step (app V N) (app V N')
 | e_app_abs : value V
               -> step (app (lam M) V) (M V)
@@ -317,10 +308,10 @@ We can then use these constructors \lstinline!e_app_1!,
 \lstinline!e_app_2!, and \lstinline!e_app_abs! to build objects that
 correspond directly to derivations using the rules $\SAppArgStep$,
 $\SAppFnStep$, and  $\SAppBeta$. This follows the same principles as in the
-previous chapter. 
+previous chapter.
 
 We can also revisit and prove uniqueness of evaluation and the fact that values
-do not step. The proofs are encoded as recursive functions. 
+do not step. The proofs are encoded as recursive functions.
 
 Let's practice:
 
@@ -333,7 +324,7 @@ Let's practice:
 
 
 
-\section{Representation of Assumptions using Higher-order Abstract Syntax} 
+\section{Representation of Assumptions using Higher-order Abstract Syntax}
 We now consider how to represent typing derivations. Recall that we can
 represent typing derivations with explicit contexts and without
 (i.e. Gentzen-style).
@@ -345,31 +336,30 @@ represent typing derivations with explicit contexts and without
   \begin{array}{c}
   \infer[u]{x:T}{} \\
   \vdots~~\\
-  M : S~~~~   
+  M : S~~~~
   \end{array}
-}  
+}
 \qquad
 \infer[\TApp]{M\;N : S}{M : T \arrow S & N:T}
 \end{array}
 \]
 
-We call the rule $\TFn$ parametric in $x$ and hypothetical in $u$. 
+We call the rule $\TFn$ parametric in $x$ and hypothetical in $u$.
 In the implicit context formulation, we simply reason directly from
-assumptions. 
+assumptions.
 
 
 \[
 \infer[\TFn^{x,u}]{\lambda x. \lambda y. x\;y : (\nat \arrow \nat) \arrow \nat \arrow \nat}
 {\infer[\TFn^{y,v}]{\lambda y.x\;y : \nat \arrow \nat}{
  \infer[\TApp]{x\;y : \nat}
-   {\infer[u]{x:\nat \arrow nat}{} & 
+   {\infer[u]{x:\nat \arrow nat}{} &
     \infer[v]{y:\nat \arrow nat}{}
    }
  }
 }
 \]
 
-\newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
 As an alternative, we can re-state the rules using an explicit context for
 book-keeping; this also is often useful when we want to state properties about
 our system and about contexts in particular. We will use for the judgment $M:T$
@@ -383,7 +373,7 @@ the clearer judgment $\hasty M T$.
     \fbox{$\Gamma \vdash \hasty M T$}}} \\[1em]
 \infer[\TFn^{x,u}]{\Gamma \vdash \hasty {(\lambda x.M)} {(T \arrow S)}}{
   \Gamma, u:\hasty x T \vdash \hasty M S
-}  
+}
 \qquad
 \infer[\TApp]{\Gamma \vdash \hasty {(M\;N)} S}{\Gamma \vdash \hasty M (T \arrow S)
   & \Gamma \vdash \hasty N T}\\[1em]
@@ -411,7 +401,7 @@ should be able to return a derivation $M:S$ where all the $x$ have been replaced
 by $N$ and all the uses of $u$ have been replaced by the proof that $N:T$. As a
 consequence, the substitution lemma that we have proved for typing derivations
 can be obtained for free by simply applying the function that stands for `Given
-$x$ and $u$, we can construct a derivation $M:S$'' 
+$x$ and $u$, we can construct a derivation $M:S$''
 
 
 Let's make this idea concrete. We define the datatype \lstinline!hastype! as
@@ -423,19 +413,19 @@ datatype hastype: term -> tp -> type =
 	-> hastype (lam M) (arr T S)
 | t_app:  hastype M1 (arr T S) -> hastype M2 T
 	-> hastype (app M1 M2) S
-;  
+;
 \end{lstlisting}
 
-Note that the argument to the constructor \lstinline!t_lam! must be of type 
+Note that the argument to the constructor \lstinline!t_lam! must be of type
 \lstinline!({x:term} hastype x T -> hastype (M x) S)!. We write her curly braces
-for universal quantification expressing directly more formally the sentence 
+for universal quantification expressing directly more formally the sentence
 ``Given a variable $x$ and an assumption \lstinline!hastype x T!, we can
-construct \lstinline!hastype (M x) S!.'' 
+construct \lstinline!hastype (M x) S!.''
 
 One might ask, why do we have to write \lstinline!hastype (M x) S! and why can
 we not write \lstinline!hastype M S!? - Let's look carefully at the types for
 each of the arguments. We note that we wrote \lstinline!(lam M)! and we also
-know that \lstinline!lam! takes in one argument that has type 
+know that \lstinline!lam! takes in one argument that has type
 \lstinline!term -> term!, i.e. it is an LF-function. Hence writing \lstinline!hastype M S! would be
 giving you a type-error, since the relation \lstinline!hastype! expects an
 object of type \lstinline!term!, not of type \lstinline!term -> term!.
@@ -452,9 +442,9 @@ renaming explicit below.
   \begin{array}{c}
   \infer[u]{y:T}{} \\
   \vdots~~\\
-   ~[y/x]M : S~~~~   
+   ~[y/x]M : S~~~~
   \end{array}
-}  
+}
 \end{array}
 \]
 
@@ -478,10 +468,10 @@ It is: \lstinline![|-t_lam \x.\u. t_lam \y.\v. t_app u v]!.
 
 Let us revisit the type preservation proof for the functions and
 function application, in particular we concentrate on the case for
-abstractions. 
+abstractions.
 
 \begin{theorem}
-If $\vdash M : T$ and $M \step N$ then $\vdash N : T$.  
+If $\vdash M : T$ and $M \step N$ then $\vdash N : T$.
 \end{theorem}
 \begin{proof}
 By structural induction on $\St = M \step N$.
@@ -496,16 +486,16 @@ $\D_2$ in $\D$.
 
 \end{proof}
 
-The proof below reflects the structure of the proof. 
-Case-analyzing \lstinline!s! that stands for 
+The proof below reflects the structure of the proof.
+Case-analyzing \lstinline!s! that stands for
 \lstinline![|- step M N]! yields three different cases. The case where
 we have  \lstinline![|- e_app_abs V]!
 corresponds directly to the case in the proof above that we
 wrote out explicitly where \lstinline!V! corresponds to $\V$. We then
-use inversion to analyze our assumption 
+use inversion to analyze our assumption
 \lstinline![|-hastype (app (lam M) V) T]!. We have written the two
 inversion steps as one nested pattern in Beluga. More importantly, the
-subderivation $\D~:~x:S \vdash M:T$ in the proof is represented as 
+subderivation $\D~:~x:S \vdash M:T$ in the proof is represented as
 \lstinline!\x.\u. D x u!. Recall that earlier we remarked that the
 typing rule for functions does make two assumptions: that we have a
 fresh variable \lstinline!x! and an assumption \lstinline!hastype x S!
@@ -564,7 +554,7 @@ reconstruction will however make sure that that the underscore is
 exactly the value \lstinline!D2! refers to.
 
 
-\begin{lstlisting} 
+\begin{lstlisting}
 rec tps: [ |- hastype M T] -> [ |- step M N] -> [ |- hastype N T] =
 / total s (tps m t n d s)/
 fn d => fn s => case s of
@@ -581,7 +571,7 @@ fn d => fn s => case s of
 | [ |- e_app_abs V] =>
   let [ |- t_app (t_lam \x.\u. D x u) D2] = d in
     [ |- D _ D2]
-;  
+;
 \end{lstlisting}
 
 \section*{Putting things into Contexts} As soon as we have support for binders,
@@ -596,17 +586,17 @@ Therefore, Beluga supports first class contexts.
 \begin{lstlisting}
 datatype term   : type =
 | app   : term  -> term  -> term
-| lam   : (term -> term) -> term;    
+| lam   : (term -> term) -> term;
   \end{lstlisting}
 \end{minipage}
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
 datatype term'   : type
-| one    : term' 
-| shift  : term'  -> term'  
-| lam'   : term'  -> term' 
-| app'   : term'  -> term'  -> term';  
-\end{lstlisting}  
+| one    : term'
+| shift  : term'  -> term'
+| lam'   : term'  -> term'
+| app'   : term'  -> term'  -> term';
+\end{lstlisting}
 \end{minipage}
 
 We now first define the shape and structure of our context. This is
@@ -620,11 +610,11 @@ lambda-terms to de Bruijn terms into a recursive program:
 
 
 \begin{lstlisting}
-rec vhoas2db : {g:ctx}{#p:[\gamma |-term]}  [ |-term'] =    
+rec vhoas2db : {g:ctx}{#p:[\gamma |-term]}  [ |-term'] =
  / total \gamma (vhoas2db \gamma  ) /
-mlam \gamma => mlam #p =>  case [\gamma] of 
+mlam \gamma => mlam #p =>  case [\gamma] of
 | [] => impossible [ |-#p ] in []
-| [\gamma', x:term] => (case [\gamma', x:term |-#p ..] of 
+| [\gamma', x:term] => (case [\gamma', x:term |-#p ..] of
  | [\gamma',x:term |-x] => [ |-one ]
  | [\gamma',x:term |-#p .. ] =>
    let [ |-Db] = vhoas2db [\gamma'] [\gamma' |-#p ..] in
@@ -658,7 +648,7 @@ We call an object of type \lstinline![\gamma |-term]! a contextual object and
 it describes objects of type \lstinline!term! in the context
 \lstinline!g!.
 
-Let us look at the easy cases first, for example the case 
+Let us look at the easy cases first, for example the case
 \lstinline![g |-app (E1 ..) (E2 ..)]!.  We note we write \lstinline!..!
 to indicate that the object \lstinline!E1! can refer to the variables
 in the context \lstinline!g!. This way we are very explicit about
@@ -670,7 +660,7 @@ recursive call will produce a closed de Bruijn term, namely
 \lstinline![|-F1] ! and \lstinline![|-F2]!, which we can use to
 re-assemble our proper de Bruijn term \lstinline![|-app' F1 F2]!.
 
-When we translate a lambda-term, we must extend the context. 
+When we translate a lambda-term, we must extend the context.
 
 
 Finally, we must consider the variable cases: we note that the
@@ -690,16 +680,16 @@ variables but not arbitrary terms.
 % \lstinline!(g:ctx) [g|-term'] -> [g|-term]!. The full program below exploits the same ideas as previously described.
 
 % \begin{lstlisting}
-% rec db2hoas : (g:ctx) [g|-term'] -> [g|-term] = 
-% fn e => case e of 
+% rec db2hoas : (g:ctx) [g|-term'] -> [g|-term] =
+% fn e => case e of
 % | [h,x:term |-one] => [h,x:term |-x]
 
-% | [h,x:term |-shift E => 
-%   let [h |- F ..] = db2hoas [h |- E]  in 
+% | [h,x:term |-shift E =>
+%   let [h |- F ..] = db2hoas [h |- E]  in
 %   [h,x:term |- F ..]
 
-% | [h |-lam' E] => 
-%   let [g,x:term|- F .. x] = db2hoas  [h, x:term|- E] in 
+% | [h |-lam' E] =>
+%   let [g,x:term|- F .. x] = db2hoas  [h, x:term|- E] in
 %   [g |- lam \x.F .. x]
 
 % | [g |-app' E1 E2] =>
@@ -708,9 +698,9 @@ variables but not arbitrary terms.
 %   [g|- app (F1 ..) (F2 ..)]
 % ;
 
-% rec tohoas : [|-term'] -> [|-term] = 
-% fn e => db2hoas e ;  
-% \end{lstlisting} 
+% rec tohoas : [|-term'] -> [|-term] =
+% fn e => db2hoas e ;
+% \end{lstlisting}
 
 
 \section{Type Uniqueness Proof}
@@ -719,7 +709,7 @@ contexts. One such example is proving type uniqueness. So far we have
 been dropping the type annotation present in our abstraction. This is
 apparent when we revisit the grammar for terms, where we define
 abstractions as $\lambda x{:}T.M$, and the type of the constructor
-\lstinline!lam: (term -> term) -> term!. 
+\lstinline!lam: (term -> term) -> term!.
 
 While this does not matter when we are proving type preservation, we
 will not be able to prove that every term has a unique type, unless we
@@ -729,7 +719,7 @@ highlighting the new parts in green. We also define equality
 explicitly using reflexivity.
 
 \begin{lstlisting}
-datatype term : type = 
+datatype term : type =
 | app : term  -> term  -> term
 | lam : <<tp>> ->(term -> term) -> term
 ;
@@ -739,7 +729,7 @@ datatype hastype: term -> tp -> type =
 	-> hastype (lam <<T>> M) (arr T S)
 | t_app:  hastype M1 (arr T S) -> hastype M2 T
 	-> hastype (app M1 M2) S
-;  
+;
 
 datatype eq: term -> term -> type =
 | refl: eq  M M ;
@@ -755,11 +745,8 @@ of the proof even more apparent, we already use our LF encoding to
 describe our typing judgments. This will also make the translation of
 this proof into a Beluga program much easier.
 
-\newcommand{\oftyp}{\mathtt{hastype}\;}
-\newcommand{\eq}{\;\mathtt{eq}\;}
-
 \begin{theorem}[Type uniqueness]$\;$\\
-If $\Gamma \vdash \oftyp M\;T$ and $\Gamma \vdash \oftyp M\; S$ 
+If $\Gamma \vdash \oftyp M\;T$ and $\Gamma \vdash \oftyp M\; S$
 then $\eq T\;S$.
 \end{theorem}
 \begin{proof}
@@ -779,7 +766,7 @@ $
 \C = \ianc{\begin{array}{c}{\C}_{1} \\ \Gamma\vdash \oftyp
     M\;(\textsf{arr}\;T'\;S') \end{array}\quad\begin{array}{c}{\C}_{2} \\
     \Gamma\vdash \oftyp N\;T' \end{array}}{\Gamma \vdash \oftyp
-  (\textsf{app}\;M\;N)\;S'}{\textsf{t\_app}}        
+  (\textsf{app}\;M\;N)\;S'}{\textsf{t\_app}}
 %\end{array}
 $
 %
@@ -796,7 +783,7 @@ Therefore there is a proof for $\eq\;S\;S'$ by reflexivity (\emphFact{since we k
 \[
 \D = \ianc{\begin{array}{c}{\D}_{1} \\ \emphFact{\Gamma, x, u{:}\oftyp x\;T \vdash} \oftyp M\;S \end{array}}{\emphFact{\Gamma \vdash} \oftyp (\textsf{lam}\;x{:}T.M)\;(\textsf{arr}\;T\;S)}{\textsf{t\_lam}}
 \quad\quad
-\C = \ianc{\begin{array}{c}{\C}_{1} \\ \emphFact{\Gamma, x, u{:}\oftyp x\;T \vdash} \oftyp M\;S' \end{array}}{\emphFact{\Gamma \vdash} \oftyp (\textsf{lam}\;x{:}T.M)\;(\textsf{arr}\;T\;S')}{\textsf{t\_lam}}  
+\C = \ianc{\begin{array}{c}{\C}_{1} \\ \emphFact{\Gamma, x, u{:}\oftyp x\;T \vdash} \oftyp M\;S' \end{array}}{\emphFact{\Gamma \vdash} \oftyp (\textsf{lam}\;x{:}T.M)\;(\textsf{arr}\;T\;S')}{\textsf{t\_lam}}
 \]
 \begin{tabular}{p{8cm}l}
 $\E : \eq\; S\; S'$ & by i.h. using $\D_{1}$ and $\C_{1}$ \\
@@ -805,7 +792,7 @@ $\E : \eq\;S\; S\quad$  \emphFact{and $S = S'$} & by inversion using reflexivity
 %ause
 
 Therefore there is a proof for $\eq\;(\textsf{arr}\; T\; S)\;(\textsf{arr}\;T\;S')$ by reflexivity.
-\end{small}    
+\end{small}
 
 \paragraph*{Case 3}%\\% [-2.5em]
 \begin{small}
@@ -815,7 +802,7 @@ Therefore there is a proof for $\eq\;(\textsf{arr}\; T\; S)\;(\textsf{arr}\;T\;S
 \C = \ianc{x,v{:}\oftyp x\;S \in \Gamma}{\Gamma \vdash \oftyp x\;S}{v}\hspace{3cm}
 \]
 Every variable $x$ is associated with a unique typing assumption
-(\emphFact{property of the context}), hence $v = u$ and $S = T$. 
+(\emphFact{property of the context}), hence $v = u$ and $S = T$.
 \end{small}
 
 \end{proof}
@@ -844,16 +831,16 @@ classify contexts. We observe that in our typing rules, we always
 introduce a variable $x$ and the assumption $\oftyp x\;T$ at the same
 time.
 To denote that these two assumptions always come in pairs, we are
-writing the keyword \lstinline!block!. 
+writing the keyword \lstinline!block!.
 
 \begin{lstlisting}
-schema tctx = some [t:tp] block (x:exp, _t:type_of x t);  
+schema tctx = some [t:tp] block (x:exp, _t:type_of x t);
 \end{lstlisting}
 
 The schema \t{tctx} describes a context containing assumptions
 \t{x:tm}, each associated with a typing assumption \t{oft x t}
 for some type \t{t}.  Formally, we are using a dependent product $\Sigma$
-(used only in contexts) to tie \t{x} to \t{oft x t}. 
+(used only in contexts) to tie \t{x} to \t{oft x t}.
 We thus do not need to establish separately that for every variable there is a
 unique typing assumption: this is inherent in the definition of \t{tctx}.
 The schema classifies well-formed contexts and checking whether a
@@ -870,7 +857,7 @@ contexts.
 %\multicolumn{1}{c}{Context} & \multicolumn{1}{c}{Is of schema
 %  \lstinline!tctx!?}\\
 \hspace{2cm}Context & \hspace{1.5cm}Is of schema \lstinline!tctx!?\\
-\hline 
+\hline
 \lstinline!b1:block x:tm.hastype x (arr nat nat), b2:block y:tm.hastype y nat!
 & yes \\ \hline
 \lstinline!x:tm, u:hastype x (arr nat nat)! & no (not grouped in blocks)
@@ -879,9 +866,9 @@ contexts.
 missing) \\\hline
 \lstinline!b:block x:tm.hastype y nat! & no (\lstinline!y! is free) \\
 \hline
-\lstinline!b1:block x:tm.hastype x (arr nat nat), b2:block y:tm.hastype x nat! 
+\lstinline!b1:block x:tm.hastype x (arr nat nat), b2:block y:tm.hastype x nat!
 & no (wrong binding structure)
-\end{tabular}  
+\end{tabular}
 \end{center}
 
 
@@ -891,7 +878,7 @@ corresponds to the type uniqueness theorem.
 
 
 \begin{lstlisting}[caption={Type Uniqueness Proof},label=list:8-6,captionpos=b,float,abovecaptionskip=-\medskipamount]
-rec unique : (\gamma:tctx)[\gamma |-hastype (E $\mdots$) T] -> [\gamma|-hastype (E $\mdots$) T'] -> [ |-equal T T'] =  
+rec unique : (\gamma:tctx)[\gamma |-hastype (E $\mdots$) T] -> [\gamma|-hastype (E $\mdots$) T'] -> [ |-equal T T'] =
 / total d (unique _ _ _ _ d) /
 fn d => fn f => case d of
 | [\gamma |-t_app (D1 $\mdots$) (D2 $\mdots$)] =>
@@ -907,61 +894,61 @@ fn d => fn f => case d of
 | [\gamma |-#q.2 $\mdots$] =>           % d : hastype #q.x T
   let[\gamma |-#r.2 $\mdots$] = f  in  % f : hastype #q.x T'
     [ |-e_ref]
-; 
+;
 \end{lstlisting}
 
 
 We can read this type as follows: For all context \lstinline!\gamma! of
-schema \lstinline!tctx!, given a derivation for 
-\lstinline!hastype (M $\mdots$) T! in the context \lstinline!\gamma! and a derivation for 
+schema \lstinline!tctx!, given a derivation for
+\lstinline!hastype (M $\mdots$) T! in the context \lstinline!\gamma! and a derivation for
 \lstinline!hastype (M $\mdots$) S! in the context \lstinline!\gamma!, we return a
 derivation showing that \lstinline!eq T S! in the empty context.
 Although we quantified over the context \lstinline!\gamma! at the outside,
 it need not be passed explicitely to a function of this type, but
-Beluga will be able to reconstruct it. 
+Beluga will be able to reconstruct it.
 
 We call the type \lstinline![\gamma |-hastype (M $\mdots$) T! a contextual type and
-the object inhabiting it a contextual object. 
+the object inhabiting it a contextual object.
 Since the term \lstinline!M! can depend on the variables declared in the
 context \lstinline!\gamma!, we  write  \lstinline!(M $\mdots$)!. Formally,
-\lstinline!M! itself is a contextual object of type 
+\lstinline!M! itself is a contextual object of type
 \lstinline![\gamma |-tm]! and \lstinline!$\mdots$! is the identity substitution
-which $\alpha$-renames the bound variables. 
+which $\alpha$-renames the bound variables.
 On the other hand, \lstinline!T! and \lstinline!S! stand for closed
 objects of type \lstinline!tp! and they cannot refer to declarations
 from the context \lstinline!g!. Note that these subtleties were not
 captured in our original informal statement of the type uniqueness
-theorem. 
+theorem.
 
 We consider each case individually. Each case in the proof on page
 \pageref{sec:thmunique} will correspond to one case in the
 case-expression.
 %
 \paragraph{Application case:} If the first derivation \lstinline{d} concludes
-with \lstinline{t_app}, it matches 
+with \lstinline{t_app}, it matches
 the pattern \lstinline![\gamma |-t_app (D1$\mdots$) (D2$\mdots$)]!, and is
-a contextual object of type 
+a contextual object of type
 \lstinline!hastype (app (M$\mdots$) (N$\mdots$))$~$S! in the context \lstinline!\gamma!.  % We therefore know that
 % $\lstinline{M$\;$$\mdots$} =
-% \lstinline{app$\;$(M$\;$$\mdots$)\,(N$\;$$\mdots$)}$. 
+% \lstinline{app$\;$(M$\;$$\mdots$)\,(N$\;$$\mdots$)}$.
 \lstinline!D1! corresponds to the first
-premise of the typing rule for applications and has the contextual type 
+premise of the typing rule for applications and has the contextual type
 \lstinline![\gamma |-hastype (M $\mdots$) (arr T S)]!.
 
 Using a let-binding, we invert the second
-argument, the derivation \lstinline{f} which 
+argument, the derivation \lstinline{f} which
 must have type
 \lstinline![\gamma |-hastype (app (M $\mdots$) (N $\mdots$))$~$ S']!. \lstinline!F1!
 corresponds to the first premise of the typing rule for applications
 and has type \lstinline![\gamma |-hastype (M $\mdots$) (arr T' S')]!.
 The appeal to the induction hypothesis using \lstinline{D1} and \lstinline{F1} in the
-on-paper proof 
+on-paper proof
 corresponds to the recursive call
  \lstinline!unique [\gamma |-D1 $\mdots$] [g |-F1 $\mdots$]!.
 Note that while \lstinline!unique!'s type says it takes a context variable \lstinline!{g:tctx}!,
 we do not pass it explicitly; Beluga infers it from the context in the first argument
-passed. 
-The result of the recursive call is a contextual object of type 
+passed.
+The result of the recursive call is a contextual object of type
 \lstinline![ |-eq (arr T S) (arr T' S')]!. The only rule that
 could derive such an object is \lstinline{ref}, and pattern matching
 establishes that \lstinline!arr T S!$=$\lstinline!arr T' S'! and hence
@@ -972,7 +959,7 @@ rule \lstinline!ref!.
  \paragraph{Abstraction case:}
   If the first derivation \lstinline{d} concludes with \lstinline{t_lam}, it matches
  the pattern \lstinline{[\gamma |-t_lam \x.\u.D$\mdots$x u]}, and is
- a contextual object in the context \lstinline!\gamma! of type 
+ a contextual object in the context \lstinline!\gamma! of type
  \lstinline{hastype (lam T (\x.M$\mdots$x))$~$(arr T S)}.
  %Thus, $\lstinline{M$\;$$\mdots$} = \lstinline{lam$\;$T1$\;$($\lambda$x.$\;$M0$\;$$\mdots$$\;$x)}$
  % and $\lstinline{T} = \lstinline{arr$\;$T1$\;$T2}$.
@@ -981,7 +968,7 @@ rule \lstinline!ref!.
  \lstinline{F1$\mdots$x u} deriving \lstinline{hastype (M$\mdots$x)$~$S'} that can use \lstinline{x},
  \lstinline{u:hastype x T}, and assumptions from \lstinline!\gamma!.
  %Hence, after pattern matching on \lstinline{d} and \lstinline{f}, we know that
- %$\lstinline{M} = \lstinline{lam~T1$\;$($\lambda$x.$\;$M$\;$$\mdots$x}$\lstinline{)} and 
+ %$\lstinline{M} = \lstinline{lam~T1$\;$($\lambda$x.$\;$M$\;$$\mdots$x}$\lstinline{)} and
  %$\lstinline{T} = \lstinline{arr T1 T2}$ and $\lstinline{T'} = \lstinline{arr T1 T2'}$.
 
  The use of the induction hypothesis on \lstinline{D} and \lstinline{F} in a paper proof
@@ -994,31 +981,31 @@ rule \lstinline!ref!.
  explicitly giving the type of \lstinline{D}, so it is easier to write \lstinline!_!.)
  To retrieve \lstinline{x} we take the first projection
  \lstinline{b.1}, and to retrieve \lstinline{x}'s typing assumption we take the second projection \lstinline{b.2}.
- 
+
  Now we can appeal to the induction hypothesis using
  \lstinline!D1$\mdots$b.1 b.2! and \lstinline!F1$\mdots$b.1 b.2! in the context
- \lstinline!g,b:block x:tm,u:hastype x T1!. 
+ \lstinline!g,b:block x:tm,u:hastype x T1!.
   From the i.h.\ we get a
  contextual object, a closed derivation of
  \lstinline![|-equal (arr T S) (arr T S')]!. The only rule that could
  derive this is \lstinline{ref}, and pattern matching establishes that \lstinline{S}
  must equal \lstinline{S'}, since we must have \lstinline!arr T S!$ =$
 \lstinline!arr T1 S'!.  Therefore, there is a proof of
-\lstinline![ |-equal S S']!, 
+\lstinline![ |-equal S S']!,
  and we can finish with the reflexivity rule \lstinline{ref}.
 
  \paragraph{Assumption case:} Here, we must have used an assumption from the
  context \lstinline!\gamma! to construct the derivation \lstinline{d}.  Parameter variables
-  allow a generic case that matches a declaration 
+  allow a generic case that matches a declaration
 \lstinline!block x:tm, u:hastype x T! for any \lstinline{T} in \lstinline!\gamma!. Since our pattern match
  proceeds on typing derivations, we want the second component of the
  parameter \lstinline{#q}, written as \lstinline{#q.2} or \lstinline!#q.u!.  The pattern match on \lstinline{d}
- also establishes that \lstinline{M = #q.1} (or \lstinline!M = #q.x!). 
- % and \lstinline{S = T}. 
+ also establishes that \lstinline{M = #q.1} (or \lstinline!M = #q.x!).
+ % and \lstinline{S = T}.
  Next, we pattern match on \lstinline{f}, which has type
 \lstinline!hastype (#q.1$\;$$\mdots$) S! in the context \lstinline!\gamma!.  Clearly, the only
  possible way to derive \lstinline{f} is by using an assumption from \lstinline!\gamma!. We call
- this assumption \lstinline{#r}, standing for a declaration 
+ this assumption \lstinline{#r}, standing for a declaration
 \lstinline!block y:tm,u:hastype y S!, so \lstinline{#r.2} refers to the second component
 \lstinline!hastype (#r.1$~\mdots$)$~$ S!. Pattern matching between \lstinline{#r.2} and \lstinline{f}
  also establishes that % both types are equal and that \lstinline{S' = T'} and
@@ -1029,16 +1016,16 @@ rule \lstinline!ref!.
  solution to establish that \lstinline{#r.1 = #q.1} is the one where both the
  parameter variable \lstinline!#r! and the parameter variable
  \lstinline!#q! refer to the same bound variable in
- the context \lstinline!g!.  Therefore, we must have 
+ the context \lstinline!g!.  Therefore, we must have
  \lstinline!#r = #q!, and both
  parameters must have equal types, and \lstinline{S = S' = T = T'}.  (In general,
- unification in the presence 
+ unification in the presence
  of $\Sigma$-types does not yield a unique unifier, but in Beluga only
  parameter variables and variables from the context can be of $\Sigma$ type,
  yielding a unique solution.)
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "book"
-%%% End: 
+%%% End:

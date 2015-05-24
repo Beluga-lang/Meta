@@ -1,3 +1,85 @@
+%\topmargin 0pt
+%\advance \topmargin by -\headheight
+%\advance \topmargin by -\headsep
+
+
+
+%\oddsidemargin 0pt
+%\evensidemargin \oddsidemargin
+%\marginparwidth 0.5in
+
+
+
+% \setlength{\topmargin}{15mm}
+\setlength{\topmargin}{5mm}
+
+%\setlength{\textwidth}{155mm}
+\setlength{\textwidth}{155mm}
+%\setlength{\textwidth}{165mm}
+\setlength{\textheight}{200mm}
+%\setlength{\textheight}{195mm}
+
+\setlength{\evensidemargin}{5mm}
+\setlength{\oddsidemargin}{5mm}
+
+\usepackage[T1]{fontenc}
+\usepackage{fix-cm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{srcltx}
+\usepackage{charter}
+\usepackage{euler}
+
+\usepackage{latexsym}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{comment}
+\usepackage{color}
+
+\newtheorem{@problem}{Exercise}[section]
+\newenvironment{problem}{\begin{@problem}\rm}{\end{@problem}}
+
+\newtheorem{@sol}{Solution}[section]
+\newenvironment{sol}{\begin{@sol}\rm}{\end{@sol}}
+
+
+% \input prelude
+
+\usepackage{proof}
+
+\newcommand{\nl}{\overline{n}}
+
+\newtheorem{@axiom}{Axiom}
+\newenvironment{axiom}{\begin{@axiom}\rm}{\end{@axiom}}
+% \newtheorem{@theorem}{Theorem}[section]
+% \newenvironment{theorem}{\begin{@theorem}\rm}{\end{@theorem}}
+
+% \newtheorem{@lemma}{Lemma}[section]
+% \newenvironment{lemma}{\begin{@lemma}\rm}{\end{@lemma}}
+
+
+
+\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
+\newcommand{\dRed}[1]{{\color{dRed}#1}}
+
+\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
+\newcommand{\mygreen}[1]{{\color{dGreen}#1}}
+\newcommand{\emphFact}[1]{{\mygreen{#1}}}
+
+\usepackage{graphics}
+\usepackage{graphicx}
+
+\usepackage{url}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+
 \usepackage{xspace}
 
 
@@ -15,7 +97,7 @@
 \newcommand{\arrayenvr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}r@{}}#1\end{array}}
 \newcommand{\arrayenvbr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[b]{@{}r@{}}#1\end{array}}
 \newcommand{\arrayenvl}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}l@{}}#1\end{array}}
-\newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}} 
+\newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
 \newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
 
 \newcommand{\subtype}{\leq}
@@ -166,3 +248,139 @@
 \newcommand{\W}{{\mathcal{W}}}
 \newcommand{\St}{{\mathcal{S}}}
 \newcommand{\FV}{\mathsf{FV}}
+
+\usepackage{cdsty}
+
+% For listing package to pretty print contextualML
+\usepackage{listings}
+
+%
+%
+% ContextualML
+%
+%
+\lstdefinelanguage{ContextualML}
+{
+  morekeywords={and, block, case, of, mlam, fn, impossible, let, in, schema,
+    some, rec, type, ctype, prop, stratified, inductive, coinductive, LF, if, then,
+    else, total},
+  keepspaces=true,
+  sensitive,
+  morecomment=[n]{(*}{*)},
+  morestring=[b]"
+}[keywords,comments,strings]
+
+\lstloadlanguages{ContextualML}
+\lstset{language=ContextualML}
+
+\usepackage{natbib}
+\bibpunct{[}{]}{;}{a}{}{,}
+\def\newblock{\hskip .11em plus .33em minus .07em}
+
+
+\newcommand{\bred}{\beta{-}\textsf{red}}
+\newcommand{\blam}{\textsf{lam{-}red}}
+\newcommand{\appMred}{\textsf{app{-}red{-}1}}
+\newcommand{\appNred}{\textsf{app{-}red{-}2}}
+
+\newcommand{\bref}{\textsf{reflexive}}
+\newcommand{\bmred}{\textsf{one{-}step}}
+\newcommand{\btrans}{\textsf{transitive}}
+
+% \newcommand{\FV}{\mathsf{FV}}
+\newcommand{\FMV}{\mathsf{FMV}}
+
+\newcommand{\jtype}{\mathit{type}}
+\newcommand{\edot}{\bullet}
+\newcommand{\lb}{{[\![}}
+\newcommand{\rb}{{]\!]}}
+
+% \newcommand{\arrow}{\rightarrow}
+
+% \newcommand{\chk}{\Leftarrow}
+% \newcommand{\syn}{\Rightarrow}
+% \newcommand{\bnfas}{\mathrel{::=}}
+% \newcommand{\bnfalt}{\mathrel{\mid}}
+
+\newcommand{\type}{\textsf{type}}
+\newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
+% ---------------------------------------------------------------------------
+
+%
+% Set up listings "literate" keyword stuff (for \lstset below)
+%
+\newdimen\zzlistingsize
+\newdimen\zzlistingsizedefault
+\zzlistingsizedefault=9.5pt
+\zzlistingsize=\zzlistingsizedefault
+\global\def\InsideComment{0}
+\newcommand{\Lstbasicstyle}{\fontsize{\zzlistingsize}{1.05\zzlistingsize}\ttfamily}
+\newcommand{\keywordFmt}{\fontsize{0.9\zzlistingsize}{1.0\zzlistingsize}\bf}
+\newcommand{\smartkeywordFmt}{\if0\InsideComment\keywordFmt\fi}
+\newcommand{\commentFmt}{\def\InsideComment{1}\fontsize{0.95\zzlistingsize}{1.0\zzlistingsize}\rmfamily\slshape}
+
+\newcommand{\LST}{\setlistingsize{\zzlistingsizedefault}}
+
+\newlength{\zzlstwidth}
+\newcommand{\setlistingsize}[1]{\zzlistingsize=#1%
+\settowidth{\zzlstwidth}{{\Lstbasicstyle~}}}
+\setlistingsize{\zzlistingsizedefault}
+
+% The order of the "literate" definitions is significant:
+%   later definitions shadow earlier ones.  The \\Pi definition must come
+%   *after* the \\ definition, or the first part of \\Pi --- that is, \\ --- will
+%   be matched, and instead of $\Pi$ you'll get $\lambda Pi$.
+%
+\lstset{literate={->}{{$\rightarrow~$}}2 %
+                 {=>}{{$\Rightarrow~$}}2 %
+                 {|-}{{$\vdash\,$}}2 %
+                 {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
+                 {\\}{{$\lambda$}}1 %
+                 {\\Pi}{{$\Pi$}}1 %
+                 {\\gamma}{{$\gamma$}}1 %
+                 {\\psi}{{$\psi$}}1 %
+                 {FN}{{$\Lambda$}}1 %
+                 % {<<}{\color{myotherblue}}1 %
+                 {<<}{\color{dGreen}}1 %
+                 {<<r}{\color{dRed}}1 %
+                 {<*}{\color{dGreen}}1 %
+                 {<dim}{\color{dimgrey}}1 %
+                 {>>}{\color{black}}1 %
+                 {?}{\bf{?}}1
+                 ,
+                 columns=[l]fullflexible,
+                 basewidth=\zzlstwidth,
+                 basicstyle=\Lstbasicstyle,
+                 keywordstyle=\keywordFmt,
+                 identifierstyle=\relax,
+                 % stringstyle=\relax,
+                 commentstyle=\commentFmt,
+                 breaklines=true,
+                 breakatwhitespace=true,   % doesn't do anything (?!)
+                 mathescape=true,   % interprets $...$ in listing as math mode
+                 % tabsize=8,
+                 texcl=false}
+
+% ---------------------------------------------------------------------------
+
+\renewcommand{\t}[1]{\lstinline{#1}}
+
+%%%%%%%%%%%%%%%% Chapter 2 %%%%%%%%%%%%%%%%
+
+\newcommand{\halts}{~\mathsf{halts}}
+
+%%%%%%%%%%%%%%%% Chapter 3 %%%%%%%%%%%%%%%%
+
+%\newcommand{\shift}{\textsf{shift}\;}
+\newcommand{\shift}{\uparrow\!}
+% \newcommand{\lam}{\lambda}
+% \newcommand{\lam}{\textsf{lam}\;}
+% \newcommand{\app}{\textsf{app}\;}
+\newcommand{\app}{}
+% \newcommand{\lam}{\lambda}
+
+\newcommand{\shiftby}{\textsf{shift}\;}
+\newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
+
+\newcommand{\oftyp}{\mathtt{hastype}\;}
+\newcommand{\eq}{\;\mathtt{eq}\;}
