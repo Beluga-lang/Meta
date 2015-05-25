@@ -1,77 +1,85 @@
 \chapter{Introduction}
-%Mechanizing formal systems, given via axioms and inference rules, together with
-%proofs about them plays an important role in establishing trust in formal
-%developments. 
-% There are several ambitious projects on the way (see for
-%example LLVM \citep{ZhaoNMZ12} and VTS \citep{Appel11}, including%
-% CompCert \citep{Leroy-Compcert-CACM}), but we also see wide-spread use
-%of proof assistants to (partially) mechanize new language designs to
-%gain a deeper understanding of these systems and provide trustworthy
-%zaguarantees about them. 
+Mechanizing formal systems, given via axioms and inference rules, together with
+proofs about them plays an important role in establishing trust in
+formal developments. In particular, programming language designers and
+developers have embraced proof assistants to verify software artifacts (see for example verification of the LLVM
+\citep{ZhaoNMZ12} and VTS \citep{Appel11}, and CompCert
+\citep{Leroy-Compcert-CACM})). More generally,  mechanizing formal systems
+and their meta-theory  (at least partially) allows us to gain a deeper
+understanding of these systems and as we are working with more
+realistic and larger specifications proof assistants are becoming an essential
+tool to deal with the growing complexity of languages and proofs about
+them. % provide trustworthy guarantees about them. 
 
-
-A formal definition of a programming language
-provides a precise specification not only for programmers, but also
-for implementors of these languages. Working with formal definitions such as the
-ones we have explored so far is often easier when we can animate their use using
-a concrete implementation. This allows us to gain a deeper understanding of the
-systems we are working with.
-
-However, formal definitions not only provide a precise spec for implementors,
-but allows the rigorous analysis of its properties such as uniqueness of
-evaluation, or type safety. But a language definition is also an
-intricate artifact, which is carefully designed, and the proof of its
-properties are often complex and subtle --  above all many cases are
-tedious. How then can we trust our language design? How can we trust
-that indeed the properties we claim about a language are true? How do
-we know that a given program indeed satisfies a certain safety
-property? How can we compare different properties? --  
-%
-Realistic languages have many cases to be considered, and while many
-of them will be straightforward, the task of verifying them all can
-be complex. Consequently it can be difficult to define a language
+Realistic languages have many cases to be considered, and
+while many of them will be straightforward, the task of verifying them
+all can be complex. Consequently it can be difficult to define a language
 correctly, and prove the appropriate theorems -- let alone maintain
 the definition and the associated proofs when the language evolves and
-changes.  
-
-Fortunately, the burden can be alleviated by mechanizing the
-definition of a language together with its meta-theory. In this companion,
-we will give a brief introduction to the logical framework LF \citep{Harper93jacm} and its
-implementation in Beluga \citep{Pientka:POPL08,Pientka:PPDP08,Pientka:IJCAR10,Cave:POPL12} -- a programming environment which
-supports the implementation of language definitions and their
-meta-theory. It supports the definition of formal systems given via
-axioms and inference rules, as well as proofs about these formal
-systems. It is an ideal environment to prototype languages and explore their
-theoretical properties. %Compared to other existing approaches, Beluga provides the most infrastructure
+changes.  Being able to animate the use of formal definitions using
+proof assistants, allows us to gain a deeper understanding of the
+systems we are working with. Being able mechanize proofs about formal
+definitions, forces us to clearly understand each step and leaves no
+room for error.  It also substantially facilitates the maintenance of
+proofs as the languages evolve and change.
 
 
-\section{Mechanizing Definitions} Language formalization frequently
-start an informal, on-paper definition of the language. It mostly
-consists of 3 distinct parts: 
+\section{Approach}
 
-\begin{itemize}
-\item Represent the grammar / syntax of a language
-\item Represent its operational and static semantic
-\item Represent its meta-theory, i.e. proofs about the semantics such
-  type preservation and progress, correctness of program transformations, and normalization.
-\end{itemize}
+A key question in this endeavor is how to represent formal systems and
+derivations. To encode the formal systems, we need to understand how
+to represent variables, enforce their scope, and deal with operations
+such as renaming and substitution. When representing derivations, we
+face the challenge that they often depend on sets of assumptions; we
+therefore need to understand how to represent a set of assumptions,
+how to enforce the scope of assumptions within a derivation, and how
+to support weakening and substitution properties. The choices we make
+will ultimately have impact our proof developments. It will determine
+how much effort is required, how feasible a given development is in
+practice, how reusable and extendable a proof development is, how easy
+it is to automatically find the proof, and how readable the final proof is.  
 
-Each layer brings up different questions we must address. The choice
-we make in each of the questions substantially influences how easy it
-is to attack the next layer.  There are a number of systems we could have chosen to mechanize each layer such as Coq or Isabelle. In these notes we use system that is specialized for our task and provides the most supporting infrastructure. 
+General purpose proof environments such as Coq or Agda are built on powerful dependent type theories, but lack direct support for many intricate aspects that arise when we tackle the mechanization of formal systems and proofs. Instead the user chooses among a variety of techniques or libaries for binders that may smooth the path (see \cite{Aydemir:TechReport09}). However, this often comes with a heavy price tag.
+
+On the other side we have domain-specific proof languages such as Beluga \citep{Pientka:POPL08,Pientka:PPDP08,Pientka:IJCAR10,Cave:POPL12} lack (at this point) some of the computational power systems like Coq or Agda have, but provide a sophisticated infrastructure to deal automatically with many bureaucratic details regarding variables and  assumptions. We harness the power of abstraction, by defining common concepts such as variable binding, derivations depending on sets of assumptions by their canonical form together with sets of operations and properties. Users do not need to understand any technical details on how these concepts are implemented and prove (often standard) lemmas, but instead simply use these concepts abstractly through syntactic constructs provided by Beluga. As a consquence, mechanizing proofs about formal systems (programming languages) such as proofs by logical relations does not require a deep and complicated mathematical apparatus, but can be carried out in a direct and intuitive way. 
+
+\section{Goals}
+We pursue several goals with this companion:
+
+\begin{enumerate}
+\item Understand how to define formal systems using higher-order abstract syntax  
+\item Curry-Howard isomorphism: Proofs = Programs  
+\item Deeper understanding of programming languages and their properties
+\end{enumerate}
+
+
+% \section{Mechanizing Definitions} Language formalization frequently
+% start an informal, on-paper definition of the language. It mostly
+% consists of 3 distinct parts: 
+
+% \begin{itemize}
+% \item Represent the grammar / syntax of a language
+% \item Represent its operational and static semantic
+% \item Represent its meta-theory, i.e. proofs about the semantics such
+%   type preservation and progress, correctness of program transformations, and normalization.
+% \end{itemize}
+
+% Each layer brings up different questions we must address. The choice
+% we make in each of the questions substantially influences how easy it
+% is to attack the next layer.  There are a number of systems we could have chosen to mechanize each layer such as Coq or Isabelle. In these notes we use system that is specialized for our task and provides the most supporting infrastructure. 
  
 
-\section{Adequacy} An important question we must keep in mind in
-this endeavour is the following: 
-What does it mean to correctly represent such a language
-definition in a formal framework? -- In general, we aim for a
-\emph{adequate representation}, i.e. the objects represented formally
-in the framework describe exactly those we were talking about on
-paper. More precisely, the representation of the language is
-isomorphic to the informal definition of the language we had on
-paper. But in practice we even want more: we want that the structure
-of the language is preserved as well -- this will mean that we want a
-bijection (in fact a compositional bijection).
+% \section{Adequacy} An important question we must keep in mind in
+% this endeavour is the following: 
+% What does it mean to correctly represent such a language
+% definition in a formal framework? -- In general, we aim for a
+% \emph{adequate representation}, i.e. the objects represented formally
+% in the framework describe exactly those we were talking about on
+% paper. More precisely, the representation of the language is
+% isomorphic to the informal definition of the language we had on
+% paper. But in practice we even want more: we want that the structure
+% of the language is preserved as well -- this will mean that we want a
+% bijection (in fact a compositional bijection).
 
 % To establish adequacy, we require two tools: 1) Adequacy proof:
 % induction proofs on the canonical forms of LF 2) Modularity of
@@ -80,11 +88,11 @@ bijection (in fact a compositional bijection).
 % adequate with respect to one set of assumptions, how do we know it
 % remains adequate given some other set of assumptions)
 
-Adequacy is a deep property of an encoding and maybe surprisingly it
-is a property that often does not hold. In fact, often our
-representation in some programming / proof environment admits many
-more terms than are meaningful. 
+% Adequacy is a deep property of an encoding and maybe surprisingly it
+% is a property that often does not hold. In fact, often our
+% representation in some programming / proof environment admits many
+% more terms than are meaningful. 
 
-We omit here a detailed discussion of how to prove adequacy, we
-will refer the interested reader to the article
-\citep{HarperLicata:JFP07}. 
+% We omit here a detailed discussion of how to prove adequacy, we
+% will refer the interested reader to the article
+% \citep{HarperLicata:JFP07}. 
