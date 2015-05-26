@@ -2,7 +2,7 @@
 \begin{quote}
 ``A language that doesn't affect the way you think about programming, is
 not worth knowing.``
-\hfill - Alan Perlis  
+\hfill - Alan Perlis
 \end{quote}
 
 Definitions of programming languages typically cover three fundamental
@@ -12,7 +12,7 @@ execute and evaluate a given term, and its type structure i.e. what
 are well-typed expressions. We revisit these concepts for a small
 language containing booleans and numbers following \citep[Ch 3,Ch
 8]{TAPL} in preparation for representing this language together with
-its operational semantics and type system in \beluga.  
+its operational semantics and type system in \beluga.
 
 \section{Encoding the language and its definitions}
 \subsection{Terms: Booleans and Numbers}
@@ -62,7 +62,7 @@ To illustrate consider a few examples:
 \end{tabular}
 
 % We can declare infix
-% operator by using the keyword \lstinline!%infix!. 
+% operator by using the keyword \lstinline!%infix!.
 
 
 
@@ -72,60 +72,63 @@ will describe how we evaluate a given term. To give a deterministic
 evaluation strategy, it is convenient to first define what the values
 of our language. In \cite{TAPL}, we distinguished between terms and values in the
 grammar itself and we think of values as a sub-class of terms; here we take a slightly
-different approach and define explicitly what it means to be a value 
-using the judgment $t \isv$. We can think of the judgment $t \isv$ as a
+different approach and define explicitly what it means to be a value
+using the judgment $t \Value$. We can think of the judgment $t \Value$ as a
 predicate on terms which is defined via axioms and inference rules. A
-term $t$ is value iff we can give a derivation for $t \isv$.
-
+term $t$ is value iff we can give a derivation for $t \Value$.
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$e \isv$}: \mbox{Expression $e$ is a value}}\\[1em]
-\infer[\Vzero]{\tmzero \isv}{} \qquad \infer[\Vsuc]{(\tmsucc t) \isv}{t \isv}
-\qquad \infer[\Vtrue]{\tmtrue \isv}{}
-\qquad \infer[\Vfalse]{\tmfalse \isv}{}
+\multicolumn{1}{l}{\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
+\infer[\VZero]{\tmzero \Value}{} \qquad
+\infer[\VSuc]{(\tmsucc t) \Value}{t \Value} \qquad
+\infer[\VTrue]{\tmtrue \Value}{} \qquad
+\infer[\VFalse]{\tmfalse \Value}{} \qquad
 \end{array}
 \]
 
 Here we identify $\tmtrue$, $\tmfalse$, $\tmzero$ as values; in
 addition $(\tmsucc t)$ describes a value provided that $t$ is
-a value. In \cite{TAPL}, 
+a value. In \cite{TAPL},
 
 We are now ready to define when a term $t$ steps using the
-judgment $t \steps t'$ using congruence rules and reduction rules.
+judgment $t \Steps t'$ using congruence rules and reduction rules.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$t \steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
 \\[1em]
-\multicolumn{1}{l}{\mbox{\text{Congruence Rules}}}\\[1em]
-\infer[\SSUC]{\tmsucc t \steps \tmsucc t'}{t \steps t'}
-\quad
-\infer[\SPRED]{\tmpred t \steps \tmpred t'}{t \steps t'} \quad
-\infer[\SISZERO]{\tmiszero t \steps \tmiszero t'}{t \steps t'}
+\multicolumn{1}{l}{\mbox{\text{Congruence Rules}}}
 \\[1em]
-\infer[\SIF]{\tmif t {t_1}{t_2} \steps \tmif t' {t_1}{t_2}}{t \steps t'}
+\infer[\ESuc]{\tmsucc t \Steps \tmsucc t'}{t \Steps t'}\qquad
+\infer[\EPred]{\tmpred t \Steps \tmpred t'}{t \Steps t'}
 \\[1em]
-\multicolumn{1}{l}{\mbox{\text{Reduction Rules (Axioms)}}}\\[1em]
-\infer[\SPREDZ]{\tmpred \tmzero \steps \tmzero}{}\quad
-\infer[\SPREDSUCC]{\tmpred (\tmsucc t) \steps t}{t \isv}\\[1em]
-\infer[\SISZEROZ]{\tmiszero \tmzero \steps \tmtrue}{} \qquad
-\infer[\SISZEROSUCC]{\tmiszero (\tmsucc t) \steps \tmfalse}{t \isv} \\[1em]
-\infer[\SIFT]{\tmif \tmtrue {t_1}{t_2} \steps t_1}{}\qquad
-\infer[\SIFF]{\tmif \tmfalse {t_1}{t_2} \steps t_2}{}
+\infer[\EIsZero]{\tmiszero t \Steps \tmiszero t'}{t \Steps t'}\qquad
+\infer[\EIf]{\tmif t {t_1}{t_2} \Steps \tmif t' {t_1}{t_2}}{t \Steps t'}
+\\[1em]
+\multicolumn{1}{l}{\mbox{\text{Reduction Rules (Axioms)}}}
+\\[1em]
+\infer[\EPredZ]{\tmpred \tmzero \Steps \tmzero}{}\qquad
+\infer[\EPredSucc]{\tmpred (\tmsucc t) \Steps t}{t \Value}
+\\[1em]
+\infer[\EIsZeroZ]{\tmiszero \tmzero \Steps \tmtrue}{} \qquad
+\infer[\EIsZeroSucc]{\tmiszero (\tmsucc t) \Steps \tmfalse}{t \Value}
+\\[1em]
+\infer[\EIfT]{\tmif \tmtrue {t_1}{t_2} \Steps t_1}{}\qquad
+\infer[\EIfF]{\tmif \tmfalse {t_1}{t_2} \Steps t_2}{}
 \end{array}
 \]
 
-Our goal is to represent the relation $t \steps t'$ and describe the derivation
+Our goal is to represent the relation $t \Steps t'$ and describe the derivation
 trees which correspond to evaluating a given sub-term. To accomplish this we
 also must be able to construct derivation trees that prove that a given term is
 a value. Recall that a data-type provides us with inductive definition of
 constructing elements. Clearly, terms are inductively defined and are easily
 translated into a data-type definition. However, we also defined inductively
-what it means for a term to be a value: we use the axioms $\Vzero$, $\Vtrue$,
-$\Vfalse$ together with the inference rule $\Vsuc$. Similarly, we defined
+what it means for a term to be a value: we use the axioms $\VZero$, $\VTrue$,
+$\VFalse$ together with the inference rule $\VSuc$. Similarly, we defined
 inductively what it means for a term $t$ to step to a term $t'$. In Beluga,
 data-types are powerful enough to encode such inductive definitions about
-predicates and relations. To represent the judgment $t \isv$ we define a
+predicates and relations. To represent the judgment $t \Value$ we define a
 predicate (type family) \lstinline!value! and state that it takes terms as
 argument by declaring its type as \lstinline!term -> type!. Then each rule
 corresponds to a constructor in our data-type definition. A derivation tree then
@@ -160,22 +163,22 @@ need to pass instantiations for them when constructing objects using the said co
 
 To illustrate consider the following concrete example.\\[1em]
 
-\begin{tabular}{llll}
-The derivation ~~~~&
+\begin{tabular}{l@{\qquad}l}
+The derivation &
 $
-\infer[\Vsuc]{(\tmsucc (\tmsucc \tmzero))~\isv}
-{\infer[\Vsuc]{(\tmsucc \tmzero)~\isv}{
- \infer[\Vzero]{\tmzero \isv}{}
+\infer[\VSuc]{(\tmsucc (\tmsucc \tmzero)) \Value}
+{\infer[\VSuc]{(\tmsucc \tmzero)~\Value}{
+ \infer[\VZero]{\tmzero \Value}{}
  }
 }
-$
-& ~~~~is represented as &  \lstinline!(v_s <<(suc z)>> (v_s <<z>> v_z))!\\[1em]
+$\\[1em]
+is represented as &
+\lstinline!(v_s <<(suc z)>> (v_s <<z>> v_z))!\\[1em]
 \end{tabular}
 
 In Beluga, we simply write
-
 \begin{lstlisting}
-let v : [ |-num_value (succ (succ z))] = [ |-v_s (v_s v_z)];
+let v : [ |-num_value (succ (succ z))] = [ |-v_s (v_s v_z)];!
 \end{lstlisting}
 
 We bind the derivation to the name \lstinline!v! and declare that \lstinline!v!
@@ -195,7 +198,7 @@ The right hand side can be read as: Assuming \lstinline!x:term! and
 \lstinline!succ (succ x)! is a numerical value.
 
 
-We can similarly encode the small-step relation $t \steps t'$ between the terms
+We can similarly encode the small-step relation $t \Steps t'$ between the terms
 $t$ and $t'$ using the type family/relation \lstinline!step!.
 
 \begin{lstlisting}
@@ -238,15 +241,15 @@ Here \lstinline!e1! stands for the derivation
 
 \[
 \begin{array}{c}
-\infer[\SPRED]{(\tmpred {(\tmsucc {(\tmpred {\tmzero})})}) \steps (\tmpred {(\tmsucc {\tmzero})})}
-{\infer[\SSUC]{(\tmsucc {(\tmpred {\tmzero})}) \steps (\tmsucc {\tmzero} )}
- {\infer[\SPREDZ]{(\tmpred {\tmzero}) \steps \tmzero}{}}
+\infer[\EPred]{(\tmpred {(\tmsucc {(\tmpred {\tmzero})})}) \Steps (\tmpred {(\tmsucc {\tmzero})})}
+{\infer[\ESuc]{(\tmsucc {(\tmpred {\tmzero})}) \Steps (\tmsucc {\tmzero} )}
+ {\infer[\EPredZ]{(\tmpred {\tmzero}) \Steps \tmzero}{}}
 }
 \end{array}
 \]
 
 The name \lstinline!e2! stands for the derivation consisting of only
-the axiom $\SPREDZ$.
+the axiom $\EPredZ$.
 
 \section{Typing Rules}
 Finally, we remark that following these ideas, we can encode typing rules for
@@ -280,30 +283,27 @@ analyze derivation trees.
 
 \subsection{Type preservation: A Simple Proof by Structural Induction} The first property we re-visit is type
 preservation. In particular, we write $\vdash t : T$ and $\vdash t
-\steps t'$ to clearly state that we only consider closed terms
+\Steps t'$ to clearly state that we only consider closed terms
 
 \begin{theorem}
-If   $\overset{\D}{\vdash t : T}$ and $\overset{\St}{\vdash t \steps
-  t'}$ then $\vdash t' : T$.
+If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\St}{}{t \Steps t'}$ then $\vdash t' : T$.
 \end{theorem}
 \begin{proof}
-By structural induction on the derivation $\St : t \steps t'$. We
+By structural induction on the derivation $\proofderiv{\St}{}{t \Steps t'}$. We
 consider here only a few cases.
 
-\paragraph{Case} $\St = \ianc{}{\tmpred \tmzero \steps \tmzero}{\SPREDZ}$
-\\[1em]
-$\D~::~ \vdash \tmpred {\tmzero} : T$ \hfill by assumption\\
-$\D'::~\vdash \tmzero : \nat$ and $T = \nat$ \hfill by inversion using rule $\TPred$ \\
-$~~~~::~\vdash \tmzero : \nat$ \hfill by rule $\TZero$.
+\begin{case}{$\St = \ianc{}{\tmpred \tmzero \Steps \tmzero}{\EPredZ}$}
+$\proofderivc{\D~}{}{\tmpred {\tmzero} : T}$ \hfill by assumption\\
+$\proofderivc{\D'}{}{\tmzero : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
+$\proofderivc{~~~~}{}{\tmzero : \Nat}$ \hfill by rule $\TZero$.
+\end{case}
 
-
-
-\paragraph{Case} $\St = \ianc{\above{\St '}{M \steps M'}}{(\tmpred M) \steps (\tmpred M')}{\SPRED}$
-\\[1em]
-$\D~::~\vdash (\tmpred M) : T$ \hfill by assumption \\
-$\D'::~\vdash M : \nat$ and $T = \nat$ \hfill by inversion using rule $\TPred$ \\
-$\F~::~\vdash M' : \nat$ \hfill by IH using $\D'$ and $\St'$\\
-$~~~~::~\vdash (\tmpred M') : \nat$ \hfill by rule $\TPred$
+\begin{case}{$\St = \ianc{\above{\St '}{M \Steps M'}}{(\tmpred M) \Steps (\tmpred M')}{\EPred}$}
+$\proofderivc{\D~}{}{\tmpred M : T}$ \hfill by assumption \\
+$\proofderivc{\D'}{}{M : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
+$\proofderivc{\F~}{}{M' : \Nat}$ \hfill by IH using $\D'$ and $\St'$\\
+$\proofderivc{~~~~}{}{\tmpred M' : \Nat}$ \hfill by rule $\TPred$.
+\end{case}
 
 \end{proof}
 
@@ -313,7 +313,7 @@ function where case-analysis in the proof corresponds to case analysis
 in the program and the appeal to the IH corresponds to making a
 recursive call. From a program point of view, we can read the type
 preservation theorem as: Given a typing derivation $\vdash t:T$ and a derivation
-for $\vdash t \steps t'$, we return a typing derivation $\vdash t':T$.
+for $\vdash t \Steps t'$, we return a typing derivation $\vdash t':T$.
 
 We begin by translating and representing the actual theorem statement
 in Beluga. This is straightforward keeping in mind that
@@ -323,7 +323,7 @@ in Beluga. This is straightforward keeping in mind that
 On paper judgment~~ & ~~Type in Beluga \\
 \hline
 $\vdash M :T$ & \lstinline![ |-hastype M T]! \\
-$\vdash M \steps M'$ & \lstinline![ |-steps M M']! \\
+$\vdash M \Steps M'$ & \lstinline![ |-steps M M']! \\
 \end{tabular}
 \end{center}
 
@@ -370,7 +370,7 @@ fn d => fn s = ? ;
 
 
 \paragraph{Case analysis - Pattern matching} Next, we split the proof
-into different cases analyzing $\St : M \steps M'$. This corresponds
+into different cases analyzing $\St : M \Steps M'$. This corresponds
 to pattern matching on \lstinline!s:[|-step M M']! in our program.
 
 \begin{lstlisting}
@@ -391,9 +391,9 @@ fn d => fn s => case s of
 We sometimes use \lstinline!_! (underscore) for an argument, if we do
 not need a name for it, since it does not play a role in the
 proof. For example, when we represent the derivation\\[1em] $\St =
-\ianc{M \isv}{\tmpred ({\tmsucc M}) \steps M}{\SPREDSUCC}$ we simply
+\ianc{M \Value}{\tmpred ({\tmsucc M}) \Steps M}{\EPredSucc}$ we simply
 write \lstinline![|-e_pred_suc _]! since the subderivation
-representing $M \isv$ is not used in proving that types are preserved.
+representing $M \Value$ is not used in proving that types are preserved.
 \\[1em]
 \emph{Convention:} Variables describing sub-derivations,
 i.e. variables occurring inside \lstinline![   ]! must be
@@ -562,26 +562,27 @@ not step, i.e. there are not rules that apply. For \lstinline!zero!,
 \lstinline!true! and \lstinline!false! this should be easy, since there is no
 rule that applies. But how do we argue that \emph{every number} that is a value
 does not step? - We prove a contradiction. We show inductively that if $M$ is a
-value and $M \steps M'$ then we can derive falsehood (written as $\bot$).
+value and $M \Steps M'$ then we can derive falsehood (written as $\bot$).
 
 \begin{theorem}
-If $M \steps M'$ and $M \isv$ then $\bot$.
+If $\proofderiv{\St}{M \Steps M'}$ and $\proofderiv{\V}{M \Value}$ then $\bot$.
 \end{theorem}
 \begin{proof}
-By structural induction on the derivation $\V:M \isv$.
+By structural induction on the derivation $\proofderiv{\V}{M \Value}$.
 
-\paragraph{Base case} $\V = \ianc{}{\tmzero \isv}{}$
-\\[1em]
-$\tmzero \steps M'$ \hfill by assumption \\
+\begin{basecase}{$\V = \ianc{}{\tmzero \Value}{}$}
+$\proofderiv{\St}{\tmzero \Steps M'}$ \hfill by assumption \\
 By inspecting all the existing rules, there exists no $M'$. Therefore, this
 assumption is false, and from false we can derive anything; in particular, we
 can conclude $\bot$.
+\end{basecase}
 
-\paragraph{Step case} $\V = \ianc{\above{\V'}{ N \isv}}{(\tmsucc N) \isv}{}$
-\\[1em]
-$\St~:~(\tmsucc N) \steps M'$ \hfill by assumption \\
-$\St':~N \steps N'$ and $M' = (\tmsucc N')$\hfill by inversion using $\SSUC$\\
-$\bot$ \hfill by i.h. using $\St'$ and $\V'$\\
+\begin{stepcase}{$\V = \ianc{\above{\V'}{ N \Value}}{(\tmsucc N) \Value}{}$}
+$\proofderiv{\St~}{(\tmsucc N) \Steps M'}$ \hfill by assumption \\
+$\proofderiv{\St'}{N \Steps N'}$ \quad and \quad $M' = (\tmsucc N')$ \hfill by inversion using $\ESuc$\\
+$\bot$ \hfill by i.h. using $\St'$ and $\V'$
+\end{stepcase}
+
 \end{proof}
 
 
@@ -628,7 +629,7 @@ fn s => fn v => case v of
 
 Let's consider the case \lstinline![|-v_z] : [|-value zero]!. We argued in the
 proof by ``By inspecting all the existing rules, there exists no $M'$.'' This
-corresponds to case-analyzing \lstinline!s!; however, there are not cases. In
+corresponds to case-analyzing \lstinline!s!; however, there are no cases. In
 Beluga, we write \lstinline!impossible s in []! for splitting \lstinline!s! in
 the empty context. It is effectively a case-expression without branches.
 
@@ -753,105 +754,102 @@ can take another step. In this section we prove that we can always
 evaluate a well-typed term to a final value.
 
 \begin{theorem}
-If $\overset{\D}{~\vdash M : T}$ then $M\;\mathsf{halts}$, i.e.~there exists a value $V$ s.t. $M
-\mstep V$.
+If $\proofderivc{\D}{}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
+\MSteps V$.
 \end{theorem}
 
 We recap our definition of multi-step relations that was the
 reflexive, transitive closure over the single step relation.
 
 \[
-\begin{array}{c}
-\infer[\text{m-ref}]{M \mstep M}{}
-\qquad
-\infer[\text{m-tr}]{M \mstep N}{M \mstep K & K \mstep N}
-\qquad
-\infer[\text{m-step}]{M \mstep N}{M \steps N}
+\begin{array}{c@{\qquad}c@{\qquad}c}
+\infer[\MRef]{M \MSteps M}{} &
+\infer[\MTr]{M \MSteps N}{M \MSteps K & K \MSteps N} &
+\infer[\MStep]{M \MSteps N}{M \Steps N}
 \end{array}
 \]
 
 Evaluation of a term $M$ may clearly not yield a value in one step; in fact we may need to chain multiple steps together.
 In the proof for showing that well-typed terms terminate, we will see the need for lemmas that justify bigger steps when we evaluate a term.
 
-\begin{lemma}[Multi Step Lemmas]$\;$\\
+\begin{lemma}[Multi Step Lemmas]~
   \begin{enumerate}
-  \item If $M \mstep M'$ then $(\tmpred M) \mstep (\tmpred M')$.
-  \item If $M \mstep M'$ then $(\tmsucc M) \mstep (\tmsucc M')$.
-  \item If $M \mstep M'$ then $(\tmiszero M) \mstep (\tmiszero M')$.
-  \item If $M \mstep M'$ then $(\tmif M {M_1} {M_2}) \mstep (\tmif {M'} {M_1} {M_2})$.
+  \item If $M \MSteps M'$ then $(\tmpred M) \MSteps (\tmpred M')$.
+  \item If $M \MSteps M'$ then $(\tmsucc M) \MSteps (\tmsucc M')$.
+  \item If $M \MSteps M'$ then $(\tmiszero M) \MSteps (\tmiszero M')$.
+  \item If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-By structural induction  on $M \mstep M'$.
+By structural induction  on $M \MSteps M'$.
 \end{proof}
 
 Moreover, we lift type preservation to multi-step relations.
 
 \begin{lemma}[Type preservation for multi-step relation]
-If $\vdash M : T$ and $M \mstep M'$ then $\vdash M':T$.
+If $\vdash M : T$ and $M \MSteps M'$ then $\vdash M':T$.
 \end{lemma}
 \begin{proof}
-By structural induction on $M \mstep M'$.
+By structural induction on $M \MSteps M'$.
 \end{proof}
 
 Finally, we are ready to consider the proof that evaluation of well-typed terms
-terminates. We first define $M~\mathsf{halts}$ as follows:
+terminates. We first define $M \Halts$ as follows:
 
 \[
 \begin{array}{c}
-\infer{M \halts}{M \mstep V & V \isv }
+\infer{M \Halts}{M \MSteps V & V \Value }
 \end{array}
 \]
 
 
 
 \begin{proof}
-By structural induction on $\D:~\vdash M : T$. We show a few
+By structural induction on $\proofderivc{\D}{}{M : T}$. We show a few
 representative cases.
 
-\paragraph{Case:}  $\D = \ianc{}{\vdash \tmzero :\nat}{\TZero}$\\[0.5em]
-%
-$\tmzero \isv$ \hfill by $\Vzero$ rule \\
-$\tmzero \mstep \tmzero$ \hfill by $\text{m-ref}$\\
-$\tmzero \isv$ \hfill by definition $\Vzero$\\
-$\tmzero \halts$ \hfill by definition of $\halts$
+\begin{case}{$\D = \ianc{}{\vdash \tmzero :\Nat}{\TZero}$}
+$\tmzero \Value$ \hfill by $\VZero$ rule \\
+$\tmzero \MSteps \tmzero$ \hfill by $\MRef$\\
+$\tmzero \Value$ \hfill by definition $\VZero$\\
+$\tmzero \Halts$ \hfill by definition of $\Halts$
+\end{case}
 
-\paragraph{Case:} $\D = \ianc{\above{\D'}{\vdash N : \nat}}{\vdash (\tmpred N) : \nat}{\TPred}$
-\\[0.5em]
-$N \halts$, i.e. $\exists V.$ s.t.$~\V':V\isv$ ~~and~~ $\St':N \mstep V$ \hfill by i.h. $\D'$\\[1em]
+\begin{case}{$\D = \ianc{\above{\D'}{\vdash N : \Nat}}{\vdash (\tmpred N) : \Nat}{\TPred}$}
+$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\St':N \MSteps V$ \hfill by i.h. $\D'$\\[1em]
 %
-\fbox{To Prove: ~~~$M\halts$, i.e.$\exists W$.s.t.$W \isv$~~~and~~~$\St:~(\tmpred N) \mstep W$}\\[1em]
+\fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$}\\[1em]
 %
-\textbf{Subcase:} $\V' = \ianc{}{\tmzero \isv}{\Vzero}$ and $V = \tmzero$ \hfill \\[0.5em]
-%
-$\St': N \mstep \tmzero$ \hfill restating assumption $\St'$\\
-$\St_0: (\tmpred N) \mstep (\tmpred \tmzero)$ \hfill by lemma mstep-pred \\
-$\St_1: (\tmpred \tmzero) \mstep \tmzero$ \hfill by $\text{m-step}$ using $\SPREDZ$\\
-$\St~: (\tmpred N) \mstep \tmzero$ \hfill by $\text{m-tr}$ using $\St_0$ and $\St_1$\\
-$\exists W$.s.t.$W \isv$~~~and~~~$\St:~(\tmpred N) \mstep W$ \hfill by choosing
+\begin{subcase}{$\V' = \ianc{}{\tmzero \Value}{\VZero}$ \quad and \quad $V = \tmzero$}
+$\St': N \MSteps \tmzero$ \hfill restating assumption $\St'$\\
+$\St_0: (\tmpred N) \MSteps (\tmpred \tmzero)$ \hfill by lemma mstep-pred \\
+$\St_1: (\tmpred \tmzero) \MSteps \tmzero$ \hfill by $\MStep$ using $\EPredZ$\\
+$\St~: (\tmpred N) \MSteps \tmzero$ \hfill by $\MTr$ using $\St_0$ and $\St_1$\\
+$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$ \hfill by choosing
 $W = \tmzero$\\
-$(\tmpred N)\halts$ \hfill by definition of $\halts$
-\\[1em]
-%
-%
-\textbf{Subcase:} $\V' = \ianc{\above{\W}{V'\isv}}{(\tmsucc V') \isv}{\Vsuc}$ and $V = \tmsucc V'$ \hfill \\[0.5em]
-$\St': N \mstep (\tmsucc V')$ \hfill restating assumption $\St'$\\
-$\St_0: (\tmpred N) \mstep (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
-$\St_1: (\tmpred (\tmsucc V')) \mstep V'$ \hfill by $\text{m-step}$ using $\SPREDSUCC$ and $\W$\\
-$\St~: (\tmpred N) \mstep V'$ \hfill by $\text{m-tr}$ using $\St_0$ and $\St_1$\\
-$\exists W$.s.t.$W \isv$~~~and~~~$\St:~(\tmpred N) \mstep W$ \hfill by choosing
-$W = V'$\\
-$(\tmpred N)\halts$ \hfill by definition of $\halts$
-\\[1em]
-%
-\textbf{Subcase:} $\V' = \ianc{}{\tmtrue \isv}{\Vtrue}$ and $V = \tmtrue$ \hfill \\[0.5em]
-$\St': N \mstep \tmtrue$ \hfill restating assumption $\St'$\\
-$\F~:~ \vdash \tmtrue : \nat$ \hfill by type preservation for multi-step relations using $\D'$\\
-$~~~ \bot$ \hfill
-\\[1em]
+$(\tmpred N)\Halts$ \hfill by definition of $\Halts$
+\end{subcase}
 
-\textbf{Subcase:} $\V' = \ianc{}{\tmfalse \isv}{\Vfalse}$ and $V = \tmfalse$ \hfill \\[0.5em]
+\begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSuc}$ \quad and \quad $V = \tmsucc V'$}
+$\St': N \MSteps (\tmsucc V')$ \hfill restating assumption $\St'$\\
+$\St_0: (\tmpred N) \MSteps (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
+$\St_1: (\tmpred (\tmsucc V')) \MSteps V'$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
+$\St~: (\tmpred N) \MSteps V'$ \hfill by $\MTr$ using $\St_0$ and $\St_1$\\
+$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$ \hfill by choosing
+$W = V'$\\
+$(\tmpred N)\Halts$ \hfill by definition of $\Halts$
+\end{subcase}
+
+\begin{subcase}{$\V' = \ianc{}{\tmtrue \Value}{\VTrue}$ \quad and \quad  $V = \tmtrue$}
+$\St': N \MSteps \tmtrue$ \hfill restating assumption $\St'$\\
+$\F~:~ \vdash \tmtrue : \Nat$ \hfill by type preservation for multi-step relations using $\D'$\\
+$~~~ \bot$ \hfill
+\end{subcase}
+
+\begin{subcase}{$\V' = \ianc{}{\tmfalse \Value}{\VFalse}$ \quad and \quad $V = \tmfalse$}
 Similar to the case where $V = \tmtrue$.
+\end{subcase}
+\end{case}
 
 \end{proof}
 

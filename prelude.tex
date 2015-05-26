@@ -5,32 +5,30 @@
 \usepackage{fix-cm}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
 \usepackage{listings}
 \usepackage{srcltx}
 \usepackage{charter}
 \usepackage{euler}
 \usepackage{latexsym}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage{amsfonts}
 \usepackage{comment}
 \usepackage{color}
 \usepackage{proof}
-\usepackage{graphics}
-\usepackage{graphicx}
 \usepackage{url}
 \usepackage{xspace}
-\usepackage{cdsty}
-\usepackage{listings}
 \usepackage{natbib}
+\usepackage{cdsty}
+
 
 % ---------------------------------------------------------------------------
-% ------------------------ Names of Languages ------------------------
+% ---------------------------- Names of Languages ---------------------------
 % ---------------------------------------------------------------------------
 
 \newcommand{\beluga}{\textsc{beluga}}
 \newcommand{\twelf}{\textsc{twelf}}
 \newcommand{\minml}{\textsc{minml}}
+
 
 % ---------------------------------------------------------------------------
 % ------------------------ Theorems and environments ------------------------
@@ -138,17 +136,12 @@
 \newcommand{\union}{\mathrel{\cup}}
 \newcommand{\sect}{\mathrel{\cap}}
 \newcommand{\unit}{\texttt{()}}
-\newcommand{\Unit}{\textsf{unit}}
 \newcommand{\bang}{\texttt{!}}
 \renewcommand{\gets}{\mathop{\texttt{:=}}}
 
 \newcommand{\down}{\mathrel{\,\Downarrow\,}}
 \newcommand{\step}{\mathrel{\,\Rightarrow\,}}
-\newcommand{\steps}{\mathrel{\,\longrightarrow\,}}
-\newcommand{\mstep}{\longrightarrow^*}
 
-% \newcommand{\syn}{\mathrel{\,\uparrow\,}}
-% \newcommand{\chk}{\mathrel{\,\downarrow\,}}
 \newcommand{\syn}{\mathrel{\,\Rightarrow\,}}
 \newcommand{\chk}{\mathrel{\,\Leftarrow\,}}
 \newcommand{\arr}{\mathrel{\texttt{->}}}
@@ -193,20 +186,24 @@
 % ------------------------ Judgments, properties, types ---------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\isv}{~\textsf{value}}
 \newcommand{\Int}{\textsf{int}}
 \newcommand{\Float}{\textsf{float}}
 \newcommand{\Bool}{\textsf{bool}}
 \newcommand{\Real}{\textsf{real}}
 \newcommand{\String}{\textsf{string}}
 \newcommand{\Char}{\textsf{char}}
+\newcommand{\Nat}{\textsf{nat}}
+\newcommand{\Unit}{\textsf{unit}}
 \newcommand{\Ref}{~\textsf{ref}}
 \newcommand{\Array}{~\textsf{array}}
-\newcommand{\nat}{\textsf{nat}}
 
-\newcommand{\TT}{\textsf{tt}}
+\newcommand{\Value}{~\mathsf{value}}
+\newcommand{\Halts}{~\mathsf{halts}}
+\newcommand{\Steps}{\mathrel{\,\longrightarrow\,}}
+\newcommand{\MSteps}{\longrightarrow^*}
+
+
 \newcommand{\FV}{\mathsf{FV}}
-% \newcommand{\FV}{\mathsf{FV}}
 \newcommand{\FMV}{\mathsf{FMV}}
 
 
@@ -281,24 +278,28 @@
 \newcommand{\TByVal}{\textsc{t-by-val}}
 \newcommand{\TByValTuple}{\textsc{t-by-val-tuple}}
 
-\newcommand{\SIFT}{\textsc{e-iftrue}\xspace}
-\newcommand{\SIFF}{\textsc{e-iffalse}\xspace}
-\newcommand{\SIF}{\textsc{e-if}\xspace}
-\newcommand{\SSUC}{\textsc{e-succ}\xspace}
-\newcommand{\SPRED}{\textsc{e-pred}\xspace}
-\newcommand{\SPREDZ}{\textsc{e-pred-zero}\xspace}
-\newcommand{\SPREDSUCC}{\textsc{e-pred-succ}\xspace}
-\newcommand{\SISZERO}{\textsc{e-ifzero}\xspace}
-\newcommand{\SISZEROZ}{\textsc{e-ifzero-zero}\xspace}
-\newcommand{\SISZEROSUCC}{\textsc{e-ifzero-succ}\xspace}
-\newcommand{\SAppFnStep}{\textsc{e-app1}\xspace}
-\newcommand{\SAppArgStep}{\textsc{e-app2}\xspace}
-\newcommand{\SAppBeta}{\textsc{e-app-abs}\xspace}
+\newcommand{\EIfT}{\textsc{e-iftrue}\xspace}
+\newcommand{\EIfF}{\textsc{e-iffalse}\xspace}
+\newcommand{\EIf}{\textsc{e-if}\xspace}
+\newcommand{\ESuc}{\textsc{e-succ}\xspace}
+\newcommand{\EPred}{\textsc{e-pred}\xspace}
+\newcommand{\EPredZ}{\textsc{e-pred-zero}\xspace}
+\newcommand{\EPredSucc}{\textsc{e-pred-succ}\xspace}
+\newcommand{\EIsZero}{\textsc{e-ifzero}\xspace}
+\newcommand{\EIsZeroZ}{\textsc{e-ifzero-zero}\xspace}
+\newcommand{\EIsZeroSucc}{\textsc{e-ifzero-succ}\xspace}
+\newcommand{\EAppFnStep}{\textsc{e-app1}\xspace}
+\newcommand{\EAppArgStep}{\textsc{e-app2}\xspace}
+\newcommand{\EAppBeta}{\textsc{e-app-abs}\xspace}
 
-\newcommand{\Vzero}{\textsc{v-zero}}
-\newcommand{\Vsuc}{\textsc{v-succ}}
-\newcommand{\Vtrue}{\textsc{v-true}}
-\newcommand{\Vfalse}{\textsc{v-false}}
+\newcommand{\MRef}{\textsc{m-ref}}
+\newcommand{\MTr}{\textsc{m-tr}}
+\newcommand{\MStep}{\textsc{m-step}}
+
+\newcommand{\VZero}{\textsc{v-zero}}
+\newcommand{\VSuc}{\textsc{v-succ}}
+\newcommand{\VTrue}{\textsc{v-true}}
+\newcommand{\VFalse}{\textsc{v-false}}
 
 \newcommand{\BAnno}{\textsc{b-anno}\xspace}
 \newcommand{\BAnnoFn}{\textsc{b-anno-fn}\xspace}
@@ -340,7 +341,6 @@
 
 \newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
 
-\newcommand{\halts}{~\mathsf{halts}}
 
 \newcommand{\eq}{\;\mathtt{eq}\;}
 
@@ -361,6 +361,17 @@
 \newcommand{\arrayenvl}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}l@{}}#1\end{array}}
 \newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
 \newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
+
+% ---------------------------------------------------------------------------
+% ------------------- MAGIC (a.k.a. Work in Progress) -----------------------
+% ---------------------------------------------------------------------------
+
+\newcommand{\proofderiv}[2]{\mathbin{#1 \; :: \; #2 }}
+\newcommand{\proofderivc}[3]{\proofderiv{#1}{#2 \vdash #3}}
+\newenvironment{case}[1]{\paragraph{Case}{#1}\\[1em]}{}
+\newenvironment{basecase}[1]{\paragraph{Base case}{#1}\\[1em]}{}
+\newenvironment{stepcase}[1]{\paragraph{Step case}{#1}\\[1em]}{}
+\newenvironment{subcase}[1]{\textbf{Subcase}{\quad #1}\\[0.5em]}{}
 
 
 % ---------------------------------------------------------------------------

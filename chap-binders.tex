@@ -229,12 +229,12 @@ Let's look at a few examples:
 % \begin{center}
 %   \begin{tabular}{lp{0.25cm}l}
 % On Paper (Object language)     & & LF/Beluga (Meta-language)\\
-% $\lambda x{:}\nat.x$ & & \lstinline!lam nat (\x. x)! \\
-% $\lambda x{:}\nat \arrow \Bool.\lambda y{:}\nat. x\;y$ & &
+% $\lambda x{:}\Nat.x$ & & \lstinline!lam nat (\x. x)! \\
+% $\lambda x{:}\Nat \arrow \Bool.\lambda y{:}\Nat. x\;y$ & &
 % \lstinline!lam (arrow nat bool) (\x. lam nat \y. app x y)! \\
-% $\lambda w{:}\nat arrow \Bool.\lambda v{:}\nat. w\;v$ & &
+% $\lambda w{:}\Nat arrow \Bool.\lambda v{:}\Nat. w\;v$ & &
 % \lstinline!lam (arrow nat bool) (\x. lam nat \y. app x y)! \\
-% $\lambda w{:}\nat. (\lambda v{:}\nat \arrow nat \arrow nat. v\;w) \;w$
+% $\lambda w{:}\Nat. (\lambda v{:}\Nat \arrow nat \arrow nat. v\;w) \;w$
 % && \lstinline!lam nat (\x. (app (lam (arrow nat (arrow nat nat))!\\
 % && ~~~~~\lstinline!                    (\v. app v x)) x))!
 %   \end{tabular}
@@ -277,17 +277,17 @@ evaluation rules. Let us recall our rules for evaluating function application.
 
 \[
 \begin{array}{c}
-\infer[\SAppBeta]{(\lambda x.M)\;V ~\step~ [V/x]M}{} \qquad
-\infer[\SAppArgStep]{M\;N \step M'\;N}{M \step M'} \\[1em]
-\infer[\SAppFnStep]{V\;N \step V\;N'}{N \step N' & V~\isv}
+\infer[\EAppBeta]{(\lambda x.M)\;V ~\step~ [V/x]M}{} \qquad
+\infer[\EAppArgStep]{M\;N \step M'\;N}{M \step M'} \\[1em]
+\infer[\EAppFnStep]{V\;N \step V\;N'}{N \step N' & V \Value}
 \end{array}
 \]
 
 To represent evaluation, we again revisit our data-type
 \lstinline!step! and define three constructor, each one corresponding to one of
-the rules in the operational semantics. The representation for $\SAppArgStep$
-and $\SAppFnStep$ follows the previous ideas and is straightforward. For
-representing the rule $\SAppBeta$, we take advantage of the fact that
+the rules in the operational semantics. The representation for $\EAppArgStep$
+and $\EAppFnStep$ follows the previous ideas and is straightforward. For
+representing the rule $\EAppBeta$, we take advantage of the fact that
 LF-functions (i.e. \lstinline!M! in \lstinline!lam M! has type
 \lstinline!term -> term! and denotes a LF-function!) can be applied to an
 argument. Hence, we can model the substitution $[V/x]M$ by simply writing
@@ -306,8 +306,8 @@ datatype step: term -> term -> type =
 
 We can then use these constructors \lstinline!e_app_1!,
 \lstinline!e_app_2!, and \lstinline!e_app_abs! to build objects that
-correspond directly to derivations using the rules $\SAppArgStep$,
-$\SAppFnStep$, and  $\SAppBeta$. This follows the same principles as in the
+correspond directly to derivations using the rules $\EAppArgStep$,
+$\EAppFnStep$, and  $\EAppBeta$. This follows the same principles as in the
 previous chapter.
 
 We can also revisit and prove uniqueness of evaluation and the fact that values
@@ -350,11 +350,11 @@ assumptions.
 
 
 \[
-\infer[\TFn^{x,u}]{\lambda x. \lambda y. x\;y : (\nat \arrow \nat) \arrow \nat \arrow \nat}
-{\infer[\TFn^{y,v}]{\lambda y.x\;y : \nat \arrow \nat}{
- \infer[\TApp]{x\;y : \nat}
-   {\infer[u]{x:\nat \arrow nat}{} &
-    \infer[v]{y:\nat \arrow nat}{}
+\infer[\TFn^{x,u}]{\lambda x. \lambda y. x\;y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat}
+{\infer[\TFn^{y,v}]{\lambda y.x\;y : \Nat \arrow \Nat}{
+ \infer[\TApp]{x\;y : \Nat}
+   {\infer[u]{x:\Nat \arrow nat}{} &
+    \infer[v]{y:\Nat \arrow nat}{}
    }
  }
 }
@@ -453,13 +453,13 @@ variable $y$. It is exactly this kind of renaming that is happening, when we
 write \lstinline!hastype (M x) S!.
 %\\[0.5em]
 \noindent
-Let us revisit the typing derivation for $\lambda x.\lambda y.x~y : (\nat \arrow
-\nat) \arrow \nat \arrow \nat$. How would be encode it? - First we translate the
+Let us revisit the typing derivation for $\lambda x.\lambda y.x~y : (\Nat \arrow
+\Nat) \arrow \Nat \arrow \Nat$. How would be encode it? - First we translate the
 typing judgment into our representation as
 \lstinline![|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))]!.
 Then we construct an object of this type that will correspond to the typing
-derivation for  $\lambda x.\lambda y.x~y : (\nat \arrow
-\nat) \arrow \nat \arrow \nat$.
+derivation for  $\lambda x.\lambda y.x~y : (\Nat \arrow
+\Nat) \arrow \Nat \arrow \Nat$.
 %
 It is: \lstinline![|-t_lam \x.\u. t_lam \y.\v. t_app u v]!.
 
@@ -476,7 +476,7 @@ If $\vdash M : T$ and $M \step N$ then $\vdash N : T$.
 \begin{proof}
 By structural induction on $\St = M \step N$.
 
-\paragraph*{Case}$\St = \ianc{\above{\V}{V\isv}}{(\lambda x.M)\;V \step [V/x]M}{\SAppBeta}$\\[1em]
+\paragraph*{Case}$\St = \ianc{\above{\V}{V \Value}}{(\lambda x.M)\;V \step [V/x]M}{\EAppBeta}$\\[1em]
 $~~~~~~~~\;\vdash (\lambda x.M)\;V : T$\hfill by assumption  \\
 $\D_1~ :~ \vdash (\lambda x.M) : S \arrow T$~~and~~$\D_2 : \vdash V : S$ \hfill by inversion using
 rule $\TApp$\\
