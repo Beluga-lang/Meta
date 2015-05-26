@@ -1,22 +1,27 @@
 \chapter{The Basics: Mechanizing languages and proofs}
-% \section{Encoding MiniML}
-We approach here the problem from a practitioners point of view looking at
-examples and highlighting how to \emph{use} Beluga rather than dwelling on its
-concrete language and how it is defined. This might be compared to how we learn to program in a
-given language. We give different sample programs highlighting some of the
-specific features a given programming language might possess.
+\begin{quote}
+``A language that doesn't affect the way you think about programming, is
+not worth knowing.``
+\hfill - Alan Perlis  
+\end{quote}
 
-Beluga is a typed functional language which supports writing data-type
-definitions in the logical framework LF. We showcase the
-power and elegance of using LF by encoding MiniML together with its operational
-semantics and typing rules. We then proceed to write functional recursive
-programs about our definitions. If these functions are total, they correspond to
-inductive proofs about our definitions.
+Definitions of programming languages typically cover three fundamental
+aspects: the grammar of the language, i.e. what are sytnactically well-formed
+terms in the language, its operational semantics, i.e, how do we
+execute and evaluate a given term, and its type structure i.e. what
+are well-typed expressions. We revisit these concepts for a small
+language containing booleans and numbers following \citep[Ch 3,Ch
+8]{TAPL} in preparation for representing this language together with
+its operational semantics and type system in \beluga.  
 
 \section{Encoding the language and its definitions}
-\subsection{Terms: Booleans and Arithmetic Expressions}
-Recall the definition of terms (see for example \cite[Ch 3, Fig 3-2]{TAPL})
-consisting of boolean and arithmetic expressions.
+\subsection{Terms: Booleans and Numbers}
+Let us consider a simple language containing booleans, if-expressions,
+and numbers together with simple operations that allow us to test
+whether a given number is zero (see \cite[Ch 3, Fig 3-1,Fig
+3-2]{TAPL}). We define numbers using $\tmzero$ and
+$\tmsucc$-operation. To analyze and manipulate numbers, we also
+provide a $\tmpred$-operator.
 
 \[
 \begin{array}{llcl}
@@ -25,11 +30,18 @@ consisting of boolean and arithmetic expressions.
 \end{array}
 \]
 
-To represent these terms in Beluga, or more precisely in the logical framework
-LF, Beluga's sublanguage for making such definitions, we define a data-type for terms as follows.
+The first question we investigate is how to define and represent terms
+in the proof enviroment \beluga.  To represent terms in Beluga, we
+declare a type \lstinline!term! for terms together with constants
+corresponding to the constructors $\tmfalse$, $\tmtrue$, $\tmzero$,
+$\tmsucc$, $\tmpred$, $\tmiszero$, etc. More precisely we use the logical framework
+LF \citep{Harper93jacm} for introducing new types such as
+\lstinline!term! together with constants \lstinline!true!,
+\lstinline!false!, etc. that can be used to construct terms. All
+constants are used as prefix operators by default.
 
 \begin{lstlisting}
-datatype term  : type =
+LF term  : type =
 | true  : term
 | false : term
 | if_then_else: term -> term -> term -> term
@@ -40,47 +52,55 @@ datatype term  : type =
 ;
 \end{lstlisting}
 
-This might look familiar from defining data-types in OCaml or SML; for each
-construct $\tmfalse,~\tmtrue,~\tmzero,~ \tmsucc t,~\tmpred t, \ldots$ in our
-language there is a corresponding constructor in our data-type. We map
-$\tmif t {t_1} {t_2}$ to the construct \lstinline!if_then_else T T1 T2!, but otherwise keep the
-same names. To illustrate consider a few examples:
+To illustrate consider a few examples:
 
 \begin{tabular}{lll}
-%On paper & & Code\\
+%\multicolumn{1}{c}{On paper} & & \multicolumn{1}{c}{Code}\\[0.5em]
 -- $\tmif \tmfalse \tmzero {\tmsucc \tmzero}$ & is represented as  &
 \lstinline!if_then_else false z (succ z)!\\
 -- $\tmiszero (\tmpred (\tmsucc \tmzero))$ & is represented as & \lstinline!iszero (pred (succ z))!.
 \end{tabular}
 
-\subsection{Small Step Semantics}
-We also defined the small-step semantics for a little language using the
-judgment $t \steps t'$ which we read as ``Term $t$ steps to term $t'$ in one
-single step. Previously we distinguished between terms and values in the
-grammar and we thought of values as a sub-class of terms; here we take a slightly
-different approach and define explicitly what it means to be a value.
-using the judgment $t \isv$. We can think of the judgment $t \isv$ as a
-predicate which is defined via axioms and inference rules. If we can prove that
-$t$ is value if we can prove $t \isv$.
+% We can declare infix
+% operator by using the keyword \lstinline!%infix!. 
 
+
+
+\subsection{Small Step Semantics}
+Next, we define the small-step semantics for our little language. This
+will describe how we evaluate a given term. To give a deterministic
+evaluation strategy, it is convenient to first define what the values
+of our language. In \cite{TAPL}}, we distinguished between terms and values in the
+grammar itself and we think of values as a sub-class of terms; here we take a slightly
+different approach and define explicitly what it means to be a value 
+using the judgment $t \isv$. We can think of the judgment $t \isv$ as a
+predicate on terms which is defined via axioms and inference rules. A
+term $t$ is value iff we can give a derivation for $t \isv$.
 
 \[
 \begin{array}{c}
+\multicolumn{1}{l}{\fbox{$e \isv$}: \mbox{Expression $e$ is a value}}\\[1em]
 \infer[\Vzero]{\tmzero \isv}{} \qquad \infer[\Vsuc]{(\tmsucc t) \isv}{t \isv}
 \qquad \infer[\Vtrue]{\tmtrue \isv}{}
 \qquad \infer[\Vfalse]{\tmfalse \isv}{}
 \end{array}
 \]
 
-We are now ready to re-state our small-step semantics for our language of
-arithmetic expressions.
+Here we identify $\tmtrue$, $\tmfalse$, $\tmzero$ as values; in
+addition $(\tmsucc t)$ describes a value provided that $t$ is
+a value. In \cite{TAPL}, 
+
+We are now ready to define when a term $t$ steps using the
+judgment $t \steps t'$ using congruence rules and reduction rules.
 
 \[
 \begin{array}{c}
+\multicolumn{1}{l}{\fbox{$t \steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\\[1em]
 \multicolumn{1}{l}{\mbox{\text{Congruence Rules}}}\\[1em]
 \infer[\SSUC]{\tmsucc t \steps \tmsucc t'}{t \steps t'}
-\qquad
-\infer[\SPRED]{\tmpred t \steps \tmpred t'}{t \steps t'} \qquad
+\quad
+\infer[\SPRED]{\tmpred t \steps \tmpred t'}{t \steps t'} \quad
 \infer[\SISZERO]{\tmiszero t \steps \tmiszero t'}{t \steps t'}
 \\[1em]
 \infer[\SIF]{\tmif t {t_1}{t_2} \steps \tmif t' {t_1}{t_2}}{t \steps t'}
