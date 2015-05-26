@@ -34,14 +34,41 @@ face the challenge that they often depend on sets of assumptions; we
 therefore need to understand how to represent a set of assumptions,
 how to enforce the scope of assumptions within a derivation, and how
 to support weakening and substitution properties. The choices we make
-will ultimately have impact our proof developments. It will determine
+will ultimately  impact our proof developments. It will determine
 how much effort is required, how feasible a given development is in
 practice, how reusable and extendable a proof development is, how easy
 it is to automatically find the proof, and how readable the final proof is.  
 
-General purpose proof environments such as Coq or Agda are built on powerful dependent type theories, but lack direct support for many intricate aspects that arise when we tackle the mechanization of formal systems and proofs. Instead the user chooses among a variety of techniques or libaries for binders that may smooth the path (see \cite{Aydemir:TechReport09}). However, this often comes with a heavy price tag.
+General purpose proof environments such as Coq \citep{bertot/casteran:2004} or Agda \citep{Norell:phd07} are built on
+powerful dependent type theories, but lack direct support for many
+intricate aspects that arise when we tackle the mechanization of
+formal systems and proofs. Instead the user chooses among a variety of
+techniques or libaries for binders that may smooth the path (see
+\cite{Aydemir:TechReport09}). However, this often comes with a heavy
+price tag - especially for more advanced proofs.  Consider for example proofs
+by logical relations, a proof technique going back to 
+\cite{Tait67} and later refined by 
+\cite{GirardLafontTaylor:proofsAndTypes}.  Such proofs play a
+fundamental role to establish rich properties such as contextual
+equivalence or normalization.  The central idea of logical relations is to specify relations on well-typed terms via structural induction on the syntax of types instead of directly on the syntax of terms themselves. Thus, for instance, logically related functions take logically related arguments to related results, while  logically related pairs consist of components that are related pairwise.  While proofs using logical relations often are not large, they are conceptually intricate, since they rely heavily on various properties of variables and substitutions.
+% For example \cite{Altenkirch:TLCA93} remarked 
+%
+%\begin{quote}
+%``I discovered that the core part of the proof (here proving lemmas about CR) is fairly straightforward and only requires a good understanding of the paper version. However, in completing the proof I observed %that in certain places I had to invest much more work than expected, e.g. proving lemmas about substitution and weakening.'' 
+%\end{quote}
+%
+For example,  \cite{Berardi:WLF90} remarked about his mechanization of Girard's normalization proof:
+\begin{quote}
+``We may think of Girard's proof as an iceberg. In the top of it, we find what we usually consider the real proof; underwater, the most  of the matter, consisting of all mathematical preliminaries a reader must know in order to understand what is going on.''
+\end{quote}
 
-On the other side we have domain-specific proof languages such as Beluga \citep{Pientka:POPL08,Pientka:PPDP08,Pientka:IJCAR10,Cave:POPL12} lack (at this point) some of the computational power systems like Coq or Agda have, but provide a sophisticated infrastructure to deal automatically with many bureaucratic details regarding variables and  assumptions. We harness the power of abstraction, by defining common concepts such as variable binding, derivations depending on sets of assumptions by their canonical form together with sets of operations and properties. Users do not need to understand any technical details on how these concepts are implemented and prove (often standard) lemmas, but instead simply use these concepts abstractly through syntactic constructs provided by Beluga. As a consquence, mechanizing proofs about formal systems (programming languages) such as proofs by logical relations does not require a deep and complicated mathematical apparatus, but can be carried out in a direct and intuitive way. 
+Early work \citep{Berardi:WLF90,CCoquand:92,Altenkirch:TLCA93}  within general purpose proof environment represented lambda-terms using (well-scoped) de Bruijn indices which leads to a substantial amount of overhead to prove properties about substitutions such as substitution lemmas and composition of substitution. To improve readability and generally better support such meta-theoretic reasoning, nominal approaches support $\alpha$-renaming but substitution and properties about them are specified separately; the Isabelle Nominal package \citep{Urban:JAR08} has been used in a variety of logical relations proofs from proving strong normalization for Moggi's modal lambda-calculus \citep{Doczkal:LFMTP09} to mechanically verifying the meta-theory of LF itself including the completeness of equivalence checking \citep{Narboux:LFMTP08,Urban:TOCL11}.  However,  these approaches still lack the right level of abstraction. It should not matter how we implement variable binding, contexts and substitutions - rather users should be able to use these concepts first-class. 
+% One might compare the situation we face to a programming language  lacking abstract data types i.e. the power to abstractly define values together with operations on them.  %  As a consequence, these developments lack important aspects: flexibility (we cannot easily change the representation of substitutions or variables).
+
+\beluga~\citep{Pientka:IJCAR10,Pientka:CADE15} follows this path and provides a sophisticated infrastructure to deal automatically with many bureaucratic details regarding variables and  assumptions, while giving up  (at this point) some of the computational power present in general proof assistants such as Coq or Agda.  We harness the power of abstraction, by defining common concepts such as variable binding, derivations depending on sets of assumptions together with sets of operations and properties. While these concepts, their operations, and properties are grounded and carefully defined theoretically, users do not need to understand any technical details on how these concepts are implemented nor do they need to prove (often standard) lemmas;  instead they simply use these concepts abstractly through syntactic constructs provided. As a consequence, mechanizing proofs about formal systems, even advanced proofs by logical relations, does not require a deep and complicated mathematical apparatus, but can be carried out in a direct and intuitive way.  By doing so we harvest many of the same benefits that abstract data types bring to programming languages \cite{Liskov:PowerAbstraction}: we can change the concrete implementation of variables, substitutions, and contexts choosing what is most efficient;  proof developments are modular and as users do not have direct access to the concrete implementation of variables, substitutions, and contexts, they also cannot add any tempting, but dangerous shortcuts that would corrupt part of the infrastructure; most importantly, proof developments are easier to understand and to read as the high-level steps are not obscured by low-level operations and as a consequence, we stand a chance to automate such proofs.
+
+In this exposition, we introduce \beluga~ by example, starting from a simple language of arithmetic expressions (as for example described in \cite[Ch 3, Ch 8]{TAPL})) and showing how to encode this language together with simple inductive proofs  in \beluga. This will allow us to introduce the basic idea of encoding proofs as recursive functions. We then extend our simple language of arithmetic expressions to include functions (as for example described in \cite[Ch 5, Ch 9]{TAPL}). This introduces several important ideas: how to encode variables and their scope, how to encode assumptions, and how to characterize derivations that depend on assumptions. Finally, we consider the proof of normalization for the simply typed lambda-calculus (see \cite[Ch 12]{TAPL}) and show how to directly represent this proof as a recursive program in \beluga. Throughout the text we will point to exercises that allow readers to practice and explore some topics further.
+
 
 \section{Goals}
 We pursue several goals with this companion:
@@ -50,6 +77,7 @@ We pursue several goals with this companion:
 \item Understand how to define formal systems using higher-order abstract syntax  
 \item Curry-Howard isomorphism: Proofs = Programs  
 \item Deeper understanding of programming languages and their properties
+\item Provide a tutorial to \beluga
 \end{enumerate}
 
 
@@ -96,3 +124,8 @@ We pursue several goals with this companion:
 % We omit here a detailed discussion of how to prove adequacy, we
 % will refer the interested reader to the article
 % \citep{HarperLicata:JFP07}. 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "book"
+%%% End:
