@@ -7,8 +7,8 @@ or more generally constructs that allow us to abstract over variables.
 Let's recall our grammar for lambda-terms:
 
 \[
-\begin{array}{llcl}
-\mbox{Terms} & M, N & := & x \mid \lambda x{:}T.M \mid M\;N
+\begin{array}{ll@{\bnfas}l}
+\mbox{Terms} & M, N & x \bnfalt \lam x{:}T.M \bnfalt M \app N
 \end{array}
 \]
 
@@ -24,7 +24,7 @@ of Barendregt, which is often employed in on-paper proofs, is one such
 approach where $\alpha$-conversion is applied as needed to ensure
 that:
 
-\begin{enumerate}
+\begin{enumerate}[(i)]
 \item bound variables are distinct from free variables, and
 \item all binders bind variables not already in scope.
 \end{enumerate}
@@ -90,10 +90,10 @@ $k$'th enclosing $\lambda$.
 Here are some examples:
 
 \[
-\begin{array}{lcl}
-\lambda x. x  & & \lambda 1 \\
-\lambda x. \lambda y . x\;y & & \lambda 2\; 1\\
-\lambda x. (\lambda y. x \; y)\; x & & \lambda (\lambda 2\;1) \;1
+\begin{array}{l@{\qquad}l}
+\lam x. x  & \lamdb 1 \\
+\lam x. \lam y . x\;y & \lamdb 2\; 1\\
+\lam x. (\lam y. x \; y)\; x & \lamdb (\lamdb 2\;1) \;1
 \end{array}
 \]
 
@@ -106,9 +106,9 @@ manipulations extremely challenging.
 How can we define more formally a grammar for de Bruijn terms:
 
 \[
-\begin{array}{llcl}
-\mbox{Indices}            & I    & ::= & 1 \mid \shift I \\
-\mbox{De Bruijn Terms   } & T, S & := & I \mid \lambda T \mid \app T\;S
+\begin{array}{ll@{\bnfas}l}
+\mbox{Indices}         & I    & 1 \bnfalt \shift I \\
+\mbox{De Bruijn Terms} & T, S & I \bnfalt \lamdb T \bnfalt T \app S
 \end{array}
 \]
 
@@ -116,14 +116,14 @@ The index $3$ is represented as $\shift (\shift 1)$. The distinction
 between indices and de Bruijn Terms is not really necessary; often we
 see the following definition
 \[
-\begin{array}{llcl}
-\mbox{De Bruijn Terms   } & T, S & := & 1 \mid \shift T \mid \lam T \mid \app T\;S
+\begin{array}{ll@{\bnfas}l}
+\mbox{De Bruijn Terms} & T, S & 1 \bnfalt \shift T \bnfalt \lamdb T \bnfalt T \app S
 \end{array}
 \]
 
 This allows us to shift arbitrary de Bruijn terms. Intuitively, the
-meaning of shifting $\shift (\lam \;1\;2)$ is that we shift all free
-variables in this term and the result would be $\lam \;1\;3$. We leave
+meaning of shifting $\shift (\lamdb 1 \app 2)$ is that we shift all free
+variables in this term and the result would be $\lamdb 1 \app 3$. We leave
 the exact definition of shifting arbitrary terms for later.
 
 
@@ -133,8 +133,8 @@ Let us first consider the translation between lambda-terms and their
 corresponding de Bruijn representation.
 
 \begin{center}
-\begin{tabular}{lp{9cm}}
-$  \Gamma \vdash M \leadsto T\quad\quad$ & Term $M$ with the free variables
+\begin{tabular}{l@{\qquad}p{9cm}}
+\fbox{$\Gamma \vdash M \Translates T$} & Term $M$ with the free variables
     in $\Gamma$ is translated to the de Bruijn representation $T$
 \end{tabular}
 \end{center}
@@ -142,17 +142,15 @@ $  \Gamma \vdash M \leadsto T\quad\quad$ & Term $M$ with the free variables
 We can then define this translation using the following inference rules:
 
 \[
-\begin{array}{c}
-\infer{\Gamma \vdash \lambda x. M \leadsto \lambda S}{\Gamma,x \vdash M
-\leadsto S} \quad
-\infer{\Gamma \vdash M\;N \leadsto T\;S}{
-\Gamma \vdash M \leadsto T
-  &
-\Gamma \vdash N \leadsto S}
-\\[1em]
-\infer{\Gamma,x \vdash x \;\;\leadsto \;1}{} \quad
-\infer{\Gamma, y \vdash x\;\; \leadsto\;\; \shift I}{\Gamma \vdash x \leadsto
-  I \quad y \neq x}
+\begin{array}{l@{\quad}l}
+\infer[\TrLam]{\Gamma \vdash \lam x. M \Translates \lamdb S}{\Gamma,x \vdash M \Translates S} &
+\infer[\TrApp]{\Gamma \vdash M \app N \Translates T \app S}
+      { \Gamma \vdash M \Translates T &
+        \Gamma \vdash N \Translates S}\\[1em]
+\infer[\TrTop]{\Gamma, x \vdash x \Translates 1}{} &
+\infer[\TrNext]{\Gamma, y \vdash x \Translates \shift I}
+      { \Gamma \vdash x \Translates I &
+        y \neq x}
 \end{array}
 \]
 
@@ -169,19 +167,19 @@ encountered.
 and crucially relies on properly shifting variables.
 
 
-$\shiftby\;n\;c\;T$ means we shift all free variables (i.e. all
+$\ShiftBy n c T$ means we shift all free variables in T (i.e. all
 variables greater than $c$) by $n$.
 
-For example, $\shift^2 (\lambda \lambda 1\;(2\;4))$ should yield
-$(\lambda \lambda 1\;(2\;6))$. We assume some simplification rules
-such as: $\shift^n \shift^k I = \shift ^{n+k} I$
+For example, $\shiftn 2 (\lamdb \lamdb 1 \app (2 \app 4))$ should yield
+$(\lamdb \lamdb 1 \app (2 \app 6))$. We assume some simplification rules
+such as: $\shiftn n (\shiftn k I) = \shiftn {n+k} I$
 
 \[
-\begin{array}{lcll}
-\shiftby n \;c \; I & = & I  & \mbox{if}\; k < c \\
-                   & =  & \shift^n I &\mbox{if}\; k \geq c \\
-\shiftby n\;c \; (\lambda T) & = & \lambda (\shiftby n\;(c+1)\;T)\\
-\shiftby n\;c\; (T\;S)       & = & (\shiftby n \;c\; T)\;(\shiftby n \;c\;S)
+\begin{array}{l@{\;=\;}ll}
+\ShiftBy n c I & I  & \mbox{if } k < c \\
+               & \shiftn n I &\mbox{if } k \geq c \\
+\ShiftBy n c (\lamdb T) & \lamdb (\ShiftBy n {(c+1)} T)\\
+\ShiftBy n c (T \app S) & (\ShiftBy n c T) \app (\ShiftBy n c S)
 \end{array}
 \]
 
@@ -206,7 +204,10 @@ that these two terms are different.
 In general, managing binders and bound variables is a major pain. So,
 several alternatives have been and are being developed.
 
-In Beluga (as in Twelf and Delphin), we support higher-order abstract syntax: our foundation, called the logical framework LF \cite{Harper93jacm} allows us to represent binders via binders in our data-language.
+In Beluga (as in Twelf and Delphin), we support higher-order abstract
+syntax: our foundation, called the logical framework LF
+\cite{Harper93jacm} allows us to represent binders via binders in our
+data-language.
 
 For example, we can declare a data-type \lstinline!term! in Beluga,
 which has two constructors.
@@ -225,36 +226,32 @@ not represent the type annotation on the function which is present in
 our grammar.
 
 Let's look at a few examples:
-
 % \begin{center}
 %   \begin{tabular}{lp{0.25cm}l}
 % On Paper (Object language)     & & LF/Beluga (Meta-language)\\
-% $\lambda x{:}\Nat.x$ & & \lstinline!lam nat (\x. x)! \\
-% $\lambda x{:}\Nat \arrow \Bool.\lambda y{:}\Nat. x\;y$ & &
+% $\lam x{:}\Nat.x$ & & \lstinline!lam nat (\x. x)! \\
+% $\lam x{:}\Nat \arrow \Bool.\lam y{:}\Nat. x\;y$ & &
 % \lstinline!lam (arrow nat bool) (\x. lam nat \y. app x y)! \\
-% $\lambda w{:}\Nat arrow \Bool.\lambda v{:}\Nat. w\;v$ & &
+% $\lam w{:}\Nat arrow \Bool.\lam v{:}\Nat. w\;v$ & &
 % \lstinline!lam (arrow nat bool) (\x. lam nat \y. app x y)! \\
-% $\lambda w{:}\Nat. (\lambda v{:}\Nat \arrow nat \arrow nat. v\;w) \;w$
+% $\lam w{:}\Nat. (\lam v{:}\Nat \arrow nat \arrow nat. v\;w) \;w$
 % && \lstinline!lam nat (\x. (app (lam (arrow nat (arrow nat nat))!\\
 % && ~~~~~\lstinline!                    (\v. app v x)) x))!
 %   \end{tabular}
 % \end{center}
-
-
-
 \begin{center}
-  \begin{tabular}{lp{0.25cm}l}
-On Paper (Object language)     & & LF/Beluga (Meta-language)\\
-$\lambda x.x$ & & \lstinline!lam \x. x! \\
-$\lambda x.\lambda y. x\;y$ & &
-\lstinline!lam \x. lam \y. app x y! \\
-$\lambda w.\lambda v. w\;v$ & &
-\lstinline!lam \x.lam \y. app x y)! \\
-$\lambda w. (\lambda v. v\;w) \;w$
-&& \lstinline!lam \x. (app (lam \v. app v x) x)!
-  \end{tabular}
+\begin{tabular}{l@{\quad}|@{\quad}l}
+  On Paper (Object language) & LF/Beluga (Meta-language)\\
+  \hline
+  $\lam x.x$ & \lstinline!lam \x. x! \\
+  $\lam x.\lam y. x \app y$ &
+  \lstinline!lam \x. lam \y. app x y! \\
+  $\lam w.\lam v. w \app v$ &
+  \lstinline!lam \x.lam \y. app x y)! \\
+  $\lam w. (\lam v. v \app w) \app w$
+  & \lstinline!lam \x. (app (lam \v. app v x) x)!
+\end{tabular}
 \end{center}
-
 
 Note that the type of \lstinline!\x. x! is \lstinline!exp -> exp!. So,
 we represent binders  via lambda-abstractions in our
@@ -277,9 +274,11 @@ evaluation rules. Let us recall our rules for evaluating function application.
 
 \[
 \begin{array}{c}
-\infer[\EAppBeta]{(\lambda x.M)\;V ~\step~ [V/x]M}{} \qquad
-\infer[\EAppArgStep]{M\;N \step M'\;N}{M \step M'} \\[1em]
-\infer[\EAppFnStep]{V\;N \step V\;N'}{N \step N' & V \Value}
+\multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\\[1em]
+\infer[\EAppBeta]{(\lam x.M) \app V \Steps [V/x]M}{} \qquad
+\infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \\[1em]
+\infer[\EAppFnStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
 \end{array}
 \]
 
@@ -330,16 +329,10 @@ represent typing derivations with explicit contexts and without
 (i.e. Gentzen-style).
 
 \[
-\begin{array}{c}
-\multicolumn{1}{l}{\mbox{Typing rules with implicit contexts using the judgment \fbox{$M:T$}}} \\[1em]
-\infer[\TFn^{x,u}]{\lambda x.M : T \arrow S}{
-  \begin{array}{c}
-  \infer[u]{x:T}{} \\
-  \vdots~~\\
-  M : S~~~~
-  \end{array}
-}
-\qquad
+\begin{array}{c@{\qquad}c}
+\multicolumn{2}{l}{\mbox{Typing rules with implicit contexts using the judgment \fbox{$M:T$}}} \\[1em]
+\infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
+                 {\infer*{M:S}{\infer[u]{x:T}{}}} &
 \infer[\TApp]{M\;N : S}{M : T \arrow S & N:T}
 \end{array}
 \]
@@ -350,9 +343,9 @@ assumptions.
 
 
 \[
-\infer[\TFn^{x,u}]{\lambda x. \lambda y. x\;y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat}
-{\infer[\TFn^{y,v}]{\lambda y.x\;y : \Nat \arrow \Nat}{
- \infer[\TApp]{x\;y : \Nat}
+\infer[\TFn^{x,u}]{\lam x. \lam y. x \app y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat}
+{\infer[\TFn^{y,v}]{\lam y.x \app y : \Nat \arrow \Nat}{
+ \infer[\TApp]{x \app y : \Nat}
    {\infer[u]{x:\Nat \arrow nat}{} &
     \infer[v]{y:\Nat \arrow nat}{}
    }
@@ -371,13 +364,12 @@ the clearer judgment $\hasty M T$.
 \begin{array}{c}
 \multicolumn{1}{l}{\mbox{Typing rules with explicit contexts using the judgment
     \fbox{$\Gamma \vdash \hasty M T$}}} \\[1em]
-\infer[\TFn^{x,u}]{\Gamma \vdash \hasty {(\lambda x.M)} {(T \arrow S)}}{
-  \Gamma, u:\hasty x T \vdash \hasty M S
-}
-\qquad
-\infer[\TApp]{\Gamma \vdash \hasty {(M\;N)} S}{\Gamma \vdash \hasty M (T \arrow S)
-  & \Gamma \vdash \hasty N T}\\[1em]
-\infer[u]{\Gamma \vdash \hasty x T}{u:\hasty x T \in \Gamma}
+\infer[u]{\Gamma \vdash \hasty x T}{u:\hasty x T \in \Gamma} \qquad
+\infer[\TFn^{x,u}]{\Gamma \vdash \hasty {(\lam x.M)} {(T \arrow S)}}
+                 {\Gamma, u:\hasty x T \vdash \hasty M S}\\[1em]
+\infer[\TApp]{\Gamma \vdash \hasty {(M \app N)} S}
+             {\Gamma \vdash \hasty M (T \arrow S)
+  & \Gamma \vdash \hasty N T}
 \end{array}
 \]
 
@@ -388,7 +380,7 @@ assumptions explicit and provides an explicit rule for looking up variables.
 
 When we encode typing rules as a data-type, the first formulation with implicit
 contexts is particular interesting and elegant. Why? - Because, we can read the
-rule $\TFn$ as follows: $\lambda x.M$ has type $T \arrow S$, if given a variable
+rule $\TFn$ as follows: $\lam x.M$ has type $T \arrow S$, if given a variable
 $x$ and an assumption $u$ that stands for $x:T$ we can show that $M$ has type
 $S$, i.e. we can construct a derivation for $M:S$.
 
@@ -417,9 +409,9 @@ datatype hastype: term -> tp -> type =
 \end{lstlisting}
 
 Note that the argument to the constructor \lstinline!t_lam! must be of type
-\lstinline!({x:term} hastype x T -> hastype (M x) S)!. We write her curly braces
+\lstinline!({x:term} hastype x T -> hastype (M x) S)!. We write here curly braces
 for universal quantification expressing directly more formally the sentence
-``Given a variable $x$ and an assumption \lstinline!hastype x T!, we can
+``Given a variable \lstinline!x! and an assumption \lstinline!hastype x T!, we can
 construct \lstinline!hastype (M x) S!.''
 
 One might ask, why do we have to write \lstinline!hastype (M x) S! and why can
@@ -432,33 +424,26 @@ object of type \lstinline!term!, not of type \lstinline!term -> term!.
 But what \lstinline!(M x)! in \lstinline!hastype (M x) S! does not seem to
 correspond to anything in the informal rule? - This is a misconception. In the
 informal rule, we required that $x$ is new. It might have been clearer to not
-re-use the variable name $x$ that was occurring bound in $\lambda
+re-use the variable name $x$ that was occurring bound in $\lam
 x.M$. We restate our previous rule $\TFn$ where we make the possibly necessary
 renaming explicit below.
 
 \[
 \begin{array}{c}
-\infer[\TFn^{y,u}]{\lambda x.M : T \arrow S}{
-  \begin{array}{c}
-  \infer[u]{y:T}{} \\
-  \vdots~~\\
-   ~[y/x]M : S~~~~
-  \end{array}
-}
+\infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
+                 {\infer*{[y/x]M:S}{\infer[u]{y:T}{}}}
 \end{array}
 \]
 
 Here we see that indeed we replace all occurrences of $x$ in $M$ with a new
 variable $y$. It is exactly this kind of renaming that is happening, when we
 write \lstinline!hastype (M x) S!.
-%\\[0.5em]
-\noindent
-Let us revisit the typing derivation for $\lambda x.\lambda y.x~y : (\Nat \arrow
+Let us revisit the typing derivation for $\lam x.\lam y.x~y : (\Nat \arrow
 \Nat) \arrow \Nat \arrow \Nat$. How would be encode it? - First we translate the
 typing judgment into our representation as
 \lstinline![|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))]!.
 Then we construct an object of this type that will correspond to the typing
-derivation for  $\lambda x.\lambda y.x~y : (\Nat \arrow
+derivation for  $\lam x.\lam y.x~y : (\Nat \arrow
 \Nat) \arrow \Nat \arrow \Nat$.
 %
 It is: \lstinline![|-t_lam \x.\u. t_lam \y.\v. t_app u v]!.
@@ -471,18 +456,20 @@ function application, in particular we concentrate on the case for
 abstractions.
 
 \begin{theorem}
-If $\vdash M : T$ and $M \step N$ then $\vdash N : T$.
+If $\proofderivc{\D}{}{M : T}$ and $\proofderiv{\St}{M \Steps N}$ then $\vdash N : T$.
 \end{theorem}
 \begin{proof}
-By structural induction on $\St = M \step N$.
+By structural induction on the derivation $\proofderiv{\St}{M \Steps N}$.
 
-\paragraph*{Case}$\St = \ianc{\above{\V}{V \Value}}{(\lambda x.M)\;V \step [V/x]M}{\EAppBeta}$\\[1em]
-$~~~~~~~~\;\vdash (\lambda x.M)\;V : T$\hfill by assumption  \\
-$\D_1~ :~ \vdash (\lambda x.M) : S \arrow T$~~and~~$\D_2 : \vdash V : S$ \hfill by inversion using
-rule $\TApp$\\
-$\D~~:~~x:S \vdash M : T$ \hfill by inversion on $\D_1$ using rule $\TFn$\\
-$~\qquad \vdash [V/x]M : T$ \hfill by substitution lemma using $V$ and
+\begin{case}{$\St = \ianc{\above{\V}{V \Value}}{(\lam x.M) \app V \Steps [V/x]M}{\EAppBeta}$}
+$\proofderivc{~~~~}{}{(\lam x.M) \app V : T}$
+\hfill by assumption  \\
+$\proofderivc{\D_1}{}{(\lam x.M) : S \arrow T}$ \quad and \quad $\proofderivc{\D_2}{}{V : S}$
+\hfill by inversion using rule $\TApp$\\
+$\proofderivc{\D~}{x:S}{M : T}$ \hfill by inversion on $\D_1$ using rule $\TFn$\\
+$\proofderivc{~~~~}{}{[V/x]M : T}$ \hfill by substitution lemma using $V$ and
 $\D_2$ in $\D$.
+\end{case}
 
 \end{proof}
 
@@ -495,7 +482,7 @@ wrote out explicitly where \lstinline!V! corresponds to $\V$. We then
 use inversion to analyze our assumption
 \lstinline![|-hastype (app (lam M) V) T]!. We have written the two
 inversion steps as one nested pattern in Beluga. More importantly, the
-subderivation $\D~:~x:S \vdash M:T$ in the proof is represented as
+subderivation $\proofderivc{\D}{x:S}{M:T}$ in the proof is represented as
 \lstinline!\x.\u. D x u!. Recall that earlier we remarked that the
 typing rule for functions does make two assumptions: that we have a
 fresh variable \lstinline!x! and an assumption \lstinline!hastype x S!
@@ -504,45 +491,31 @@ occurrences of $x$ by the value $V$ and all assumptions $V:S$ are
 replaced by the proof $\D_2$. This is how the derivation evolves
 
 \[
-\begin{array}{clc}
-\ianc{
-  \begin{array}{c}
-\ianc{}{x:S}{u}  \\[0.5em]
-\D^{x,u}\\[0.5em]
-    M:T
-  \end{array}}
-{\lambda x.M : S \arrow T}{\TFn^{x,u}}
-& ~~~~\mbox{Replace $x$ by $V$ in $\D$ yields}~~ &
-\ianc{
-  \begin{array}{c}
-\ianc{}{V:S}{u}  \\[0.5em]
-[V/x]\D^{u}\\[0.5em]
-    [V/x]M:T
-  \end{array}}
-{\lambda x.M : S \arrow T}{\TFn^{x,u}}
+\begin{array}{c@{\quad}l@{\quad}c}
+\infer[\TFn^{x,u}]
+      {\lam x. M : S \arrow T}
+      {\deduce[\vspace{2pt}]{M:T}
+              {\deduce[\vspace{2pt}]{\D^{x,u}}
+                      {\infer[u]{x:S}{}}}} &
+\mbox{replacing $x$ by $V$ in $\D$ yields} &
+\infer[\TFn^{x,u}]
+      {\lam x. M : S \arrow T}
+      {\deduce[\vspace{2pt}]{[V/x] M:T}
+              {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
+                      {\infer[u]{V:S}{}}}}\\[1em]
+\infer[\TFn^{x,u}]
+      {\lam x. M : S \arrow T}
+      {\deduce[\vspace{2pt}]{[V/x] M:T}
+              {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
+                      {\infer[u]{V:S}{}}}} &
+\mbox{replacing $u$ by $\D_2$ in $\D$ yields} &
+\infer[\TFn^{x,u}]
+      {\lam x. M : S \arrow T}
+      {\deduce[\vspace{2pt}]{[V/x] M:T}
+              {\deduce[\vspace{2pt}]{[V/x][\D_2/u]\D}
+                      {\deduce[\vspace{2pt}]{V:S}{\D_2}}}}
 \end{array}
 \]
-
-\[
-\begin{array}{clc}
-\ianc{
-  \begin{array}{c}
-\ianc{}{V:S}{u}  \\[0.5em]
-[V/x]\D^{u}\\[0.5em]
-    [V/x]M:T
-  \end{array}}
-{\lambda x.M : S \arrow T}{\TFn^{x,u}}
-& ~~~~\mbox{replacing the assumption $u$ by $\D_2$ in $\D$ yields}~~ &
-\ianc{
-  \begin{array}{c}
-\ianc{\D_2}{V:S}{}  \\[0.5em]
-[V/x][\D_2/u]\D \\[0.5em]
-    [V/x]M:T
-  \end{array}}
-{\lambda x.M : S \arrow T}{\TFn^{x,u}}
-\end{array}
-\]
-
 
 When we are interpreting the derivation $\D$ as a function that
 for any $x$ and any assumption $x:S$ returns a derivation for $M:T$,
@@ -708,7 +681,7 @@ We also sometimes prove properties that hold only for non-empty
 contexts. One such example is proving type uniqueness. So far we have
 been dropping the type annotation present in our abstraction. This is
 apparent when we revisit the grammar for terms, where we define
-abstractions as $\lambda x{:}T.M$, and the type of the constructor
+abstractions as $\lam x{:}T.M$, and the type of the constructor
 \lstinline!lam: (term -> term) -> term!.
 
 While this does not matter when we are proving type preservation, we
@@ -746,64 +719,55 @@ describe our typing judgments. This will also make the translation of
 this proof into a Beluga program much easier.
 
 \begin{theorem}[Type uniqueness]$\;$\\
-If $\Gamma \vdash \oftyp M\;T$ and $\Gamma \vdash \oftyp M\; S$
-then $\eq T\;S$.
+If $\proofderivc{\D}{\Gamma}{\tmhastype M T}$ and $\proofderivc{\C}{\Gamma}{\tmhastype M S}$
+then $\eq T S$.
 \end{theorem}
 \begin{proof}
-By structural induction on the first typing derivation.
+By structural induction on the typing derivation $\proofderivc{\D}{\Gamma}{\tmhastype M T}$.
 
 
-\paragraph*{Case 1} $\;$\\%[0.5em]
-\begin{small}
-$
-\D = \ianc{\begin{array}{c}{\D}_{1} \\ \Gamma\vdash \oftyp M\;(\textsf{arr}\;T\;S) \end{array}\quad\begin{array}{c}{\D}_{2} \\ \Gamma\vdash \oftyp N\;T \end{array}}
-{\Gamma \vdash \oftyp (\textsf{app}\;M\;N)\;S}{\textsf{t\_app}}
-%\\[1em]
-$
-\\[1em]
-%\quad
-$
-\C = \ianc{\begin{array}{c}{\C}_{1} \\ \Gamma\vdash \oftyp
-    M\;(\textsf{arr}\;T'\;S') \end{array}\quad\begin{array}{c}{\C}_{2} \\
-    \Gamma\vdash \oftyp N\;T' \end{array}}{\Gamma \vdash \oftyp
-  (\textsf{app}\;M\;N)\;S'}{\textsf{t\_app}}
-%\end{array}
-$
-%
+\begin{case}{$\D = \inferaa
+            {\TApp}
+            { \Gamma \vdash \tmhastype {(\tmapp M N)} S}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tparr T S)}}{\D_1}}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype N T}{\D_2}}$}
+$\C = \inferaa
+            {\TApp}
+            { \Gamma \vdash \tmhastype {(\tmapp M N)} S'}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tparr {T'} S')}}{\C_1}}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype N T'}{\C_2}}$
 \\[2em]
-\begin{tabular}{p{8cm}l}
-$\E{:}\eq\; (\textsf{arr}\;T\;S)\;(\textsf{arr}\;T'\;S')$ & by i.h. using $\D_{1}$ and $\C_{1}$ \\
-$\E{:}\eq\;(\textsf{arr}\;T\;S)\;(\textsf{arr}\;T\; S)\quad$  \emphFact{and $S = S'$ and $T=T'$} & by inversion on reflexivity  \\[1em]
-\end{tabular}
-\end{small}
 
-Therefore there is a proof for $\eq\;S\;S'$ by reflexivity (\emphFact{since we know $S=S'$}).%\\[1em]
-\paragraph*{Case 2} $\;$\\[-1.5em]
-\begin{small}
-\[
-\D = \ianc{\begin{array}{c}{\D}_{1} \\ \emphFact{\Gamma, x, u{:}\oftyp x\;T \vdash} \oftyp M\;S \end{array}}{\emphFact{\Gamma \vdash} \oftyp (\textsf{lam}\;x{:}T.M)\;(\textsf{arr}\;T\;S)}{\textsf{t\_lam}}
-\quad\quad
-\C = \ianc{\begin{array}{c}{\C}_{1} \\ \emphFact{\Gamma, x, u{:}\oftyp x\;T \vdash} \oftyp M\;S' \end{array}}{\emphFact{\Gamma \vdash} \oftyp (\textsf{lam}\;x{:}T.M)\;(\textsf{arr}\;T\;S')}{\textsf{t\_lam}}
-\]
-\begin{tabular}{p{8cm}l}
-$\E : \eq\; S\; S'$ & by i.h. using $\D_{1}$ and $\C_{1}$ \\
-$\E : \eq\;S\; S\quad$  \emphFact{and $S = S'$} & by inversion using reflexivity\\[1em]
-\end{tabular}
+$\proofderiv{\E}{\eq {(\tparr T S)} {(\tparr T' S')}}$ \hfill by i.h. using $\D_1$ and $\C_1$ \\
+$\proofderiv{\E}{\eq {(\tparr T S)} {(\tparr T S)}}$  \; and \; \emphFact{$S = S'$} \; and \; \emphFact{$T=T'$} \hfill by inversion on reflexivity.\\[1em]
+
+Therefore there is a proof for $\eq S S'$ by reflexivity (\emphFact{since we know $S=S'$}).
+\end{case}
+
+\begin{case}{$\D = \infera{\TLam}
+   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tparr T S)}}
+   {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S}{\D_1}}$}
+$ \C = \infera{\TLam}
+   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tparr T S')}}
+   {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S'}{\D_1}}
+$\\[2em]
+
+$\proofderiv{\E}{\eq S S'}$ \hfill by i.h. using $\D_{1}$ and $\C_1$ \\
+$\proofderiv{\E}{\eq S S}$ \quad and \quad \emphFact{$S = S'$} \hfill by inversion using reflexivity\\[1em]
 %ause
 
-Therefore there is a proof for $\eq\;(\textsf{arr}\; T\; S)\;(\textsf{arr}\;T\;S')$ by reflexivity.
-\end{small}
+Therefore there is a proof for $\eq {(\tparr T S)} {(\tparr T S')}$ by reflexivity.
+\end{case}
 
-\paragraph*{Case 3}%\\% [-2.5em]
-\begin{small}
-\[
-\D = \ianc{x,u{:}\oftyp x\;T \in \Gamma}{\Gamma \vdash \oftyp x \; T}{u}
-\quad\quad\hspace{2.5cm}
-\C = \ianc{x,v{:}\oftyp x\;S \in \Gamma}{\Gamma \vdash \oftyp x\;S}{v}\hspace{3cm}
-\]
+\begin{case}{
+    $\D = \infera{u} {\Gamma \vdash \tmhastype x T}
+    {x, u : \tmhastype x T \in \Gamma}$ \qquad
+    $\C = \infera{v}{\Gamma \vdash \tmhastype x S}
+    {x, v : \tmhastype x S \in \Gamma}$
+}
 Every variable $x$ is associated with a unique typing assumption
 (\emphFact{property of the context}), hence $v = u$ and $S = T$.
-\end{small}
+\end{case}
 
 \end{proof}
 
@@ -813,9 +777,9 @@ proof:
 \begin{itemize}
 \item We rely on the fact that every assumption is unique and there
   are not two assumptions about the same variable; this is in fact
-  implicitly enforced in the rule $\textsf{t\_lam}$ where we ensure
+  implicitly enforced in the rule $\TLam$ where we ensure
   that the variable is new.
-\item We extend our context in the rule $\textsf{t\_lam}$.
+\item We extend our context in the rule $\TLam$.
 \item We reason about equality using reflexivity. We note that by
   using our rule \lstinline!refl!, we are able to learn that two types
   are actually the same (i.e. $T = T'$).
@@ -828,7 +792,7 @@ The encoding of this proof is in fact straightforward in Beluga. We
 first describe the shape (i.e. type) of our context using a
 \emph{schema declaration}. Just as types classify terms, schemas
 classify contexts. We observe that in our typing rules, we always
-introduce a variable $x$ and the assumption $\oftyp x\;T$ at the same
+introduce a variable $x$ and the assumption $\tmhastype x T$ at the same
 time.
 To denote that these two assumptions always come in pairs, we are
 writing the keyword \lstinline!block!.
@@ -961,14 +925,14 @@ rule \lstinline!ref!.
  the pattern \lstinline{[\gamma |-t_lam \x.\u.D$\mdots$x u]}, and is
  a contextual object in the context \lstinline!\gamma! of type
  \lstinline{hastype (lam T (\x.M$\mdots$x))$~$(arr T S)}.
- %Thus, $\lstinline{M$\;$$\mdots$} = \lstinline{lam$\;$T1$\;$($\lambda$x.$\;$M0$\;$$\mdots$$\;$x)}$
+ %Thus, $\lstinline{M$\;$$\mdots$} = \lstinline{lam$\;$T1$\;$($\lam$x.$\;$M0$\;$$\mdots$$\;$x)}$
  % and $\lstinline{T} = \lstinline{arr$\;$T1$\;$T2}$.
  Pattern matching---through a let-binding---serves to invert the second derivation \lstinline{f}, which
  must have been by \lstinline{t_lam} with a subderivation
  \lstinline{F1$\mdots$x u} deriving \lstinline{hastype (M$\mdots$x)$~$S'} that can use \lstinline{x},
  \lstinline{u:hastype x T}, and assumptions from \lstinline!\gamma!.
  %Hence, after pattern matching on \lstinline{d} and \lstinline{f}, we know that
- %$\lstinline{M} = \lstinline{lam~T1$\;$($\lambda$x.$\;$M$\;$$\mdots$x}$\lstinline{)} and
+ %$\lstinline{M} = \lstinline{lam~T1$\;$($\lam$x.$\;$M$\;$$\mdots$x}$\lstinline{)} and
  %$\lstinline{T} = \lstinline{arr T1 T2}$ and $\lstinline{T'} = \lstinline{arr T1 T2'}$.
 
  The use of the induction hypothesis on \lstinline{D} and \lstinline{F} in a paper proof

@@ -2,6 +2,7 @@
             top=40mm,
             left=30mm]{geometry}
 \usepackage[T1]{fontenc}
+\usepackage{microtype}
 \usepackage{fix-cm}
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -11,6 +12,7 @@
 \usepackage{srcltx}
 \usepackage{charter}
 \usepackage{euler}
+\usepackage{enumerate}
 \usepackage{latexsym}
 \usepackage{comment}
 \usepackage{color}
@@ -172,15 +174,13 @@
 % \newcommand{\bnfalt}{\mathrel{\mid}}
 
 %\newcommand{\shift}{\textsf{shift}\;}
-\newcommand{\shift}{\uparrow\!}
-% \newcommand{\lam}{\lambda}
-% \newcommand{\lam}{\textsf{lam}\;}
-% \newcommand{\app}{\textsf{app}\;}
-\newcommand{\app}{}
-% \newcommand{\lam}{\lambda}
+\newcommand{\shiftn}[2]{\uparrow^{#1}\!#2}
+\newcommand{\shift}[1]{\shiftn{}{#1}}
+\newcommand{\app}{\;}
 
-\newcommand{\shiftby}{\textsf{shift}\;}
-
+\renewcommand{\bnfas}{\;\mathrel{::=}\;}
+\renewcommand{\bnfalt}{\, \mid \,}
+\newcommand{\lamdb}{\lam\;} % Lambda for de Bruijn
 
 % ---------------------------------------------------------------------------
 % ------------------------ Judgments, properties, types ---------------------
@@ -201,7 +201,8 @@
 \newcommand{\Halts}{~\mathsf{halts}}
 \newcommand{\Steps}{\mathrel{\,\longrightarrow\,}}
 \newcommand{\MSteps}{\longrightarrow^*}
-
+\newcommand{\Translates}{\leadsto}
+\newcommand{\ShiftBy}[3]{\mathsf{shift}\;#1\;#2\;#3}
 
 \newcommand{\FV}{\mathsf{FV}}
 \newcommand{\FMV}{\mathsf{FMV}}
@@ -216,10 +217,15 @@
 \newcommand{\tmif}[3]{\textsf{if\;} #1 \textsf{\;then\;} #2 \textsf{\;else\;} #3}
 \newcommand{\tmfun}[3]{\textsf{fun } #1 (#2) = #3}
 \newcommand{\tmfn}[2]{\textsf{fn } #1\;\texttt{=>}\;#2}
-\newcommand{\tmapp}[2]{#1\;#2}
 \newcommand{\tmrectyp}[3]{\textsf{rec } {#1}\,:\,{#2}\;\texttt{=>}\;#3}
 \newcommand{\tmrec}[2]{\textsf{rec } {#1}\texttt{=>}\;#2}
 \newcommand{\tmlet}[3]{\textsf{let } #1 = #2 \textsf{\;in\;} #3\; \textsf{end}}
+
+\newcommand{\tmapp}[2]{\textsf{app}\;#1\;#2}
+\newcommand{\tmlam}[3]{\textsf{lam}\;#1{:}#2.#3}
+\newcommand{\tmhastype}[2]{\mathsf{hastype}\;#1\;#2}
+
+\newcommand{\tparr}[2]{\textsf{arr}\;#1\;#2}
 
 \newcommand{\tmfst}[1]{\textsf{fst}\;{#1}\xspace}
 \newcommand{\tmsnd}[1]{\textsf{snd}\;{#1}\xspace}
@@ -253,6 +259,7 @@
 \newcommand{\TMult}{\textsc{t-mult}}
 \newcommand{\TEq}{\textsc{t-eq}}
 \newcommand{\TApp}{\textsc{t-app}}
+\newcommand{\TLam}{\textsc{t-lam}}
 \newcommand{\TSub}{\textsc{t-sub}}
 \newcommand{\TFn}{\textsc{t-fn}}
 \newcommand{\TFun}{\textsc{t-fun}}
@@ -270,6 +277,11 @@
 \newcommand{\TTupleSyn}{\textsc{t-tuple-syn}\xspace}
 \newcommand{\TRec}{\textsc{t-rec}\xspace}
 \newcommand{\TAnno}{\textsc{t-anno}\xspace}
+
+\newcommand{\TrLam}{\textsc{tr-lam}}
+\newcommand{\TrApp}{\textsc{tr-app}}
+\newcommand{\TrTop}{\textsc{tr-top}}
+\newcommand{\TrNext}{\textsc{tr-next}}
 
 \newcommand{\TLet}{\textsc{t-let}\xspace}
 \newcommand{\TLetSyn}{\textsc{t-let-syn}\xspace}
@@ -335,14 +347,13 @@
 % ---------------------------------------------------------------------------
 
 \newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
-\newcommand{\oftyp}{\mathtt{hastype}\;}
 \newcommand{\jtype}{\mathit{type}}
 
 
 \newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
 
 
-\newcommand{\eq}{\;\mathtt{eq}\;}
+\newcommand{\eq}[2]{\;\mathtt{eq}\;#1\;#2}
 
 \newcommand{\lb}{{[\![}}
 \newcommand{\rb}{{]\!]}}
@@ -362,6 +373,8 @@
 \newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
 \newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
 
+\renewcommand{\t}[1]{\lstinline!#1!}
+
 % ---------------------------------------------------------------------------
 % ------------------- MAGIC (a.k.a. Work in Progress) -----------------------
 % ---------------------------------------------------------------------------
@@ -373,6 +386,9 @@
 \newenvironment{stepcase}[1]{\paragraph{Step case}{#1}\\[1em]}{}
 \newenvironment{subcase}[1]{\textbf{Subcase}{\quad #1}\\[0.5em]}{}
 
+\newcommand{\infera}[3]{\ianc{#3}{#2}{#1}}
+\newcommand{\inferaa}[4]{\ibnc{#3}{#4}{#2}{#1}}
+\newcommand{\inferaaa}[5]{\ibnc{#3}{#4}{#5}{#2}{#1}}
 
 % ---------------------------------------------------------------------------
 % --------------------------------- Other -----------------------------------

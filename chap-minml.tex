@@ -24,9 +24,9 @@ $\tmsucc$-operation. To analyze and manipulate numbers, we also
 provide a $\tmpred$-operator.
 
 \[
-\begin{array}{llcl}
-\mbox{Terms} & s,t & \bnfas & \tmfalse \mid \tmtrue \mid \tmif t {t_1}{t_2} \mid
-\tmzero \mid \tmsucc t \mid \tmpred t \mid \tmiszero t
+\begin{array}{ll@{\bnfas}l}
+\mbox{Terms} & s,t & \tmfalse \bnfalt \tmtrue \bnfalt \tmif t {t_1}{t_2} \bnfalt
+\tmzero \bnfalt \tmsucc t \bnfalt \tmpred t \bnfalt \tmiszero t
 \end{array}
 \]
 
@@ -54,11 +54,11 @@ LF term  : type =
 
 To illustrate consider a few examples:
 
-\begin{tabular}{lll}
+\begin{tabular}{l@{\quad is represented as \quad}l}
 %\multicolumn{1}{c}{On paper} & & \multicolumn{1}{c}{Code}\\[0.5em]
--- $\tmif \tmfalse \tmzero {\tmsucc \tmzero}$ & is represented as  &
+$\tmif \tmfalse \tmzero {\tmsucc \tmzero}$ &
 \lstinline!if_then_else false z (succ z)!\\
--- $\tmiszero (\tmpred (\tmsucc \tmzero))$ & is represented as & \lstinline!iszero (pred (succ z))!.
+$\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 \end{tabular}
 
 % We can declare infix
