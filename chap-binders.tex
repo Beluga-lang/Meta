@@ -729,26 +729,26 @@ By structural induction on the typing derivation $\proofderivc{\D}{\Gamma}{\tmha
 \begin{case}{$\D = \inferaa
             {\TApp}
             { \Gamma \vdash \tmhastype {(\tmapp M N)} S}
-            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tparr T S)}}{\D_1}}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tmarr T S)}}{\D_1}}
             { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype N T}{\D_2}}$}
 $\C = \inferaa
             {\TApp}
             { \Gamma \vdash \tmhastype {(\tmapp M N)} S'}
-            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tparr {T'} S')}}{\C_1}}
+            { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype M {(\tmarr {T'} S')}}{\C_1}}
             { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype N T'}{\C_2}}$
 \\[2em]
 
-$\proofderiv{\E}{\eq {(\tparr T S)} {(\tparr T' S')}}$ \hfill by i.h. using $\D_1$ and $\C_1$ \\
-$\proofderiv{\E}{\eq {(\tparr T S)} {(\tparr T S)}}$  \; and \; \emphFact{$S = S'$} \; and \; \emphFact{$T=T'$} \hfill by inversion on reflexivity.\\[1em]
+$\proofderiv{\E}{\eq {(\tmarr T S)} {(\tmarr T' S')}}$ \hfill by i.h. using $\D_1$ and $\C_1$ \\
+$\proofderiv{\E}{\eq {(\tmarr T S)} {(\tmarr T S)}}$  \; and \; \emphFact{$S = S'$} \; and \; \emphFact{$T=T'$} \hfill by inversion on reflexivity.\\[1em]
 
 Therefore there is a proof for $\eq S S'$ by reflexivity (\emphFact{since we know $S=S'$}).
 \end{case}
 
 \begin{case}{$\D = \infera{\TLam}
-   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tparr T S)}}
+   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tmarr T S)}}
    {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S}{\D_1}}$}
 $ \C = \infera{\TLam}
-   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tparr T S')}}
+   {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tmarr T S')}}
    {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S'}{\D_1}}
 $\\[2em]
 
@@ -756,7 +756,7 @@ $\proofderiv{\E}{\eq S S'}$ \hfill by i.h. using $\D_{1}$ and $\C_1$ \\
 $\proofderiv{\E}{\eq S S}$ \quad and \quad \emphFact{$S = S'$} \hfill by inversion using reflexivity\\[1em]
 %ause
 
-Therefore there is a proof for $\eq {(\tparr T S)} {(\tparr T S')}$ by reflexivity.
+Therefore there is a proof for $\eq {(\tmarr T S)} {(\tmarr T S')}$ by reflexivity.
 \end{case}
 
 \begin{case}{

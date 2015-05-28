@@ -24,12 +24,12 @@
 
 
 % ---------------------------------------------------------------------------
-% ---------------------------- Names of Languages ---------------------------
+% ---------------------------- Names of languages ---------------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\beluga}{\textsc{beluga}}
-\newcommand{\twelf}{\textsc{twelf}}
-\newcommand{\minml}{\textsc{minml}}
+\newcommand{\beluga}{\textsc{beluga}\xspace}
+\newcommand{\twelf}{\textsc{twelf}\xspace}
+\newcommand{\minml}{\textsc{minml}\xspace}
 
 
 % ---------------------------------------------------------------------------
@@ -223,9 +223,9 @@
 
 \newcommand{\tmapp}[2]{\textsf{app}\;#1\;#2}
 \newcommand{\tmlam}[3]{\textsf{lam}\;#1{:}#2.#3}
-\newcommand{\tmhastype}[2]{\mathsf{hastype}\;#1\;#2}
+\newcommand{\tmhastype}[2]{\textsf{hastype}\;#1\;#2}
 
-\newcommand{\tparr}[2]{\textsf{arr}\;#1\;#2}
+\newcommand{\tmarr}[2]{\textsf{arr}\;#1\;#2}
 
 \newcommand{\tmfst}[1]{\textsf{fst}\;{#1}\xspace}
 \newcommand{\tmsnd}[1]{\textsf{snd}\;{#1}\xspace}
@@ -252,6 +252,7 @@
 % -------------------------- Inference rules' names -------------------------
 % ---------------------------------------------------------------------------
 
+\newcommand{\ruleName}[1]{\textsc{#1}}
 \newcommand{\TIf}{\textsc{t-if}}
 \newcommand{\TPred}{\textsc{t-pred}}
 \newcommand{\TZero}{\textsc{t-zero}}
@@ -374,6 +375,7 @@
 \newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
 
 \renewcommand{\t}[1]{\lstinline!#1!}
+\newcommand{\bel}[1]{\lstinline!#1!}
 
 % ---------------------------------------------------------------------------
 % ------------------- MAGIC (a.k.a. Work in Progress) -----------------------

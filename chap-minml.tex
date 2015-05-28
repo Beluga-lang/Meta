@@ -286,10 +286,10 @@ preservation. In particular, we write $\vdash t : T$ and $\vdash t
 \Steps t'$ to clearly state that we only consider closed terms
 
 \begin{theorem}
-If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\St}{}{t \Steps t'}$ then $\vdash t' : T$.
+If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\St}{t \Steps t'}$ then $\vdash t' : T$.
 \end{theorem}
 \begin{proof}
-By structural induction on the derivation $\proofderiv{\St}{}{t \Steps t'}$. We
+By structural induction on the derivation $\proofderiv{\St}{t \Steps t'}$. We
 consider here only a few cases.
 
 \begin{case}{$\St = \ianc{}{\tmpred \tmzero \Steps \tmzero}{\EPredZ}$}
