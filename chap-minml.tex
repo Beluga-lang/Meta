@@ -1,12 +1,12 @@
 \chapter{The Basics: Mechanizing languages and proofs}
 \begin{quote}
 ``A language that doesn't affect the way you think about programming, is
-not worth knowing.``
+not worth knowing.''
 \hfill - Alan Perlis
 \end{quote}
 
 Definitions of programming languages typically cover three fundamental
-aspects: the grammar of the language, i.e. what are sytnactically well-formed
+aspects: the grammar of the language, i.e. what are syntactically well-formed
 terms in the language, its operational semantics, i.e, how do we
 execute and evaluate a given term, and its type structure i.e. what
 are well-typed expressions. We revisit these concepts for a small
@@ -25,7 +25,7 @@ provide a $\tmpred$-operator.
 
 \[
 \begin{array}{ll@{\bnfas}l}
-\mbox{Terms} & s,t & \tmfalse \bnfalt \tmtrue \bnfalt \tmif t {t_1}{t_2} \bnfalt
+\mbox{Terms} & t & \tmfalse \bnfalt \tmtrue \bnfalt \tmif t t t \bnfalt
 \tmzero \bnfalt \tmsucc t \bnfalt \tmpred t \bnfalt \tmiszero t
 \end{array}
 \]
@@ -41,14 +41,14 @@ LF \citep{Harper93jacm} for introducing new types such as
 constants are used as prefix operators by default.
 
 \begin{lstlisting}
-LF term  : type =
-| true  : term
-| false : term
-| if_then_else: term -> term -> term -> term
-| z     : term
-| succ  : term -> term
-| pred  : term -> term
-| iszero: term -> term
+LF term : type =
+| true         : term
+| false        : term
+| if_then_else : term -> term -> term -> term
+| z            : term
+| succ         : term -> term
+| pred         : term -> term
+| iszero       : term -> term
 ;
 \end{lstlisting}
 
@@ -67,172 +67,190 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 
 
 \subsection{Small Step Semantics}
+
 Next, we define the small-step semantics for our little language. This
 will describe how we evaluate a given term. To give a deterministic
 evaluation strategy, it is convenient to first define what the values
 of our language. In \cite{TAPL}, we distinguished between terms and values in the
 grammar itself and we think of values as a sub-class of terms; here we take a slightly
 different approach and define explicitly what it means to be a value
-using the judgment $t \Value$. We can think of the judgment $t \Value$ as a
-predicate on terms which is defined via axioms and inference rules. A
-term $t$ is value iff we can give a derivation for $t \Value$.
+using the judgments $t \NumValue$ and $t \Value$. We can think of these judgments
+as predicates on terms which are defined via axioms and inference rules. A
+term $t$ is numeric value iff we can give a derivation for $t \NumValue$, and a
+value iff we can give a derivation for $t \Value$.
+
+\[
+\begin{array}{c}
+\multicolumn{1}{l}{\fbox{$e \NumValue$}: \mbox{Expression $e$ is a numeric value}}\\[1em]
+\infer[\NVZero]{\tmzero \NumValue}{} \qquad
+\infer[\NVSucc]{(\tmsucc t) \NumValue}{t \NumValue} \qquad
+\end{array}
+\]
+
 \[
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
-\infer[\VZero]{\tmzero \Value}{} \qquad
-\infer[\VSuc]{(\tmsucc t) \Value}{t \Value} \qquad
+\infer[\VNumValue]{t \Value}{t \NumValue} \qquad
 \infer[\VTrue]{\tmtrue \Value}{} \qquad
 \infer[\VFalse]{\tmfalse \Value}{} \qquad
 \end{array}
 \]
 
-Here we identify $\tmtrue$, $\tmfalse$, $\tmzero$ as values; in
-addition $(\tmsucc t)$ describes a value provided that $t$ is
-a value. In \cite{TAPL},
+Here, we identify $\tmzero$ as a numeric value; in addition, $\tmsucc t$ is a
+numeric value provided that $t$ is a numeric value. We also identify $\tmtrue$
+and $\tmfalse$ as values, and say that every numeric value is a value.
 
-We are now ready to define when a term $t$ steps using the
-judgment $t \Steps t'$ using congruence rules and reduction rules.
+We are now ready to define when a term $t_1$ steps to an other term $t_1'$ using
+the judgment $t_1 \Steps t_1'$ using congruence rules and reduction rules.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\multicolumn{1}{l}{\fbox{$t_1 \Steps t_1'$}: \mbox{Term $t_1$ steps to term $t_1'$}}
 \\[1em]
 \multicolumn{1}{l}{\mbox{\text{Congruence Rules}}}
 \\[1em]
-\infer[\ESuc]{\tmsucc t \Steps \tmsucc t'}{t \Steps t'}\qquad
-\infer[\EPred]{\tmpred t \Steps \tmpred t'}{t \Steps t'}
+\infer[\ESuc]{\tmsucc t_1 \Steps \tmsucc t_1'}{t_1 \Steps t_1'}\qquad
+\infer[\EPred]{\tmpred t_1 \Steps \tmpred t_1'}{t_1 \Steps t_1'}
 \\[1em]
-\infer[\EIsZero]{\tmiszero t \Steps \tmiszero t'}{t \Steps t'}\qquad
-\infer[\EIf]{\tmif t {t_1}{t_2} \Steps \tmif t' {t_1}{t_2}}{t \Steps t'}
+\infer[\EIsZero]{\tmiszero t_1 \Steps \tmiszero t_1'}{t_1 \Steps t_1'}\qquad
+\infer[\EIf]{\tmif{t_1}{t_2}{t_3} \Steps \tmif{t_1'}{t_2}{t_3}}{t_1 \Steps t_1'}
 \\[1em]
 \multicolumn{1}{l}{\mbox{\text{Reduction Rules (Axioms)}}}
 \\[1em]
 \infer[\EPredZ]{\tmpred \tmzero \Steps \tmzero}{}\qquad
-\infer[\EPredSucc]{\tmpred (\tmsucc t) \Steps t}{t \Value}
+\infer[\EPredSucc]{\tmpred (\tmsucc nv_1) \Steps nv_1}{nv_1 \NumValue}
 \\[1em]
 \infer[\EIsZeroZ]{\tmiszero \tmzero \Steps \tmtrue}{} \qquad
-\infer[\EIsZeroSucc]{\tmiszero (\tmsucc t) \Steps \tmfalse}{t \Value}
+\infer[\EIsZeroSucc]{\tmiszero (\tmsucc nv_1) \Steps \tmfalse}{nv_1 \NumValue}
 \\[1em]
-\infer[\EIfT]{\tmif \tmtrue {t_1}{t_2} \Steps t_1}{}\qquad
-\infer[\EIfF]{\tmif \tmfalse {t_1}{t_2} \Steps t_2}{}
+\infer[\EIfT]{\tmif \tmtrue {t_2}{t_3} \Steps t_2}{}\qquad
+\infer[\EIfF]{\tmif \tmfalse {t_2}{t_3} \Steps t_3}{}
 \end{array}
 \]
 
-Our goal is to represent the relation $t \Steps t'$ and describe the derivation
-trees which correspond to evaluating a given sub-term. To accomplish this we
-also must be able to construct derivation trees that prove that a given term is
-a value. Recall that a data-type provides us with inductive definition of
-constructing elements. Clearly, terms are inductively defined and are easily
-translated into a data-type definition. However, we also defined inductively
-what it means for a term to be a value: we use the axioms $\VZero$, $\VTrue$,
-$\VFalse$ together with the inference rule $\VSuc$. Similarly, we defined
-inductively what it means for a term $t$ to step to a term $t'$. In Beluga,
-data-types are powerful enough to encode such inductive definitions about
-predicates and relations. To represent the judgment $t \Value$ we define a
-predicate (type family) \lstinline!value! and state that it takes terms as
-argument by declaring its type as \lstinline!term -> type!. Then each rule
-corresponds to a constructor in our data-type definition. A derivation tree then
-corresponds to an expression formed by these constructors.
+Our  goal  is  to  represent  the  relation  $t_1 \Steps t_1'$ and  describe the
+derivation trees which correspond to evaluating a given sub-term.
+To accomplish this we also must be able to construct derivation trees that prove
+that  a given  term is  a value  or a  numeric  value. Recall  that a  data-type
+provides us with inductive definition of constructing elements.
+Clearly,  terms  are  inductively  defined  and  are  easily  translated  into a
+data-type definition. However,  we also defined inductively  what it means for a
+term  to be a value or a numeric value:  we use the  axioms $\NVZero$, $\VTrue$,
+$\VFalse$  together  with  the   inference  rules  $\NVSucc$  and  $\VNumValue$.
+Similarly,  we defined inductively  what it means for a term $t_1$  to step to a
+term $t_1'$.
+In Beluga,  data-types are powerfull enough to encode such inductive definitions
+about  predicates  and  relations.  To represent the judgment  $t \NumValue$  we
+define  a predicate (type family) \lstinline!num_value!  and state that it takes
+terms as argument  by declaring its type as \lstinline!term -> type!.  Then each
+rule corresponds to a constructor in our data-type definition. A derivation tree
+then corresponds to an expression formed by these constructors.
 
 \begin{lstlisting}
-datatype value : term -> type =
-| v_true : value true
-| v_false: value false
-| v_z    : value z
-| v_s    : value N -> value (succ N)
+LF num_value : term -> type =
+| nv_zero     : num_value z
+| nv_succ     : num_value T -> num_value (succ T)
+;
+
+LF value : term -> type =
+| v_num_value : num_value T -> value T
+| v_true      : value true
+| v_false     : value false
 ;
 \end{lstlisting}
 
-In our definition of the constructor \lstinline!v_s! the capital letter
-\lstinline!N! is thought to be universally quantified at the outside. We can
-hence read the constructor \lstinline!v_s! as follows:
+In our definition  of  the constructor \lstinline!nv_succ!, the  capital  letter
+\lstinline!T! is thought  to be  universally quantified  at the outside.  We can
+hence read the constructor \lstinline!nv_succ! as follows:
 
 \begin{center}
 \begin{tabular}{p{12cm}}
-``For all terms
-\lstinline$N$, if \lstinline!D! is a derivation for \lstinline!value N!, then we can form a derivation
-\lstinline!(v_s <<N>> D)! for \lstinline!value (succ N)!. ``
+``For  all  terms   \lstinline$T$,   if   \lstinline!D!  is  a  derivation   for
+\lstinline!num_value T!,      then      we     can     form     a     derivation
+\lstinline!(nv_succ <<T>> D)! for \lstinline!num_value (succ N)!.''
 \end{tabular}
 \end{center}
 
 
-We mark here the term \lstinline!<<N>>! in green since in practice programmers
-can omit writing it and Beluga will infer it. The recipe is ``if we do not
+We mark here  the term \lstinline!<<N>>! in green  since in practice programmers
+can omit  writing it  and Beluga  will  infer it.  The recipe is  ``if we do not
 explicitly quantify over variables in the definition of a constructor, we do not
-need to pass instantiations for them when constructing objects using the said constructor.''
+need  to pass instantiations  for them when constructing objects  using the said
+constructor.''
 
 To illustrate consider the following concrete example.\\[1em]
 
 \begin{tabular}{l@{\qquad}l}
 The derivation &
 $
-\infer[\VSuc]{(\tmsucc (\tmsucc \tmzero)) \Value}
-{\infer[\VSuc]{(\tmsucc \tmzero)~\Value}{
- \infer[\VZero]{\tmzero \Value}{}
- }
-}
+\infer[\NVSucc]
+  { (\tmsucc (\tmsucc \tmzero)) \NumValue }
+  { \infer[\NVSucc]
+      { (\tmsucc \tmzero)~\NumValue }
+      { \infer[\NVZero]
+          {\tmzero \NumValue}
+          {}
+      }
+  }
 $\\[1em]
 is represented as &
-\lstinline!(v_s <<(suc z)>> (v_s <<z>> v_z))!\\[1em]
+\lstinline!(nv_succ <<(succ z)>> (nv_succ <<z>> v_zero))!\\[1em]
 \end{tabular}
 
 In Beluga, we simply write
 \begin{lstlisting}
-let v : [ |-num_value (succ (succ z))] = [ |-v_s (v_s v_z)];!
+  let v : [|- num_value (succ (succ z))] = [|- nv_succ (nv_succ nv_zero)];!
 \end{lstlisting}
 
-We bind the derivation to the name \lstinline!v! and declare that \lstinline!v!
-has type \lstinline![|-num_value (succ (succ z))]!. Note, we in general write
-derivations using \lstinline!|-! . On the left hand side of this symbol we can
-list assumptions and the right hand side describes what we claim can be derived
+We bind the derivation to the name \lstinline!v!  and declare that \lstinline!v!
+has type \lstinline![|- num_value (succ (succ z))]!.  Note,  we in general write
+derivations using \lstinline!|-!.  On the left hand side  of this symbol  we can
+list assumptions and the right hand side describes  what we claim can be derived
 from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
-let w : [x:term, v: num_value x |-num_value (succ (succ x))] =
-   [x:term, v:num_value x |-v_s (v_s v)];
+let w : [x: term, nv: num_value x |- num_value (succ (succ x))] =
+   [x: term, nv: num_value x |- nv_succ (nv_succ nv)];
 \end{lstlisting}
 
-The right hand side can be read as: Assuming \lstinline!x:term! and
-\lstinline!v:num_value x!, i.e. \lstinline!x! is a numerical value, then
-\lstinline!v_s (v_s v)! is the witness for the fact that
-\lstinline!succ (succ x)! is a numerical value.
+The  right  hand  side   can  be  read  as:   Assuming  \lstinline!x: term!  and
+\lstinline!nv: num_value x!,  i.e. \lstinline!nv!  is the derivation that states
+that \lstinline!x! is  a numerical value,  then \lstinline!nv_succ (nv_succ nv)!
+is the witness for the fact that \lstinline!succ (succ x)! is a numerical value.
 
 
-We can similarly encode the small-step relation $t \Steps t'$ between the terms
+We can similarly encode  the small-step relation $t \Steps t'$ between the terms
 $t$ and $t'$ using the type family/relation \lstinline!step!.
 
 \begin{lstlisting}
-datatype step: term -> term -> type =
-| e_if_true:  step (if_then_else true M2 M3)    M2
-| e_if_false: step (if_then_else false M2 M3)   M3
-| e_pred_zero:    step (pred z) z
-| e_pred_succ:    num_value N
-                 -> step (pred (succ N)) N
-| e_iszero_zero:  step (iszero z) true
-| e_iszero_succ:  num_value N
-                -> step (iszero (succ N)) false
-| e_if_then_else:       step M1 M1'
-                -> step (if_then_else M1 M2 M3)      (if_then_else M1' M2 M3)
-| e_succ:         step M M'
-                -> step (succ M) (succ M')
-| e_pred:         step M M'
-                -> step (pred M) (pred M')
-| e_iszero:       step M N
-                -> step (iszero M) (iszero N)
+LF step: term -> term -> type =
+| e_if_true      : step (if_then_else true T2 T3) T2
+| e_if_false     : step (if_then_else false T2 T3) T3
+| e_pred_zero    : step (pred z) z
+| e_pred_succ    : num_value NV1
+                   -> step (pred (succ NV1)) NV1
+| e_iszero_zero  : step (iszero z) true
+| e_iszero_succ  : num_value NV1
+                   -> step (iszero (succ NV1)) false
+| e_if_then_else : step T1 T1'
+                   -> step (if_then_else T1 T2 T3) (if_then_else T1' T2 T3)
+| e_succ         : step T1 T1'
+                   -> step (succ T1) (succ T1')
+| e_pred         : step T1 T1'
+                   -> step (pred T1) (pred T1')
+| e_iszero       : step T1 T1'
+                   -> step (iszero T1) (iszero T1')
 ;
 \end{lstlisting}
 
-
-Next, we show a few examples of how to encode and represent
-derivations that a concrete term steps to another.
+Next,  we show a few examples of  how to encode and represent derivations that a
+concrete term steps to another.
 
 \begin{lstlisting}
-let e1 : [ |-step (pred (succ (pred z))) (pred (succ z))]
-= [ |-e_pred (e_succ e_pred_zero)] ;
+let e1 : [|- step (pred (succ (pred z))) (pred (succ z))] =
+         [|- e_pred (e_succ e_pred_zero)] ;
 
-
-let e2 : [ |-step (pred (succ z)) z]
-= [ |-e_pred_succ v_z] ;
+let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ nv_zero] ;
 \end{lstlisting}
 
 
