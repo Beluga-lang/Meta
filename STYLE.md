@@ -15,19 +15,19 @@ This is the apendix B of the TAPL.
  v, w                    | v, w       |           | values
  nv                      | nv         |           | numeric values
  l, j, k                 | l          |           | record/variant field labels
- μ                       | store      |           | stores
+ \mu                     | store      |           | stores
                          |            |           |
  M, N, P, Q, S, T, U, V  | tyS, tyT   |           | types
  A, B, C                 | tyA, tyB   |           | base types
- Σ                       |            |           | store typings
+ \Sigma                  |            |           | store typings
  X, Y, Z                 | tyX, tyY   |           | type variables
  K, L                    | kK, kL     |           | kinds
                          |            |           |
- σ                       |            |           | substitutions
- Γ, ∆                    | ctx        |           | contexts
- �                       |            |           | arbitrary statements
- �                       |            |           | typing derivations
- �                       |            |           | subtyping derivations
+ \sigma                  |            |           | substitutions
+ \Gamma, \Delta          | ctx        |           | contexts
+ \mathcal{J}             |            |           | arbitrary statements
+ \mathcal{D}             |            |           | typing derivations
+ \mathcal{C}             |            |           | subtyping derivations
 
 
 2.  Rule Naming Convention
