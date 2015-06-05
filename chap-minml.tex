@@ -1,26 +1,27 @@
 \chapter{The Basics: Mechanizing languages and proofs}
+
 \begin{quote}
 ``A language that doesn't affect the way you think about programming, is
 not worth knowing.''
 \hfill - Alan Perlis
 \end{quote}
 
-Definitions of programming languages typically cover three fundamental
-aspects: the grammar of the language, i.e. what are syntactically well-formed
-terms in the language, its operational semantics, i.e, how do we
-execute and evaluate a given term, and its type structure i.e. what
-are well-typed expressions. We revisit these concepts for a small
-language containing booleans and numbers following \citep[Ch 3,Ch
-8]{TAPL} in preparation for representing this language together with
-its operational semantics and type system in \beluga.
+Definitions of programming languages  typically cover three fundamental aspects:
+the grammar  of the language,  i.e. what are syntactically  well-formed terms in
+the language,  its operational semantics,  i.e. how do we execute and evaluate a
+given term,  and its  type structure, i.e. what are  well-typed expressions.  We
+revisit  these concepts  for  a small language  containing booleans  and numbers
+following \citep[Ch 3,Ch 8]{TAPL} in  preparation for representing this language
+together with its operational semantics and type system in \beluga.
 
 \section{Encoding the language and its definitions}
+
 \subsection{Terms: Booleans and Numbers}
-Let us consider a simple language containing booleans, if-expressions,
-and numbers together with simple operations that allow us to test
-whether a given number is zero (see \cite[Ch 3, Fig 3-1,Fig
-3-2]{TAPL}). We define numbers using $\tmzero$ and
-$\tmsucc$-operation. To analyze and manipulate numbers, we also
+
+Let  us  consider  a simple language  containing booleans,  if-expressions,  and
+numbers together  with simple operations  that allow us  to test whether a given
+number is zero (see \cite[Ch 3, Fig 3-1,Fig 3-2]{TAPL}). We define numbers using
+$\tmzero$ and $\tmsucc$-operation.  To analyze  and manipulate numbers,  we also
 provide a $\tmpred$-operator.
 
 \[
@@ -30,15 +31,14 @@ provide a $\tmpred$-operator.
 \end{array}
 \]
 
-The first question we investigate is how to define and represent terms
-in the proof enviroment \beluga.  To represent terms in Beluga, we
-declare a type \lstinline!term! for terms together with constants
-corresponding to the constructors $\tmfalse$, $\tmtrue$, $\tmzero$,
-$\tmsucc$, $\tmpred$, $\tmiszero$, etc. More precisely we use the logical framework
-LF \citep{Harper93jacm} for introducing new types such as
-\lstinline!term! together with constants \lstinline!true!,
-\lstinline!false!, etc. that can be used to construct terms. All
-constants are used as prefix operators by default.
+The first question  we investigate is  how to define  and represent terms in the
+proof  enviroment  \beluga. To represent  terms  in \beluga,  we declare  a type
+\lstinline!term!  for  terms   together  with  constants  corresponding  to  the
+constructors    $\tmfalse$,   $\tmtrue$,    $\tmzero$,   $\tmsucc$,   $\tmpred$,
+$\tmiszero$,  etc.   More   precisely   we   use   the   logical   framework  LF
+\citep{Harper93jacm} for introducing new types such as \lstinline!term! together
+with constants  \lstinline!true!,  \lstinline!false!, etc.  that  can be used to
+construct terms. All constants are used as prefix operators by default.
 
 \begin{lstlisting}
 LF term : type =
@@ -64,20 +64,18 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 % We can declare infix
 % operator by using the keyword \lstinline!%infix!.
 
-
-
 \subsection{Small Step Semantics}
 
-Next, we define the small-step semantics for our little language. This
-will describe how we evaluate a given term. To give a deterministic
-evaluation strategy, it is convenient to first define what the values
-of our language. In \cite{TAPL}, we distinguished between terms and values in the
-grammar itself and we think of values as a sub-class of terms; here we take a slightly
-different approach and define explicitly what it means to be a value
-using the judgments $t \NumValue$ and $t \Value$. We can think of these judgments
-as predicates on terms which are defined via axioms and inference rules. A
-term $t$ is numeric value iff we can give a derivation for $t \NumValue$, and a
-value iff we can give a derivation for $t \Value$.
+Next,  we define  the small-step semantics  for our  little language.  This will
+describe  how  we evaluate  a  given term.  To give  a  deterministic evaluation
+strategy,  it is convenient to first define what the values of our language.  In
+\cite{TAPL}, we distinguished between terms and values in the grammar itself and
+we think of values  as a sub-class of terms;  here we take  a slightly different
+approach and define explicitly  what it means  to be a value using the judgments
+$t \NumValue$ and $t \Value$.  We can think of these judgments  as predicates on
+terms which are defined  {\em via}  axioms and inference rules.  A term $t$ is a
+numeric value iff we can give a derivation for $t \NumValue$, and a value iff we
+can give a derivation for $t \Value$.
 
 \[
 \begin{array}{c}
@@ -109,7 +107,7 @@ the judgment $t_1 \Steps t_1'$ using congruence rules and reduction rules.
 \\[1em]
 \multicolumn{1}{l}{\mbox{\text{Congruence Rules}}}
 \\[1em]
-\infer[\ESuc]{\tmsucc t_1 \Steps \tmsucc t_1'}{t_1 \Steps t_1'}\qquad
+\infer[\ESucc]{\tmsucc t_1 \Steps \tmsucc t_1'}{t_1 \Steps t_1'}\qquad
 \infer[\EPred]{\tmpred t_1 \Steps \tmpred t_1'}{t_1 \Steps t_1'}
 \\[1em]
 \infer[\EIsZero]{\tmiszero t_1 \Steps \tmiszero t_1'}{t_1 \Steps t_1'}\qquad
@@ -139,7 +137,7 @@ term  to be a value or a numeric value:  we use the  axioms $\NVZero$, $\VTrue$,
 $\VFalse$  together  with  the   inference  rules  $\NVSucc$  and  $\VNumValue$.
 Similarly,  we defined inductively  what it means for a term $t_1$  to step to a
 term $t_1'$.
-In Beluga,  data-types are powerfull enough to encode such inductive definitions
+In \beluga, data-types are powerfull enough to encode such inductive definitions
 about  predicates  and  relations.  To represent the judgment  $t \NumValue$  we
 define  a predicate (type family) \lstinline!num_value!  and state that it takes
 terms as argument  by declaring its type as \lstinline!term -> type!.  Then each
@@ -173,7 +171,7 @@ hence read the constructor \lstinline!nv_succ! as follows:
 
 
 We mark here  the term \lstinline!<<N>>! in green  since in practice programmers
-can omit  writing it  and Beluga  will  infer it.  The recipe is  ``if we do not
+can omit  writing it  and \beluga  will infer it.  The recipe is  ``if we do not
 explicitly quantify over variables in the definition of a constructor, we do not
 need  to pass instantiations  for them when constructing objects  using the said
 constructor.''
@@ -197,9 +195,9 @@ is represented as &
 \lstinline!(nv_succ <<(succ z)>> (nv_succ <<z>> v_zero))!\\[1em]
 \end{tabular}
 
-In Beluga, we simply write
+In \beluga, we simply write
 \begin{lstlisting}
-  let v : [|- num_value (succ (succ z))] = [|- nv_succ (nv_succ nv_zero)];!
+  let v : [|- num_value (succ (succ z))] = [|- nv_succ (nv_succ nv_zero)];
 \end{lstlisting}
 
 We bind the derivation to the name \lstinline!v!  and declare that \lstinline!v!
@@ -209,8 +207,8 @@ list assumptions and the right hand side describes  what we claim can be derived
 from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
-let w : [x: term, nv: num_value x |- num_value (succ (succ x))] =
-   [x: term, nv: num_value x |- nv_succ (nv_succ nv)];
+  let w : [x: term, nv: num_value x |- num_value (succ (succ x))] =
+      [x: term, nv: num_value x |- nv_succ (nv_succ nv)];
 \end{lstlisting}
 
 The  right  hand  side   can  be  read  as:   Assuming  \lstinline!x: term!  and
@@ -218,9 +216,8 @@ The  right  hand  side   can  be  read  as:   Assuming  \lstinline!x: term!  and
 that \lstinline!x! is  a numerical value,  then \lstinline!nv_succ (nv_succ nv)!
 is the witness for the fact that \lstinline!succ (succ x)! is a numerical value.
 
-
-We can similarly encode  the small-step relation $t \Steps t'$ between the terms
-$t$ and $t'$ using the type family/relation \lstinline!step!.
+We can similarly  encode the small-step relation  $t_1 \Steps t_1'$  between the
+terms $t_1$ and $t_1'$ using the type family/relation \lstinline!step!.
 
 \begin{lstlisting}
 LF step: term -> term -> type =
@@ -260,7 +257,7 @@ Here \lstinline!e1! stands for the derivation
 \[
 \begin{array}{c}
 \infer[\EPred]{(\tmpred {(\tmsucc {(\tmpred {\tmzero})})}) \Steps (\tmpred {(\tmsucc {\tmzero})})}
-{\infer[\ESuc]{(\tmsucc {(\tmpred {\tmzero})}) \Steps (\tmsucc {\tmzero} )}
+{\infer[\ESucc]{(\tmsucc {(\tmpred {\tmzero})}) \Steps (\tmsucc {\tmzero} )}
  {\infer[\EPredZ]{(\tmpred {\tmzero}) \Steps \tmzero}{}}
 }
 \end{array}
@@ -334,11 +331,11 @@ preservation theorem as: Given a typing derivation $\vdash t:T$ and a derivation
 for $\vdash t \Steps t'$, we return a typing derivation $\vdash t':T$.
 
 We begin by translating and representing the actual theorem statement
-in Beluga. This is straightforward keeping in mind that
+in \beluga. This is straightforward keeping in mind that
 
 \begin{center}
 \begin{tabular}{l|l}
-On paper judgment~~ & ~~Type in Beluga \\
+On paper judgment~~ & ~~Type in \beluga \\
 \hline
 $\vdash M :T$ & \lstinline![ |-hastype M T]! \\
 $\vdash M \Steps M'$ & \lstinline![ |-steps M M']! \\
@@ -358,7 +355,7 @@ inference rule to distinguish between the premises and the
 conclusions. We merely were using the arrow to define syntactic
 structures.
 
-In Beluga, we strictly separate between the objects we are
+In \beluga, we strictly separate between the objects we are
 constructing (such as derivation trees, terms, etc.) from proofs about
 them. The type preservation statement makes a claim about typing
 stepping derivations. In the type of the function \lstinline!tps! the
@@ -368,7 +365,7 @@ recursive functions which analyze objects of type \lstinline![|-hastype M T]! an
 
 Last, we wrote \lstinline!?!. This is very useful when developing and
 debugging proofs/programs, since it allows us to describe incomplete
-proofs/programs and Beluga will print back to you the assumptions at
+proofs/programs and \beluga will print back to you the assumptions at
 that given point and the goal which needs to be proven.
 Let's fill in some of the details.
 
@@ -431,7 +428,7 @@ assumption and we stated ``by inversion on $\TPred$'' which indicated
 that there was exactly one case.
 
 While we certainly can write another case-expression analyzing
-\lstinline!d! in the proof, Beluga provides syntactic sugar for
+\lstinline!d! in the proof, \beluga provides syntactic sugar for
 case-expressions with one case; instead of writing
 
 \noindent
@@ -458,7 +455,7 @@ fn d => fn s => case s of
 ;
 \end{lstlisting}
 
-Beluga will compile this partial program and print for the hole
+\beluga will compile this partial program and print for the hole
 
 \begin{lstlisting}
 ________________________________________________________________________________
@@ -522,7 +519,7 @@ The full proof can be found in the attached file \lstinline!evaluation.bel!.
 \paragraph{When is a program a proof?} So far we have just written a
 functional program; for it to be a proof it needs to be a total
 function, i.e. it must be defined on all inputs and it must be
-terminating. We can check that the function is total in Beluga by
+terminating. We can check that the function is total in \beluga by
 writing the following annotation before we start writing the body of
 the function:\lstinline!/ total s (tps m t m' d s) /!. This
 annotations states that we claim to implement program \lstinline!tps! that is
@@ -597,7 +594,7 @@ can conclude $\bot$.
 
 \begin{stepcase}{$\V = \ianc{\above{\V'}{ N \Value}}{(\tmsucc N) \Value}{}$}
 $\proofderiv{\St~}{(\tmsucc N) \Steps M'}$ \hfill by assumption \\
-$\proofderiv{\St'}{N \Steps N'}$ \quad and \quad $M' = (\tmsucc N')$ \hfill by inversion using $\ESuc$\\
+$\proofderiv{\St'}{N \Steps N'}$ \quad and \quad $M' = (\tmsucc N')$ \hfill by inversion using $\ESucc$\\
 $\bot$ \hfill by i.h. using $\St'$ and $\V'$
 \end{stepcase}
 
@@ -613,14 +610,14 @@ example \lstinline!step (pred zero) zero! is; so is
 \lstinline!step (succ (pred zero)) (succ zero)!. Generally speaking, if we
 define no elements
 belonging to a type, then the type is guaranteed to be empty and models false.
-In Beluga, we can define types without elements simply by declaring a type.
+In \beluga, we can define types without elements simply by declaring a type.
 
 \begin{lstlisting}
 not_possible: type.
 \end{lstlisting}
 
 We then can translate the theorem directly into a computation-level type in
-Beluga; we have also included the totality declaration, stating that this
+\beluga; we have also included the totality declaration, stating that this
 function is recursively defined on values, i.e. object of type \lstinline![ |-value M]!.
 
 \begin{lstlisting}
@@ -648,7 +645,7 @@ fn s => fn v => case v of
 Let's consider the case \lstinline![|-v_z] : [|-value zero]!. We argued in the
 proof by ``By inspecting all the existing rules, there exists no $M'$.'' This
 corresponds to case-analyzing \lstinline!s!; however, there are no cases. In
-Beluga, we write \lstinline!impossible s in []! for splitting \lstinline!s! in
+\beluga, we write \lstinline!impossible s in []! for splitting \lstinline!s! in
 the empty context. It is effectively a case-expression without branches.
 
 For the step-case, the translation of the proof to a program is more
@@ -939,11 +936,11 @@ fn d => case d of
 
 
 \section{How to Trust Proof Environments}
-How can we trust systems such as Beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
+How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
 
-In Beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing Beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
+In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
 
-The ultimate goal is to translate Beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
+The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
 
 %%% Local Variables:
 %%% mode: latex
