@@ -250,9 +250,7 @@ let e1 : [|- step (pred (succ (pred z))) (pred (succ z))] =
 let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ nv_zero] ;
 \end{lstlisting}
 
-
 Here \lstinline!e1! stands for the derivation
-
 
 \[
 \begin{array}{c}
@@ -267,31 +265,68 @@ The name \lstinline!e2! stands for the derivation consisting of only
 the axiom $\EPredZ$.
 
 \section{Typing Rules}
+
 Finally, we remark that following these ideas, we can encode typing rules for
 our term language by representing the typing judgment $t : T$ using the type
-family (relation) \lstinline!hastype!. For the actual typing rules,
-see \cite[Ch ?, Fig. ?]{TAPL}.
+family (relation) \lstinline!hastype!.
 
+We define two types nat and bool:
+\[
+\begin{array}{lll}
+\mbox{Types} & T \bnfas & \Bool \\
+             &          & \Nat
+\end{array}
+\]
 
+which in \beluga gives:
 \begin{lstlisting}
-datatype hastype: term -> tp -> type =
-| t_zero : hastype z nat
-| t_succ : hastype M nat
-     -> hastype (succ M) nat
-| t_pred : hastype M nat
-      -> hastype (pred M) nat
-| t_true : hastype true bool
-| t_false: hastype false bool
-| t_iszero: hastype M nat
-          -> hastype (iszero M) bool
-| t_if_then_else: hastype M bool -> hastype M1 T -> hastype M2 T
-          -> hastype (if_then_else M M1 M2) T
+LF tp : type =
+| bool : tp
+| nat : tp
 ;
 \end{lstlisting}
 
+Then we add typing rules:
+\[
+\begin{array}{c}
+  \infer[\TTrue]{\tmtrue \hastype \Bool}{} \qquad
+  \infer[\TFalse]{\tmfalse \hastype \Bool}{} \qquad
+  \infer[\TIf]{\tmif{t_1}{t_2}{t_3} \hastype T}{t_1 \hastype \Bool & t_2 \hastype T & t_3 \hastype T}
+\\
+  \infer[\TZero]{\tmzero \hastype \Nat}{}\qquad
+  \infer[\TSucc]{\tmsucc t_1 \hastype \Nat}{t_1 \hastype \Nat} \qquad
+  \infer[\TPred]{\tmpred t_1 \hastype \Nat}{t_1 \hastype \Nat} \qquad
+  \infer[\TIsZero]{\tmiszero t_1 \hastype \Bool}{t_1 \hastype \Nat}
+\\
+\end{array}
+\]
 
+which in \beluga gives:
+\begin{lstlisting}
+Lf hastype : term -> tp -> type =
+| t_zero:
+      hastype z nat
+| t_succ:
+      hastype T1 nat
+      -> hastype (succ T1) nat
+| t_pred:
+      hastype T1 nat
+      -> hastype (pred T1) nat
+| t_true:
+      hastype true bool
+| t_false:
+      hastype false bool
+| t_iszero:
+      hastype T1 nat
+      -> hastype (iszero T1) bool
+| t_if_then_else:
+      hastype T1 bool -> hastype T2 T -> hastype T3 T
+      -> hastype (if_then_else T1 T2 T3) T
+;
+\end{lstlisting} % todo: find an other name than T for types
 
 \section{Encoding Proofs}
+
 We now revisit some of the properties we investigated about languages
 and how we can represent such proofs as functions that manipulate and
 analyze derivation trees.
