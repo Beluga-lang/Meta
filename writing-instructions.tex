@@ -96,13 +96,33 @@ There are examples of this environment in use in chapters 2 and 3.
 
 \section{Beluga code}
 \begin{itemize}
-\item Use \verb#\lstinline![ |- t_lam \x . x]!# to get \lstinline![ |- t_lam \x . x]!
-\item Use \verb#\begin{lslisting} .. \end{lslisting}# to show bigger fragments of \beluga code
-\item Both of the above commands are like verbatim mode, so whitespace is (..should be, anyway) preserved.
-\item Because I'm lazy, \verb#\bel{beluga code}# can be used instead of \\
-\verb#\lstinline!beluga code!#.
+\item When you mention Beluga code in a paragraph use
+  \verb#\lstinline![ |- t_lam \x . x]!# to get \lstinline![ |- t_lam \x . x]!
+\item For longer code, and code examples use literate programming. You have three options for your code:
+  \begin{enumerate}
+  \item The code you write is part of the main example for this
+    chapter and you want to extract it: use
+
+    \verb#\begin{extract}[file1.bel, file2.bel] .. \end{extract}# to
+
+    append this program to file1.bel and file2.bel. In the pdf the
+    code will be formatted using the current settings of lstlisting.
+  \item The code you write should not be extracted (perhaps is a code
+    snippet showing something that does not work). Then you use:
+
+    \verb#\begin{lstlisting} .. \end{lstlisting}#.
+  \item Finally, you have some code that is needs to be extracted but
+    you do not want it in the document. In this case you use:
+
+    \verb#\begin{extract*}[file1.bel, file2.bel] .. \end{extract*}#
+  \end{enumerate}
+% \item Use \verb#\begin{lslisting} .. \end{lslisting}# to show bigger fragments of \beluga code
+\item The code formatting commands above are like verbatim mode, so whitespace is (..should be, anyway) preserved.
+\item If you feel lazy, \verb#\bel{beluga code}# can be used instead of \\
+  \verb#\lstinline!beluga code!#. Be mindful that this is somewhat
+  fragile, if your input contains curly braces do not use it! (We're
+  looking for a fix to this, can you help?)
 \item Some keywords in \beluga code are automatically highlighted/coloured etc -- if you feel there's something missing, ``Contextual ML'' section of \verb#prelude.tex# contains all the settings. It will get a proper cleanup at some point, right now some more advanced settings are voodoo (to me anyway).
-\item \emph{FIXME} describe how to do literate programming/code extraction from the LaTeX source
 \end{itemize}
 
 \section{Exercises}
