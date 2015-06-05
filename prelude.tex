@@ -253,7 +253,7 @@
 % -------------------------- Inference rules' names -------------------------- %
 % ---------------------------------------------------------------------------- %
 
-\newcommand{\ruleName}[1]{\textsc{\small #1}\xspace}
+\newcommand{\ruleName}[1]{\textsc{\footnotesize #1}\xspace}
 
 \newcommand {\TIf}           {\ruleName{T-If}}
 \newcommand {\TPred}         {\ruleName{T-Pred}}
@@ -293,16 +293,23 @@
 \newcommand {\TByVal}        {\ruleName{T-By-Val}}
 \newcommand {\TByValTuple}   {\ruleName{T-By-Val-Tuple}}
 
-\newcommand {\EIfT}          {\ruleName{E-IfTrue}}
-\newcommand {\EIfF}          {\ruleName{E-IfFalse}}
+\newcommand {\EIfTrue}       {\ruleName{E-IfTrue}}
+\newcommand {\EIfT}          {\EIfTrue}                          % to be deleted
+\newcommand {\EIfFalse}      {\ruleName{E-IfFalse}}
+\newcommand {\EIfF}          {\EIfFalse}                         % to be deleted
 \newcommand {\EIf}           {\ruleName{E-If}}
-\newcommand {\ESuc}          {\ruleName{E-Succ}}
+\newcommand {\ESucc}         {\ruleName{E-Succ}}
+\newcommand {\ESuc}          {\ESucc}                            % to be deleted
 \newcommand {\EPred}         {\ruleName{E-Pred}}
-\newcommand {\EPredZ}        {\ruleName{E-PredZero}}
+\newcommand {\EPredZero}     {\ruleName{E-PredZero}}
+\newcommand {\EPredZ}        {\EPredZero}                        % to be deleted
 \newcommand {\EPredSucc}     {\ruleName{E-PredSucc}}
-\newcommand {\EIsZero}       {\ruleName{E-Iszero}}
-\newcommand {\EIsZeroZ}      {\ruleName{E-IszeroZero}}
-\newcommand {\EIsZeroSucc}   {\ruleName{E-IszeroSucc}}
+\newcommand {\EIszero}       {\ruleName{E-Iszero}}
+\newcommand {\EIsZero}       {\EIszero}                          % to be deleted
+\newcommand {\EIszeroZero}   {\ruleName{E-IszeroZero}}
+\newcommand {\EIsZeroZ}      {\EIszeroZero}                      % to be deleted
+\newcommand {\EIszeroSucc}   {\ruleName{E-IszeroSucc}}
+\newcommand {\EIsZeroSucc}   {\EIszeroSucc}                      % to be deleted
 
 \newcommand {\EAppFnStep}    {\ruleName{E-App1}}
 \newcommand {\EAppArgStep}   {\ruleName{E-App2}}
@@ -312,13 +319,14 @@
 \newcommand {\MTr}           {\ruleName{M-Tr}}
 \newcommand {\MStep}         {\ruleName{M-Step}}
 
-\newcommand {\NVZero}        {\ruleName{NV-Zero}}
-\newcommand {\NVSucc}        {\ruleName{NV-Succ}}
+\newcommand {\NVZero}        {\ruleName{Nv-Zero}}
+\newcommand {\NVSucc}        {\ruleName{Nv-Succ}}
 
 \newcommand {\VNumValue}     {\ruleName{V-NumValue}}
 \newcommand {\VZero}         {\ruleName{V-Zero}}
 \newcommand {\VTrue}         {\ruleName{V-True}}
 \newcommand {\VFalse}        {\ruleName{V-False}}
+\newcommand {\VSuc}          {\ruleName{V-Succ}}                 % to be deleted
 
 \newcommand {\BAnno}         {\ruleName{B-Anno}}
 \newcommand {\BAnnoFn}       {\ruleName{B-Anno-Fn}}
