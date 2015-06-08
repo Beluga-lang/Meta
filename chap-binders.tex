@@ -346,8 +346,8 @@ assumptions.
 \infer[\TFn^{x,u}]{\lam x. \lam y. x \app y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat}
 {\infer[\TFn^{y,v}]{\lam y.x \app y : \Nat \arrow \Nat}{
  \infer[\TApp]{x \app y : \Nat}
-   {\infer[u]{x:\Nat \arrow nat}{} &
-    \infer[v]{y:\Nat \arrow nat}{}
+   {\infer[u]{x:\Nat \arrow \Nat}{} &
+    \infer[v]{y:\Nat \arrow \Nat}{}
    }
  }
 }
@@ -356,20 +356,20 @@ assumptions.
 As an alternative, we can re-state the rules using an explicit context for
 book-keeping; this also is often useful when we want to state properties about
 our system and about contexts in particular. We will use for the judgment $M:T$
-the clearer judgment $\hasty M T$.
+the clearer judgment $\tmhastype M T$.
 
 
 
 \[
 \begin{array}{c}
 \multicolumn{1}{l}{\mbox{Typing rules with explicit contexts using the judgment
-    \fbox{$\Gamma \vdash \hasty M T$}}} \\[1em]
-\infer[u]{\Gamma \vdash \hasty x T}{u:\hasty x T \in \Gamma} \qquad
-\infer[\TFn^{x,u}]{\Gamma \vdash \hasty {(\lam x.M)} {(T \arrow S)}}
-                 {\Gamma, u:\hasty x T \vdash \hasty M S}\\[1em]
-\infer[\TApp]{\Gamma \vdash \hasty {(M \app N)} S}
-             {\Gamma \vdash \hasty M (T \arrow S)
-  & \Gamma \vdash \hasty N T}
+    \fbox{$\Gamma \vdash \tmhastype M T$}}} \\[1em]
+\infer[u]{\Gamma \vdash \tmhastype x T}{u:\tmhastype x T \in \Gamma} \qquad
+\infer[\TFn^{x,u}]{\Gamma \vdash \tmhastype {(\lam x.M)} {(T \arrow S)}}
+                 {\Gamma, u:\tmhastype x T \vdash \tmhastype M S}\\[1em]
+\infer[\TApp]{\Gamma \vdash \tmhastype {(M \app N)} S}
+             {\Gamma \vdash \tmhastype M (T \arrow S)
+  & \Gamma \vdash \tmhastype N T}
 \end{array}
 \]
 
@@ -456,12 +456,12 @@ function application, in particular we concentrate on the case for
 abstractions.
 
 \begin{theorem}
-If $\proofderivc{\D}{}{M : T}$ and $\proofderiv{\St}{M \Steps N}$ then $\vdash N : T$.
+If $\proofderivc{\D}{}{M : T}$ and $\proofderiv{\S}{M \Steps N}$ then $\vdash N : T$.
 \end{theorem}
 \begin{proof}
-By structural induction on the derivation $\proofderiv{\St}{M \Steps N}$.
+By structural induction on the derivation $\proofderiv{\S}{M \Steps N}$.
 
-\begin{case}{$\St = \ianc{\above{\V}{V \Value}}{(\lam x.M) \app V \Steps [V/x]M}{\EAppBeta}$}
+\begin{case}{$\S = \ianc{\above{\V}{V \Value}}{(\lam x.M) \app V \Steps [V/x]M}{\EAppBeta}$}
 $\proofderivc{~~~~}{}{(\lam x.M) \app V : T}$
 \hfill by assumption  \\
 $\proofderivc{\D_1}{}{(\lam x.M) : S \arrow T}$ \quad and \quad $\proofderivc{\D_2}{}{V : S}$
@@ -720,7 +720,7 @@ this proof into a Beluga program much easier.
 
 \begin{theorem}[Type uniqueness]$\;$\\
 If $\proofderivc{\D}{\Gamma}{\tmhastype M T}$ and $\proofderivc{\C}{\Gamma}{\tmhastype M S}$
-then $\eq T S$.
+then $\tmeq T S$.
 \end{theorem}
 \begin{proof}
 By structural induction on the typing derivation $\proofderivc{\D}{\Gamma}{\tmhastype M T}$.
@@ -738,10 +738,10 @@ $\C = \inferaa
             { \deduce[\vspace{2pt}]{\Gamma \vdash \tmhastype N T'}{\C_2}}$
 \\[2em]
 
-$\proofderiv{\E}{\eq {(\tmarr T S)} {(\tmarr T' S')}}$ \hfill by i.h. using $\D_1$ and $\C_1$ \\
-$\proofderiv{\E}{\eq {(\tmarr T S)} {(\tmarr T S)}}$  \; and \; \emphFact{$S = S'$} \; and \; \emphFact{$T=T'$} \hfill by inversion on reflexivity.\\[1em]
+$\proofderiv{\E}{\tmeq {(\tmarr T S)} {(\tmarr T' S')}}$ \hfill by i.h. using $\D_1$ and $\C_1$ \\
+$\proofderiv{\E}{\tmeq {(\tmarr T S)} {(\tmarr T S)}}$  \; and \; \emphFact{$S = S'$} \; and \; \emphFact{$T=T'$} \hfill by inversion on reflexivity.\\[1em]
 
-Therefore there is a proof for $\eq S S'$ by reflexivity (\emphFact{since we know $S=S'$}).
+Therefore there is a proof for $\tmeq S S'$ by reflexivity (\emphFact{since we know $S=S'$}).
 \end{case}
 
 \begin{case}{$\D = \infera{\TLam}
@@ -752,11 +752,11 @@ $ \C = \infera{\TLam}
    {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S'}{\D_1}}
 $\\[2em]
 
-$\proofderiv{\E}{\eq S S'}$ \hfill by i.h. using $\D_{1}$ and $\C_1$ \\
-$\proofderiv{\E}{\eq S S}$ \quad and \quad \emphFact{$S = S'$} \hfill by inversion using reflexivity\\[1em]
+$\proofderiv{\E}{\tmeq S S'}$ \hfill by i.h. using $\D_{1}$ and $\C_1$ \\
+$\proofderiv{\E}{\tmeq S S}$ \quad and \quad \emphFact{$S = S'$} \hfill by inversion using reflexivity\\[1em]
 %ause
 
-Therefore there is a proof for $\eq {(\tmarr T S)} {(\tmarr T S')}$ by reflexivity.
+Therefore there is a proof for $\tmeq {(\tmarr T S)} {(\tmarr T S')}$ by reflexivity.
 \end{case}
 
 \begin{case}{
@@ -801,12 +801,12 @@ writing the keyword \lstinline!block!.
 schema tctx = some [t:tp] block (x:exp, _t:type_of x t);
 \end{lstlisting}
 
-The schema \t{tctx} describes a context containing assumptions
-\t{x:tm}, each associated with a typing assumption \t{oft x t}
-for some type \t{t}.  Formally, we are using a dependent product $\Sigma$
-(used only in contexts) to tie \t{x} to \t{oft x t}.
+The schema \bel{tctx} describes a context containing assumptions
+\bel{x:tm}, each associated with a typing assumption \bel{oft x t}
+for some type \bel{t}.  Formally, we are using a dependent product $\Sigma$
+(used only in contexts) to tie \bel{x} to \bel{oft x t}.
 We thus do not need to establish separately that for every variable there is a
-unique typing assumption: this is inherent in the definition of \t{tctx}.
+unique typing assumption: this is inherent in the definition of \bel{tctx}.
 The schema classifies well-formed contexts and checking whether a
 context satisfies a schema will be part of type checking. As a
 consequence, type checking will ensure that we are manipulating only
@@ -842,21 +842,21 @@ corresponds to the type uniqueness theorem.
 
 
 \begin{lstlisting}[caption={Type Uniqueness Proof},label=list:8-6,captionpos=b,float,abovecaptionskip=-\medskipamount]
-rec unique : (\gamma:tctx)[\gamma |-hastype (E $\mdots$) T] -> [\gamma|-hastype (E $\mdots$) T'] -> [ |-equal T T'] =
+rec unique : (\gamma:tctx)[\gamma |-hastype (E ..) T] -> [\gamma|-hastype (E ..) T'] -> [ |-equal T T'] =
 / total d (unique _ _ _ _ d) /
 fn d => fn f => case d of
-| [\gamma |-t_app (D1 $\mdots$) (D2 $\mdots$)] =>
-  let[\gamma |-t_app (F1 $\mdots$) (F2 $\mdots$)] = f in
-  let[ |-ref]  = unique  [\gamma |-D1 $\mdots$] [\gamma |-F1 $\mdots$] in
+| [\gamma |-t_app (D1 ..) (D2 ..)] =>
+  let[\gamma |-t_app (F1 ..) (F2 ..)] = f in
+  let[ |-ref]  = unique  [\gamma |-D1 ..] [\gamma |-F1 ..] in
     [ |-ref]
 
-|[\gamma |-t_lam \x.\u. D $\mdots$ x u] =>
-  let[\gamma |-t_lam \x.\u. F $\mdots$ x u] = f in
-  let[ |-ref] = unique [\gamma,b:block(x:term,u:hastype x _)|-D $\mdots$ b.1 b.2] [\gamma,b$\,$|-F $\mdots$ b.1 b.2] in
+|[\gamma |-t_lam \x.\u. D .. x u] =>
+  let[\gamma |-t_lam \x.\u. F .. x u] = f in
+  let[ |-ref] = unique [\gamma,b:block(x:term,u:hastype x _)|-D .. b.1 b.2] [\gamma,b$\,$|-F .. b.1 b.2] in
    [ |-ref]
 
-| [\gamma |-#q.2 $\mdots$] =>           % d : hastype #q.x T
-  let[\gamma |-#r.2 $\mdots$] = f  in  % f : hastype #q.x T'
+| [\gamma |-#q.2 ..] =>           % d : hastype #q.x T
+  let[\gamma |-#r.2 ..] = f  in  % f : hastype #q.x T'
     [ |-e_ref]
 ;
 \end{lstlisting}
@@ -864,19 +864,19 @@ fn d => fn f => case d of
 
 We can read this type as follows: For all context \lstinline!\gamma! of
 schema \lstinline!tctx!, given a derivation for
-\lstinline!hastype (M $\mdots$) T! in the context \lstinline!\gamma! and a derivation for
-\lstinline!hastype (M $\mdots$) S! in the context \lstinline!\gamma!, we return a
+\lstinline!hastype (M ..) T! in the context \lstinline!\gamma! and a derivation for
+\lstinline!hastype (M ..) S! in the context \lstinline!\gamma!, we return a
 derivation showing that \lstinline!eq T S! in the empty context.
 Although we quantified over the context \lstinline!\gamma! at the outside,
 it need not be passed explicitely to a function of this type, but
 Beluga will be able to reconstruct it.
 
-We call the type \lstinline![\gamma |-hastype (M $\mdots$) T! a contextual type and
+We call the type \lstinline![\gamma |-hastype (M ..) T! a contextual type and
 the object inhabiting it a contextual object.
 Since the term \lstinline!M! can depend on the variables declared in the
-context \lstinline!\gamma!, we  write  \lstinline!(M $\mdots$)!. Formally,
+context \lstinline!\gamma!, we  write  \lstinline!(M ..)!. Formally,
 \lstinline!M! itself is a contextual object of type
-\lstinline![\gamma |-tm]! and \lstinline!$\mdots$! is the identity substitution
+\lstinline![\gamma |-tm]! and \lstinline!..! is the identity substitution
 which $\alpha$-renames the bound variables.
 On the other hand, \lstinline!T! and \lstinline!S! stand for closed
 objects of type \lstinline!tp! and they cannot refer to declarations
@@ -890,25 +890,25 @@ case-expression.
 %
 \paragraph{Application case:} If the first derivation \lstinline{d} concludes
 with \lstinline{t_app}, it matches
-the pattern \lstinline![\gamma |-t_app (D1$\mdots$) (D2$\mdots$)]!, and is
+the pattern \lstinline![\gamma |-t_app (D1 ..) (D2 ..)]!, and is
 a contextual object of type
-\lstinline!hastype (app (M$\mdots$) (N$\mdots$))$~$S! in the context \lstinline!\gamma!.  % We therefore know that
-% $\lstinline{M$\;$$\mdots$} =
-% \lstinline{app$\;$(M$\;$$\mdots$)\,(N$\;$$\mdots$)}$.
+\lstinline!hastype (app (M ..) (N ..))$~$S! in the context \lstinline!\gamma!.  % We therefore know that
+% $\lstinline{M$\;$..} =
+% \lstinline{app$\;$(M$\;$..)\,(N$\;$..)}$.
 \lstinline!D1! corresponds to the first
 premise of the typing rule for applications and has the contextual type
-\lstinline![\gamma |-hastype (M $\mdots$) (arr T S)]!.
+\lstinline![\gamma |-hastype (M ..) (arr T S)]!.
 
 Using a let-binding, we invert the second
 argument, the derivation \lstinline{f} which
 must have type
-\lstinline![\gamma |-hastype (app (M $\mdots$) (N $\mdots$))$~$ S']!. \lstinline!F1!
+\lstinline![\gamma |-hastype (app (M ..) (N ..))$~$ S']!. \lstinline!F1!
 corresponds to the first premise of the typing rule for applications
-and has type \lstinline![\gamma |-hastype (M $\mdots$) (arr T' S')]!.
+and has type \lstinline![\gamma |-hastype (M ..) (arr T' S')]!.
 The appeal to the induction hypothesis using \lstinline{D1} and \lstinline{F1} in the
 on-paper proof
 corresponds to the recursive call
- \lstinline!unique [\gamma |-D1 $\mdots$] [g |-F1 $\mdots$]!.
+ \lstinline!unique [\gamma |-D1 ..] [g |-F1 ..]!.
 Note that while \lstinline!unique!'s type says it takes a context variable \lstinline!{g:tctx}!,
 we do not pass it explicitly; Beluga infers it from the context in the first argument
 passed.
@@ -922,17 +922,17 @@ rule \lstinline!ref!.
 
  \paragraph{Abstraction case:}
   If the first derivation \lstinline{d} concludes with \lstinline{t_lam}, it matches
- the pattern \lstinline{[\gamma |-t_lam \x.\u.D$\mdots$x u]}, and is
+ the pattern \lstinline{[\gamma |-t_lam \x.\u.D .. x u]}, and is
  a contextual object in the context \lstinline!\gamma! of type
- \lstinline{hastype (lam T (\x.M$\mdots$x))$~$(arr T S)}.
- %Thus, $\lstinline{M$\;$$\mdots$} = \lstinline{lam$\;$T1$\;$($\lam$x.$\;$M0$\;$$\mdots$$\;$x)}$
+ \lstinline{hastype (lam T (\x.M .. x))$~$(arr T S)}.
+ %Thus, $\lstinline{M$\;$..} = \lstinline{lam$\;$T1$\;$($\lam$x.$\;$M0$\;$..$\;$x)}$
  % and $\lstinline{T} = \lstinline{arr$\;$T1$\;$T2}$.
  Pattern matching---through a let-binding---serves to invert the second derivation \lstinline{f}, which
  must have been by \lstinline{t_lam} with a subderivation
- \lstinline{F1$\mdots$x u} deriving \lstinline{hastype (M$\mdots$x)$~$S'} that can use \lstinline{x},
+ \lstinline{F1 .. x u} deriving \lstinline{hastype (M .. x) S'} that can use \lstinline{x},
  \lstinline{u:hastype x T}, and assumptions from \lstinline!\gamma!.
  %Hence, after pattern matching on \lstinline{d} and \lstinline{f}, we know that
- %$\lstinline{M} = \lstinline{lam~T1$\;$($\lam$x.$\;$M$\;$$\mdots$x}$\lstinline{)} and
+ %$\lstinline{M} = \lstinline{lam~T1$\;$($\lam$x.$\;$M$\;$..x}$\lstinline{)} and
  %$\lstinline{T} = \lstinline{arr T1 T2}$ and $\lstinline{T'} = \lstinline{arr T1 T2'}$.
 
  The use of the induction hypothesis on \lstinline{D} and \lstinline{F} in a paper proof
@@ -947,7 +947,7 @@ rule \lstinline!ref!.
  \lstinline{b.1}, and to retrieve \lstinline{x}'s typing assumption we take the second projection \lstinline{b.2}.
 
  Now we can appeal to the induction hypothesis using
- \lstinline!D1$\mdots$b.1 b.2! and \lstinline!F1$\mdots$b.1 b.2! in the context
+ \lstinline!D1 .. b.1 b.2! and \lstinline!F1 .. b.1 b.2! in the context
  \lstinline!g,b:block x:tm,u:hastype x T1!.
   From the i.h.\ we get a
  contextual object, a closed derivation of
@@ -967,11 +967,11 @@ rule \lstinline!ref!.
  also establishes that \lstinline{M = #q.1} (or \lstinline!M = #q.x!).
  % and \lstinline{S = T}.
  Next, we pattern match on \lstinline{f}, which has type
-\lstinline!hastype (#q.1$\;$$\mdots$) S! in the context \lstinline!\gamma!.  Clearly, the only
+\lstinline!hastype (#q.1 ..) S! in the context \lstinline!\gamma!.  Clearly, the only
  possible way to derive \lstinline{f} is by using an assumption from \lstinline!\gamma!. We call
  this assumption \lstinline{#r}, standing for a declaration
 \lstinline!block y:tm,u:hastype y S!, so \lstinline{#r.2} refers to the second component
-\lstinline!hastype (#r.1$~\mdots$)$~$ S!. Pattern matching between \lstinline{#r.2} and \lstinline{f}
+\lstinline!hastype (#r.1 .. ) S!. Pattern matching between \lstinline{#r.2} and \lstinline{f}
  also establishes that % both types are equal and that \lstinline{S' = T'} and
  \lstinline{#r.1 = #q.1}.  Finally, we observe that \lstinline{#r.1 = #q.1} only if
  \lstinline{#r} is equal to \lstinline{#q}. We can only instantiate the parameter

@@ -29,9 +29,8 @@
 % ---------------------------- Names of languages ---------------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\beluga}{\textsc{beluga}\xspace}
-\newcommand{\twelf}{\textsc{twelf}\xspace}
-\newcommand{\minml}{\textsc{minml}\xspace}
+\newcommand{\beluga}{\textsc{Beluga}\xspace}
+\newcommand{\twelf}{\textsc{Twelf}\xspace}
 
 
 % ---------------------------------------------------------------------------
@@ -80,7 +79,7 @@
 \lstset{literate={->}{{$\rightarrow~$}}2 %
                  {=>}{{$\Rightarrow~$}}2 %
                  {|-}{{$\vdash\,$}}2 %
-                 {id}{{{\smartkeywordFmt id}}}1 % 3 $~$
+                 {..}{{$.\hspace{-0.025cm}.\hspace{-0.025cm}.$}}1 % is there any nicer way?
                  {\\}{{$\lambda$}}1 %
                  {\\Pi}{{$\Pi$}}1 %
                  {\\gamma}{{$\gamma$}}1 %
@@ -137,18 +136,10 @@
 \newcommand{\F}{{\mathcal{F}}}
 \newcommand{\V}{{\mathcal{V}}}
 \newcommand{\W}{{\mathcal{W}}}
-\newcommand{\St}{{\mathcal{S}}}
+\renewcommand{\S}{{\mathcal{S}}}
 
 \newcommand{\edot}{\bullet}
 
-% \newcommand{\arrow}{\rightarrow}
-
-% \newcommand{\chk}{\Leftarrow}
-% \newcommand{\syn}{\Rightarrow}
-% \newcommand{\bnfas}{\mathrel{::=}}
-% \newcommand{\bnfalt}{\mathrel{\mid}}
-
-%\newcommand{\shift}{\textsf{shift}\;}
 \newcommand{\shiftn}[2]{\uparrow^{#1}\!#2}
 \newcommand{\shift}[1]{\shiftn{}{#1}}
 \newcommand{\app}{\;}
@@ -156,6 +147,7 @@
 \renewcommand{\bnfas}{\;\mathrel{::=}\;}
 \renewcommand{\bnfalt}{\, \mid \,}
 \newcommand{\lamdb}{\lam\;} % Lambda for de Bruijn
+
 
 % ---------------------------------------------------------------------------
 % ------------------------ Judgments, properties, types ---------------------
@@ -173,7 +165,7 @@
 \newcommand{\Array}{~\textsf{array}}
 
 \newcommand{\Value}{~\mathsf{value}}
-\newcommand{\NumValue}{~\mathsf{num~value}}
+\newcommand{\NumValue}{~\textsf{num-value}}
 \newcommand{\Halts}{~\mathsf{halts}}
 \newcommand{\Steps}{\mathrel{\,\longrightarrow\,}}
 \newcommand{\MSteps}{\longrightarrow^*}
@@ -206,22 +198,12 @@
 \newcommand{\tmfst}[1]{\textsf{fst}\;{#1}\xspace}
 \newcommand{\tmsnd}[1]{\textsf{snd}\;{#1}\xspace}
 
-% Numerical expressions
 \newcommand{\tmzero}{\textsf{z}}
 \newcommand{\tmsucc}[1]{\textsf{succ}~#1}
 \newcommand{\tmpred}[1]{\textsf{pred}~#1}
 \newcommand{\tmiszero}[1]{\textsf{iszero}~#1}
 
-\newcommand{\bref}{\textsf{reflexive}}
-\newcommand{\bmred}{\textsf{one{-}step}}
-\newcommand{\btrans}{\textsf{transitive}}
-
-\newcommand{\bred}{\beta{-}\textsf{red}}
-\newcommand{\blam}{\textsf{lam{-}red}}
-\newcommand{\appMred}{\textsf{app{-}red{-}1}}
-\newcommand{\appNred}{\textsf{app{-}red{-}2}}
-
-\newcommand{\type}{\textsf{type}}
+\newcommand{\tmeq}[2]{\mathsf{eq}\;#1\;#2}
 
 
 % ---------------------------------------------------------------------------- %
@@ -335,41 +317,7 @@
 
 
 % ---------------------------------------------------------------------------
-% ----------------------------------- ??? -----------------------------------
-% ---------------------------------------------------------------------------
-
-\newcommand{\hasty}[2]{#1~\mathsf{hastype}~#2}
-\newcommand{\jtype}{\mathit{type}}
-
-
-\newcommand{\mdots}{\,.\hspace{-0.025cm}.\hspace{-0.025cm}.\,}
-
-
-\newcommand{\eq}[2]{\;\mathtt{eq}\;#1\;#2}
-
-\newcommand{\lb}{{[\![}}
-\newcommand{\rb}{{]\!]}}
-
-\newcommand{\nl}{\overline{n}}
-
-\renewcommand{\Tilde}{\textsf{\char"7E}}
-
-\bibpunct{[}{]}{;}{a}{}{,}
-\def\newblock{\hskip .11em plus .33em minus .07em}
-
-\newcommand{\arrayenv}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvc}[1]{\renewcommand{\arraystretch}{1} \begin{array}[c]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}r@{}}#1\end{array}}
-\newcommand{\arrayenvbr}[1]{\renewcommand{\arraystretch}{1} \begin{array}[b]{@{}r@{}}#1\end{array}}
-\newcommand{\arrayenvl}[1]{\renewcommand{\arraystretch}{1} \begin{array}[t]{@{}l@{}}#1\end{array}}
-\newcommand{\arrayenvb}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}c@{}}#1\end{array}}
-\newcommand{\arrayenvbl}[1]{\renewcommand{\arraystretch}{1}  \begin{array}[b]{@{}l@{}}#1\end{array}}
-
-\renewcommand{\t}[1]{\lstinline!#1!}
-\newcommand{\bel}[1]{\lstinline!#1!}
-
-% ---------------------------------------------------------------------------
-% ------------------- MAGIC (a.k.a. Work in Progress) -----------------------
+% ------------------ Proofs and derivation trees, cases ---------------------
 % ---------------------------------------------------------------------------
 
 \newcommand{\proofderiv}[2]{\mathbin{#1 \; :: \; #2 }}
@@ -388,3 +336,7 @@
 % ---------------------------------------------------------------------------
 
 \newcommand{\emphFact}[1]{{\color{forestgreen}{#1}}}
+
+\bibpunct{[}{]}{;}{a}{}{,} % citations style
+
+\newcommand{\bel}[1]{\lstinline!#1!} % does not work with {} inside the code

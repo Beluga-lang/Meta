@@ -8,7 +8,7 @@ This document describes how to use macros defined in \verb#prelude.tex# and how 
 \section{General}
 \begin{itemize}
 \item Follow the ``Notational Conventions'' from Appendix B of TAPL; use the same nomenclature as in the book.
-\item Use \verb#\beluga# for \beluga, same with other names defined in ``Names of languages'' section of the prelude.
+\item Use \verb#\beluga# to get \beluga, same with other names defined in ``Names of languages'' section of the prelude; \emph{FIXME} what's the status of that? Do we want other languages emphasized like that?
 \item All macros, packages used etc should be in \verb#prelude.tex#, don't add that stuff to your chapter file.
 \item When creating new macros, stick to the naming conventions and style that we have; put them in the correct place in \verb#prelude.tex# file.
 \item It probably makes sense to browse through the \verb#prelude.tex#, there are some useful shortcuts there, not all of them described here.
@@ -96,7 +96,8 @@ There are examples of this environment in use in chapters 2 and 3.
 
 \section{Beluga code}
 \begin{itemize}
-\item When you mention Beluga code in a paragraph use
+\item When you mention Beluga code in a paragraph use:
+
   \verb#\lstinline![ |- t_lam \x . x]!# to get \lstinline![ |- t_lam \x . x]!
 \item For longer code, and code examples use literate programming. You have three options for your code:
   \begin{enumerate}

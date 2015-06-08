@@ -336,22 +336,22 @@ preservation. In particular, we write $\vdash t : T$ and $\vdash t
 \Steps t'$ to clearly state that we only consider closed terms
 
 \begin{theorem}
-If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\St}{t \Steps t'}$ then $\vdash t' : T$.
+If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\S}{t \Steps t'}$ then $\vdash t' : T$.
 \end{theorem}
 \begin{proof}
-By structural induction on the derivation $\proofderiv{\St}{t \Steps t'}$. We
+By structural induction on the derivation $\proofderiv{\S}{t \Steps t'}$. We
 consider here only a few cases.
 
-\begin{case}{$\St = \ianc{}{\tmpred \tmzero \Steps \tmzero}{\EPredZ}$}
+\begin{case}{$\S = \ianc{}{\tmpred \tmzero \Steps \tmzero}{\EPredZ}$}
 $\proofderivc{\D~}{}{\tmpred {\tmzero} : T}$ \hfill by assumption\\
 $\proofderivc{\D'}{}{\tmzero : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
 $\proofderivc{~~~~}{}{\tmzero : \Nat}$ \hfill by rule $\TZero$.
 \end{case}
 
-\begin{case}{$\St = \ianc{\above{\St '}{M \Steps M'}}{(\tmpred M) \Steps (\tmpred M')}{\EPred}$}
+\begin{case}{$\S = \ianc{\above{\S '}{M \Steps M'}}{(\tmpred M) \Steps (\tmpred M')}{\EPred}$}
 $\proofderivc{\D~}{}{\tmpred M : T}$ \hfill by assumption \\
 $\proofderivc{\D'}{}{M : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
-$\proofderivc{\F~}{}{M' : \Nat}$ \hfill by IH using $\D'$ and $\St'$\\
+$\proofderivc{\F~}{}{M' : \Nat}$ \hfill by IH using $\D'$ and $\S'$\\
 $\proofderivc{~~~~}{}{\tmpred M' : \Nat}$ \hfill by rule $\TPred$.
 \end{case}
 
@@ -420,7 +420,7 @@ fn d => fn s = ? ;
 
 
 \paragraph{Case analysis - Pattern matching} Next, we split the proof
-into different cases analyzing $\St : M \Steps M'$. This corresponds
+into different cases analyzing $\S : M \Steps M'$. This corresponds
 to pattern matching on \lstinline!s:[|-step M M']! in our program.
 
 \begin{lstlisting}
@@ -440,7 +440,7 @@ fn d => fn s => case s of
 
 We sometimes use \lstinline!_! (underscore) for an argument, if we do
 not need a name for it, since it does not play a role in the
-proof. For example, when we represent the derivation\\[1em] $\St =
+proof. For example, when we represent the derivation\\[1em] $\S =
 \ianc{M \Value}{\tmpred ({\tmsucc M}) \Steps M}{\EPredSucc}$ we simply
 write \lstinline![|-e_pred_suc _]! since the subderivation
 representing $M \Value$ is not used in proving that types are preserved.
@@ -615,22 +615,22 @@ does not step? - We prove a contradiction. We show inductively that if $M$ is a
 value and $M \Steps M'$ then we can derive falsehood (written as $\bot$).
 
 \begin{theorem}
-If $\proofderiv{\St}{M \Steps M'}$ and $\proofderiv{\V}{M \Value}$ then $\bot$.
+If $\proofderiv{\S}{M \Steps M'}$ and $\proofderiv{\V}{M \Value}$ then $\bot$.
 \end{theorem}
 \begin{proof}
 By structural induction on the derivation $\proofderiv{\V}{M \Value}$.
 
 \begin{basecase}{$\V = \ianc{}{\tmzero \Value}{}$}
-$\proofderiv{\St}{\tmzero \Steps M'}$ \hfill by assumption \\
+$\proofderiv{\S}{\tmzero \Steps M'}$ \hfill by assumption \\
 By inspecting all the existing rules, there exists no $M'$. Therefore, this
 assumption is false, and from false we can derive anything; in particular, we
 can conclude $\bot$.
 \end{basecase}
 
 \begin{stepcase}{$\V = \ianc{\above{\V'}{ N \Value}}{(\tmsucc N) \Value}{}$}
-$\proofderiv{\St~}{(\tmsucc N) \Steps M'}$ \hfill by assumption \\
-$\proofderiv{\St'}{N \Steps N'}$ \quad and \quad $M' = (\tmsucc N')$ \hfill by inversion using $\ESucc$\\
-$\bot$ \hfill by i.h. using $\St'$ and $\V'$
+$\proofderiv{\S~}{(\tmsucc N) \Steps M'}$ \hfill by assumption \\
+$\proofderiv{\S'}{N \Steps N'}$ \quad and \quad $M' = (\tmsucc N')$ \hfill by inversion using $\ESucc$\\
+$\bot$ \hfill by i.h. using $\S'$ and $\V'$
 \end{stepcase}
 
 \end{proof}
@@ -866,32 +866,32 @@ $\tmzero \Halts$ \hfill by definition of $\Halts$
 \end{case}
 
 \begin{case}{$\D = \ianc{\above{\D'}{\vdash N : \Nat}}{\vdash (\tmpred N) : \Nat}{\TPred}$}
-$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\St':N \MSteps V$ \hfill by i.h. $\D'$\\[1em]
+$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\S':N \MSteps V$ \hfill by i.h. $\D'$\\[1em]
 %
-\fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$}\\[1em]
+\fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$}\\[1em]
 %
 \begin{subcase}{$\V' = \ianc{}{\tmzero \Value}{\VZero}$ \quad and \quad $V = \tmzero$}
-$\St': N \MSteps \tmzero$ \hfill restating assumption $\St'$\\
-$\St_0: (\tmpred N) \MSteps (\tmpred \tmzero)$ \hfill by lemma mstep-pred \\
-$\St_1: (\tmpred \tmzero) \MSteps \tmzero$ \hfill by $\MStep$ using $\EPredZ$\\
-$\St~: (\tmpred N) \MSteps \tmzero$ \hfill by $\MTr$ using $\St_0$ and $\St_1$\\
-$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$ \hfill by choosing
+$\S': N \MSteps \tmzero$ \hfill restating assumption $\S'$\\
+$\S_0: (\tmpred N) \MSteps (\tmpred \tmzero)$ \hfill by lemma mstep-pred \\
+$\S_1: (\tmpred \tmzero) \MSteps \tmzero$ \hfill by $\MStep$ using $\EPredZ$\\
+$\S~: (\tmpred N) \MSteps \tmzero$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
 $W = \tmzero$\\
 $(\tmpred N)\Halts$ \hfill by definition of $\Halts$
 \end{subcase}
 
 \begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSuc}$ \quad and \quad $V = \tmsucc V'$}
-$\St': N \MSteps (\tmsucc V')$ \hfill restating assumption $\St'$\\
-$\St_0: (\tmpred N) \MSteps (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
-$\St_1: (\tmpred (\tmsucc V')) \MSteps V'$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
-$\St~: (\tmpred N) \MSteps V'$ \hfill by $\MTr$ using $\St_0$ and $\St_1$\\
-$\exists W$.s.t.$W \Value$~~~and~~~$\St:~(\tmpred N) \MSteps W$ \hfill by choosing
+$\S': N \MSteps (\tmsucc V')$ \hfill restating assumption $\S'$\\
+$\S_0: (\tmpred N) \MSteps (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
+$\S_1: (\tmpred (\tmsucc V')) \MSteps V'$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
+$\S~: (\tmpred N) \MSteps V'$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
 $W = V'$\\
 $(\tmpred N)\Halts$ \hfill by definition of $\Halts$
 \end{subcase}
 
 \begin{subcase}{$\V' = \ianc{}{\tmtrue \Value}{\VTrue}$ \quad and \quad  $V = \tmtrue$}
-$\St': N \MSteps \tmtrue$ \hfill restating assumption $\St'$\\
+$\S': N \MSteps \tmtrue$ \hfill restating assumption $\S'$\\
 $\F~:~ \vdash \tmtrue : \Nat$ \hfill by type preservation for multi-step relations using $\D'$\\
 $~~~ \bot$ \hfill
 \end{subcase}
