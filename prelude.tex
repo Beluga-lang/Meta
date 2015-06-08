@@ -17,6 +17,7 @@
 \usepackage{latexsym}
 \usepackage{comment}
 \usepackage{color}
+\usepackage{svgcolor}
 \usepackage{proof}
 \usepackage{url}
 \usepackage{xspace}
@@ -63,36 +64,13 @@
     else, total},
   keepspaces=true,
   sensitive,
-  morecomment=[n]{(*}{*)},
+  morecomment=[l]{\%},
+  morecomment=[n]{\%\{}{\}\%},
   morestring=[b]"
 }[keywords,comments,strings]
 
 \lstloadlanguages{ContextualML}
 \lstset{language=ContextualML}
-
-\definecolor{dRed}{rgb}{0.65, 0.0, 0.0}
-\definecolor{dGreen}{rgb}{0.133, 0.56, 0.0}
-
-%
-% Set up listings "literate" keyword stuff (for \lstset below)
-%
-\newdimen\zzlistingsize
-\newdimen\zzlistingsizedefault
-\zzlistingsizedefault=9.5pt
-\zzlistingsize=\zzlistingsizedefault
-\global\def\InsideComment{0}
-\newcommand{\Lstbasicstyle}{\fontsize{\zzlistingsize}{1.05\zzlistingsize}\ttfamily}
-\newcommand{\keywordFmt}{\fontsize{0.9\zzlistingsize}{1.0\zzlistingsize}\bf}
-\newcommand{\smartkeywordFmt}{\if0\InsideComment\keywordFmt\fi}
-\newcommand{\commentFmt}{\def\InsideComment{1}\fontsize{0.95\zzlistingsize}{1.0\zzlistingsize}\rmfamily\slshape}
-
-\newcommand{\LST}{\setlistingsize{\zzlistingsizedefault}}
-\newlength{\zzlstwidth}
-
-\newcommand{\setlistingsize}[1]{
-  \zzlistingsize=#1%
-  \settowidth{\zzlstwidth}{{\Lstbasicstyle~}}}
-\setlistingsize{\zzlistingsizedefault}
 
 % The order of the "literate" definitions is significant:
 %   later definitions shadow earlier ones.  The \\Pi definition must come
@@ -108,26 +86,22 @@
                  {\\gamma}{{$\gamma$}}1 %
                  {\\psi}{{$\psi$}}1 %
                  {FN}{{$\Lambda$}}1 %
-                 % {<<}{\color{myotherblue}}1 %
-                 {<<}{\color{dGreen}}1 %
-                 {<<r}{\color{dRed}}1 %
-                 {<*}{\color{dGreen}}1 %
+                 {<<}{\color{forestgreen}}1 %
+                 {<<r}{\color{firebrick}}1 %
+                 {<*}{\color{forestgreen}}1 %
                  {<dim}{\color{dimgrey}}1 %
                  {>>}{\color{black}}1 %
-                 {?}{\bf{?}}1
-                 ,
-                 columns=[l]fullflexible,
-                 basewidth=\zzlstwidth,
-                 basicstyle=\Lstbasicstyle,
-                 keywordstyle=\keywordFmt,
-                 identifierstyle=\relax,
-                 % stringstyle=\relax,
-                 commentstyle=\commentFmt,
-                 breaklines=true,
-                 breakatwhitespace=true,   % doesn't do anything (?!)
-                 mathescape=true,   % interprets $...$ in listing as math mode
-                 % tabsize=8,
-                 texcl=false}
+                 {?}{\bf{?}}1,
+        columns=[l]fullflexible,
+        basicstyle=\ttfamily\lst@ifdisplaystyle\footnotesize\fi,
+        keywordstyle=\bf,
+        identifierstyle=\relax,
+        stringstyle=\relax,
+        commentstyle=\slshape\color{dimgrey},
+        breaklines=true,
+        % breakatwhitespace=true,   % doesn't do anything (?!)
+        mathescape=true,   % interprets $...$ in listing as math mode
+      }
 
 
 % ---------------------------------------------------------------------------
@@ -413,4 +387,4 @@
 % --------------------------------- Other -----------------------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\emphFact}[1]{{\color{dGreen}{#1}}}
+\newcommand{\emphFact}[1]{{\color{forestgreen}{#1}}}
