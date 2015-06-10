@@ -8,47 +8,51 @@ This is the apendix B of the TAPL.
 ---------------------
 
  Text                    | ML         | Beluga    | Usage
--------------------------|------------|-----------|-----------------------------
-                         |            |           |
- p, q, r, s, t, u        | s, t       |           | terms
- x, y, z                 | x, y       |           | term variables
- v, w                    | v, w       |           | values
- nv                      | nv         |           | numeric values
- l, j, k                 | l          |           | record/variant field labels
- `\mu`                   | store      |           | stores
-                         |            |           |
- M, N, P, Q, S, T, U, V  | tyS, tyT   |           | types
- A, B, C                 | tyA, tyB   |           | base types
- `\Sigma`                |            |           | store typings
- X, Y, Z                 | tyX, tyY   |           | type variables
- K, L                    | kK, kL     |           | kinds
-                         |            |           |
- `\sigma`                |            |           | substitutions
- `\Gamma`, `\Delta`      | ctx        |           | contexts
- `\mathcal{J}`           |            |           | arbitrary statements
- `\mathcal{D}`           |            |           | typing derivations
- `\mathcal{C}`           |            |           | subtyping derivations
+-------------------------|------------|------------|-----------------------------
+                         |            |            |
+ p, q, r, s, t, u        | s, t       | M, N       | terms
+ x, y, z                 | x, y       | x, y, z    | term variables
+ v, w                    | v, w       | V, W       | values
+ nv                      | nv         |            | numeric values
+ l, j, k                 | l          |            | record/variant field labels
+ `\mu`                   | store      |            | stores
+                         |            |            |
+ M, N, P, Q, S, T, U, V  | tyS, tyT   | T, S, U, V | types
+ A, B, C                 | tyA, tyB   | A, B       | base types
+ `\Sigma`                |            |            | store typings
+ X, Y, Z                 | tyX, tyY   |            | type variables
+ K, L                    | kK, kL     | K, L       | kinds
+                         |            |            |
+ `\sigma`                |            | #S         | substitutions
+ `\Gamma`, `\Delta`      | ctx        | g, h       | contexts
+ `\mathcal{J}`           |            |            | arbitrary statements
+ `\mathcal{D}`           |            |            | typing derivations
+ `\mathcal{C}`           |            |            | subtyping derivations
 
 
 2.  Rule Naming Convention
 --------------------------
 
- Prefix                  | Beluga                 | Usage
--------------------------|------------------------|-----------------------------
- B-                      |                        | big-step evaluation
- CT-                     |                        | constraint typing
- E-                      |                        | evaluation
- K-                      |                        | kinding
- M-                      |                        | matching
- P-                      |                        | pattern typing
- Q-                      |                        | type equivalence
- QR-                     |                        | parallel reduction of types
- S-                      |                        | subtyping
- SA-                     |                        | algorithmic subtyping
- T-                      |                        | typing
- TA-                     |                        | algorithmic typing
- XA-                     |                        | exposure
+ Prefix                  | Beluga (LF / Inductive) | Usage
+-------------------------|-------------------------|-----------------------------
+ B-                      | b- / B-                 | big-step evaluation
+ CT-                     |                         | constraint typing
+ E-                      | e- / E-                 | evaluation
+ K-                      | k- / K-                 | kinding
+ M-                      | m- / M-                 | matching
+ P-                      | p- / P-                 | pattern typing
+ Q-                      |                         | type equivalence
+ QR-                     |                         | parallel reduction of types
+ S-                      |                         | subtyping
+ SA-                     |                         | algorithmic subtyping
+ T-                      | t- / T-                 | typing
+ TA-                     | ta- / TA-               | algorithmic typing
+ XA-                     |                         | exposure
 
+There are two conventions to name rules in Beluga. If the rule is
+defined using LF we take the first convention, if the rule is defined
+using an inductive type then the naming convention requires a capital
+letter so we use the second option from the table.
 
 3.  Naming and Subscripting Conventions
 ---------------------------------------
