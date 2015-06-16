@@ -7,27 +7,27 @@ This is the apendix B of the TAPL.
 1.  Metavariable Names
 ---------------------
 
- Text                    | ML         | Beluga    | Usage
--------------------------|------------|------------|-----------------------------
-                         |            |            |
- p, q, r, s, t, u        | s, t       | M, N       | terms
- x, y, z                 | x, y       | x, y, z    | term variables
- v, w                    | v, w       | V, W       | values
- nv                      | nv         |            | numeric values
- l, j, k                 | l          |            | record/variant field labels
- `\mu`                   | store      |            | stores
-                         |            |            |
- M, N, P, Q, S, T, U, V  | tyS, tyT   | T, S, U, V | types
- A, B, C                 | tyA, tyB   | A, B       | base types
- `\Sigma`                |            |            | store typings
- X, Y, Z                 | tyX, tyY   |            | type variables
- K, L                    | kK, kL     | K, L       | kinds
-                         |            |            |
- `\sigma`                |            | #S         | substitutions
- `\Gamma`, `\Delta`      | ctx        | g, h       | contexts
- `\mathcal{J}`           |            |            | arbitrary statements
- `\mathcal{D}`           |            |            | typing derivations
- `\mathcal{C}`           |            |            | subtyping derivations
+ Text                    | ML         | Beluga      | Usage
+-------------------------|------------|-------------|-----------------------------
+                         |            |             |
+ p, q, r, s, t, u        | s, t       | M, N        | terms
+ x, y, z                 | x, y       | x, y, z     | term variables
+ v, w                    | v, w       | V, W        | values
+ nv                      | nv         |             | numeric values
+ l, j, k                 | l          |             | record/variant field labels
+ `\mu`                   | store      |             | stores
+                         |            |             |
+ M, N, P, Q, S, T, U, V  | tyS, tyT   | T, S, U     | types
+ A, B, C                 | tyA, tyB   | A, B        | base types
+ `\Sigma`                |            |             | store typings
+ X, Y, Z                 | tyX, tyY   |             | type variables
+ K, L                    | kK, kL     | K, L        |  kinds
+                         |            |             |
+ `\sigma`                |            | #S          | substitutions
+ `\Gamma`, `\Delta`      | ctx        | gamma, g, h | contexts
+ `\mathcal{J}`           |            |             | arbitrary statements
+ `\mathcal{D}`           |            |             | typing derivations
+ `\mathcal{C}`           |            |             | subtyping derivations
 
 
 2.  Rule Naming Convention
@@ -78,9 +78,13 @@ etc.)
 t  is sometimes  replaced  by s (and T by S or R, etc.)  to avoid  name  clashes
 between definitions and theorems.
 
+6. For Beluga code, we use these same guidelines, and we use plain
+numbers instead of underscripts. So we will use M1 instead of M₁.
+
 There are  a few cases  where these rules  cannot all  be satisfied  at the same
 time.  In such cases,  the earlier ones are given priority. (For example, in the
 rule T-Proj₁  in Figure 11-5, rule 4  is relaxed:  the type of the subterm t₁ is
 T₁×T₂.)  The rules are ignored completely  in a very small  number of cases (for
 example,  the record projection rule T-Proj in Figure 11-7) where following them
 would yield unacceptably ugly or unreadable results.
+
