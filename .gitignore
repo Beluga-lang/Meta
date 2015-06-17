@@ -4,6 +4,7 @@
 *.pdf
 *.bbl
 *.blg
+*.out
 *.d
 *.make
 *.fls
