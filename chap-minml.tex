@@ -977,6 +977,295 @@ In \beluga, a given program is elaborated into a core language and all elaborate
 
 The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
 
+
+
+\section{Exercise 3.5.17}
+
+\subsection{Definition of the big-step semantics}
+
+% Almost taken from TAPL:
+Two styles of operational semantics are in common use. The one used so far and
+in the TAPL is called the {\em small-step} style, because the definition of the
+evaluation relation shows how individual steps of computation are used to
+rewrite a term, bit by bit, until it eventually becomes a value. On top of this,
+we define a multi-step evaluation relation that allows us to talk about terms
+evaluating (in many steps) to values. An alternative style, called
+{\em big-step} semantics (or sometimes {\em natural} semantics), directly
+formulates the notion of ``this term evaluates to that final value'', written
+$t \Downarrow v$. The big-step evaluation rules for our language of boolean and
+arithmetic expressions look like this:
+
+% If someone can do something nicer than that:
+\[
+\begin{array}{c}
+  \infer[\BValue]{v \Downarrow v}{v \Value} \\
+  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} \\
+  \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3 & v_3 \Value} \\
+  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc nv_1}{t_1 \Downarrow nv_1 & nv_1 \NumValue} \\
+  \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} \\
+  \infer[\BPredSucc]{\tmpred t_1 \Downarrow nv_1}{t_1 \Downarrow \tmsucc nv_1} \\
+  \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} \\
+  \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc nv_1} \\
+\end{array}
+\]
+
+Here is the corresponding Beluga code for this definition:
+
+\begin{lstlisting}
+LF bigstep : term -> term -> type =
+| b_value :
+      value v ->
+      bigstep v v
+| b_switchtrue :
+      bigstep T1 true -> bigstep T2 V2 -> value V2
+      -> bigstep (switch T1 T2 T3) V2
+| b_switchfalse :
+      bigstep T1 false -> bigstep T3 V3 -> value V3
+      -> bigstep (switch T1 T2 T3) V3
+| b_succ :
+      bigstep T1 NV1 -> num_value NV1
+      -> bigstep (succ T1) (succ NV1)
+| b_predzero :
+      bigstep T1 zero
+      -> bigstep (pred T1) zero
+| b_predsucc :
+      bigstep T1 (succ NV1) -> num_value NV1
+      -> bigstep (pred T1) NV1
+| b_iszerozero :
+      bigstep T1 zero
+      -> bigstep (iszero T1) true
+| b_iszerosucc :
+      bigstep T1 (succ NV1) -> num_value NV1
+      -> bigstep (iszero T1) false
+;
+\end{lstlisting}
+
+Let's show that the small-step and big-step semantics for this language
+coincide, {\em i.e.} $t \rightarrow^* v$ if and only if $t \Downarrow v$, for
+any value $v$.
+
+We will prove the two directions of the ``if and only if'' separately.
+
+\subsection{If $t \Downarrow v$ then $t \rightarrow^* v$}
+
+This part of the proof is exactly the one described in TAPL. We firstly need a
+little lemma that prooves that $\longrightarrow^*$ passes to the context:
+%                                                  ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+%                                                  this is not english, right?
+
+\begin{lemma}[A.6]
+  If $t_1 \longrightarrow^* t_1'$ then
+  \begin{enumerate}
+    \item $\tmsucc t_1 \longrightarrow^* \tmsucc t_1'$
+    \item $\tmpred t_1 \longrightarrow^* \tmpred t_1'$
+    \item $\tmiszero t_1 \longrightarrow^* \tmiszero t_1'$
+    \item $\tmif {t_1} {t_2} {t_3} \longrightarrow^* \tmif {t_1'} {t_2} {t_3}$
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  We'll only proove the fourth one, by induction on the proof
+  $t_1 \longrightarrow^* t_1'$. By definition of $\longrightarrow^*$ as the
+  reflexive transitive closure or $\longrightarrow$, we have three cases:
+  \begin{enumerate}
+    \item the case where $t_1 \longrightarrow^* t_1' = t_1 \longrightarrow t_1'$
+      is easy since the \EIf rule gives us $\tmif{t_1}{t_2}{t_3}
+      \longrightarrow \tmif{t_1'}{t_2}{t_3}$ and thus $\tmif{t_1}{t_2}{t_3}
+      \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$.
+      
+    \item the case where $t_1 \longrightarrow^* t_1$ is the reflexivity of
+      $\longrightarrow^*$ ; the same reflexivity gives us:
+      $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1}{t_2}{t_3}$.
+    
+    \item in the case $t_1 \longrightarrow^* t_1'' \longrightarrow^* t_1'$,
+      the $\longrightarrow^*$ proofs are smaller so the lemma can be applied on
+      them, giving us $\tmif{t_1}{t_2}{t_3} \longrightarrow^*
+      \tmif{t_1''}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$, which,
+      by transitivity implies what we want.
+  \end{enumerate}
+  The proof is the same for other constructors $\tmsucc$, $\tmpred$ and
+  $\tmiszero$.
+\end{proof}
+
+The \beluga proof can seem really straightforward, but infact there's a little
+problem: when we say ``if $t_1 \longrightarrow^* t_1'$ then
+$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$, we explain that
+we are able to produce a proof that $\tmif{t_1}{t_2}{t_3} \longrightarrow^*
+\tmif{t_1'}{t_2}{t_3}$ if we have a proof that $t_1 \longrightarrow^* t_1'$. By
+doing so, we implicitely quantify over the terms $t_2$ and $t_3$.
+
+In \beluga, we will have to write this quantification explicitely. Have a look:
+%TODO: need way more explainations! (mlam)
+
+\begin{lstlisting}
+rec lemma_a6_switch : [|- multistep T1 T1'] -> {T2: [|- term]} {T3: [|- term]} [|- multistep (switch T1 T2 T3) (switch T1' T2 T3)] =
+/ total m (lemma_a6_switch _ _ m _ _) /
+fn m => mlam T2 => mlam T3 => case m of 
+| [|- ms_step S] => [|- ms_step (e_switch S)]
+| [|- ms_reflexivity] => [|- ms_reflexivity]
+| [|- ms_transitivity S1 S2] =>
+   let [|- S1'] = lemma_a6_switch [|- S1] [|- T2] [|- T3] in
+   let [|- S2'] = lemma_a6_switch [|- S2] [|- T2] [|- T3] in
+   [|- ms_transitivity S1' S2']
+;
+\end{lstlisting}
+
+%TODO: more explanations (mlam)
+
+The other lemmas do not have to quantify over any terms and are thus
+straightforward to write.
+
+Let's now write the actual proof:
+\begin{proposition}[A7]
+  If $t \Downarrow v$ then $t \longrightarrow^* v.$
+  \begin{lstlisting}
+    rec proposition_a7 : [|- bigstep T1 T2] -> [|- multistep T1 T2] =
+    / total b (proposition_a7 _ _ b) /
+    fn b =>
+  \end{lstlisting}
+\end{proposition}
+
+\begin{proof}
+  By induction on the proof $t \Downarrow v$:
+  \begin{itemize}
+  \item Case $\infer{v \Downarrow v}{}\ \BValue$. By reflexivity of $\rightarrow^*$,
+    $v \longrightarrow^* v$.
+  \item Case $\infera{\BPredZero}{\tmpred{t_1} \Downarrow \tmzero}
+    {t_1 \Downarrow \tmzero}$. The proof in premice is smaller, and the
+    proposition applies and gives us one proof: $t_1 \longrightarrow^* \tmzero$.
+    We then use it with the lemma A6: $\tmpred{t_1} \longrightarrow^*
+    \tmpred{\tmzero} \longrightarrow \tmzero$. And we can conclude thanks to
+    transitivity.
+  \item Case $\inferaaa{\BIfTrue}{\tmif{t_1}{t_2}{t_3}\Downarrow v_2}
+    {t_1 \Downarrow \tmtrue}{t_2 \Downarrow v_2}{v_2 \Value}$. The proofs in the
+    premices are smaller than this one, so the proposition applies and gives us
+    two proofs: $t_1 \longrightarrow^* \tmtrue$ and $t_2 \longrightarrow^* v_2$.
+    Using the lemma A6 and the $\EIfTrue$ rule, we have:
+    $$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{\tmtrue}{t_2}{t_3}
+    \longrightarrow t_2 \longrightarrow^* v_2$$
+    And we can conclude thanks to the transitivity.
+  \item[\vdots]
+  \end{itemize}
+
+  \begin{lstlisting}
+    case b of 
+
+    | [|- b_value _] => [|- m_ref]
+
+    | [|- b_predzero B1] =>
+    let [|- M1] = proposition_a7 [|- B1] in
+    let [|- M1'] = lemma_a6_pred [|- M1] in
+    [|- m_tr M1' (m_step e_predzero)]
+
+    | [|- b_switchtrue B1 B2 _] : [|- bigstep (switch T1 T2 T3) V] =>
+    let [|- M1] = proposition_a7 [|- B1] in
+    let [|- M1s] = lemma_a6_switch [|- M1] [|- T2] [|- T3] in
+    let [|- M2] = proposition_a7 [|- B2] in
+    [|- m_tr (m_tr M1s (m_step e_switchtrue)) M2]
+
+    ..
+  \end{lstlisting}
+\end{proof}
+
+\subsection{If $t \longrightarrow^* v$ then $t \Downarrow v$ }
+
+For this direction, we will see two proofs. The first one will be a simple proof
+easy to write in \beluga. The second one will be the proof describe by the TAPL.
+
+\subsubsection{A simple proof}
+
+Let's first proove something weaker, but that can easely imply what we want to
+proove:
+
+\begin{proposition}[A9-aux-step]\label{prop_a9_aux_step}
+  If $t_1 \longrightarrow t_2 \Downarrow v$ (with $v$ a value),
+  then $t_1 \Downarrow v$.
+\end{proposition}
+
+Indeed, if we have this property, we can easely obtain:
+
+\begin{proposition}[A9-aux]\label{prop_a9_aux}
+  If $t_1 \longrightarrow^* t_2 \Downarrow v$ then $t_1 \Downarrow v$.
+  \begin{lstlisting}
+    rec proposition_a9_aux : [|- multistep M1 M2] -> [|- bigstep M2 V] -> [|- value V] -> [|- bigstep M1 V] =
+    / total m (proposition_a9_aux _ _ _ m _ _) /
+    fn m => fn b => fn v => 
+  \end{lstlisting}
+\end{proposition}
+\begin{proof}
+  Let's consider the three possibilities for $\rightarrow^*$:
+  \begin{itemize}
+  \item Case $t_1 \longrightarrow t_2 \Downarrow v$: We just apply the
+    proposition \ref{prop_a9_aux_step} and get $t_1 \Downarrow v$.
+  \item Case $t_1 \longrightarrow^* t_1 \Downarrow v$: We have
+    $t_1 \Downarrow v$.
+  \item Case $t_1 \longrightarrow^* t_{12} \longrightarrow^* t_2 \Downarrow v$:
+    We apply this proposition recursively and get $t_1 \longrightarrow^* t_{12}
+    \Downarrow v$ then $t_1 \Downarrow v$.
+  \end{itemize}
+  \begin{lstlisting}
+    case m of
+    | [|- m_step E]   => proposition_a9_aux_step [|- E] b v
+    | [|- m_ref]      => b
+    | [|- m_tr M1 M2] =>
+    let [|- B2] = proposition_a9_aux [|- M2] b v in
+    proposition_a9_aux [|- M1] [|- B2] v
+  \end{lstlisting}
+\end{proof}
+
+And then:
+
+\begin{proposition}[A9]
+  If $t \longrightarrow^* v$ then $t \Downarrow v$.
+  \begin{lstlisting}
+    rec proposition_a9 : [|- multistep T V] -> [|- value V] -> [|- bigstep T V] =
+    / total m (proposition_a9 _ _ m _) /
+    fn m => fn v =>
+  \end{lstlisting}
+\end{proposition}
+\begin{proof}
+  We apply the proposition \ref{prop_a9_aux} for $t \longrightarrow^* v
+  \Downarrow v$.
+  \begin{lstlisting}
+    let [|- V] = v in
+    proposition_a9_aux m [|- bs_value V] v
+  \end{lstlisting}
+\end{proof}
+
+%TODO: bind this proof to his proposition in LaTeX?
+%  If t1 → t2 ↓ v then t1 ↓ v.
+\begin{proof}[Proof of proposition~\ref{prop_a9_aux_step}]
+  In $t \longrightarrow t' \Downarrow v$, let's consider the different cases for
+  $\rightarrow$:
+  \begin{itemize}
+
+  \item Case $\tmif{\tmtrue}{t_2}{t_3} \longrightarrow t_2 \Downarrow v$:\\
+    We can directly construct the following:
+    \[ \inferaaa{\BIfTrue}{\tmif{\tmtrue}{t_2}{t_3} \Downarrow v}{\infer{\tmtrue \Downarrow \tmtrue}{}}{t_2 \Downarrow v}{v \Value} \]
+  \item[\vdots] {\em same for other ``terminal'' cases} %TODO: reword
+
+  \item Case $\tmif{t_1}{t_2}{t_3} \longrightarrow \tmif{t_1'}{t_2}{t_3}
+    \Downarrow v$:\\
+    Let's consider the different cases for $\Downarrow$:
+    \begin{itemize}
+    \item Case $\tmif{t_1}{t_2}{t_3} \longrightarrow \tmif{\tmtrue}{t_2}{t_3}
+      \Downarrow v$:\\
+      We know that $t_1 \longrightarrow \tmtrue$ and that $t_2 \Downarrow v$.
+      Thanks to proposition~\ref{prop_a9_aux_step}, we can build a proof of
+      $t_1 \Downarrow \tmtrue$ and we can then construct the following proof:
+      \[ \inferaaa{\BIfTrue}{\tmif{t_1}{t_2}{t_3} \Downarrow v}{t_1 \Downarrow \tmtrue}{t_2 \Downarrow v}{v \Value} \]
+    \item {\em same for \tmfalse}
+    \end{itemize}
+  \item[\vdots] {\em same for other ``context'' cases} %TODO: reword
+
+  \end{itemize}
+  \begin{lstlisting}
+    %TODO: write proof
+  \end{lstlisting}
+\end{proof}
+
+\subsubsection{A proof following the TAPL}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "book"
