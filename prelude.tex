@@ -305,6 +305,15 @@
 \newcommand {\BFun}          {\ruleName{B-Fun}}
 \newcommand {\BRec}          {\ruleName{B-Rec}}
 
+\newcommand {\BValue}        {\ruleName{B-Value}}
+\newcommand {\BIfTrue}       {\ruleName{B-IfTrue}}
+\newcommand {\BIfFalse}      {\ruleName{B-IfFalse}}
+\newcommand {\BSucc}         {\ruleName{B-Succ}}
+\newcommand {\BPredZero}     {\ruleName{B-PredZero}}
+\newcommand {\BPredSucc}     {\ruleName{B-PredSucc}}
+\newcommand {\BIszeroZero}   {\ruleName{B-IszeroZero}}
+\newcommand {\BIszeroSucc}   {\ruleName{B-IszeroSucc}}
+
 \newcommand {\BLetn}         {\ruleName{B-Letn}}
 \newcommand {\BLetp}         {\ruleName{B-LetPair}}
 \newcommand {\BPair}         {\ruleName{B-Pair}}
@@ -330,7 +339,7 @@
 
 \newcommand{\infera}[3]{\ianc{#3}{#2}{#1}}
 \newcommand{\inferaa}[4]{\ibnc{#3}{#4}{#2}{#1}}
-\newcommand{\inferaaa}[5]{\ibnc{#3}{#4}{#5}{#2}{#1}}
+\newcommand{\inferaaa}[5]{\icnc{#3}{#4}{#5}{#2}{#1}}
 
 % ---------------------------------------------------------------------------
 % --------------------------------- Other -----------------------------------
