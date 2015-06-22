@@ -88,3 +88,25 @@ T₁×T₂.)  The rules are ignored completely  in a very small  number of cases
 example,  the record projection rule T-Proj in Figure 11-7) where following them
 would yield unacceptably ugly or unreadable results.
 
+4. Inserting todo notes
+-----------------------
+
+There are some commands to instert todo lists that will be rendered in
+the document when the draft mode is enabled (Draft mode is enabled
+when the option `draft` is passed to to the document class).
+
+Commands:
+
+* `\todo{blah}` : Inserts an orange note with something to be done.
+* `\usure{blah}` : Inserts a red to signal for things that the author
+  is unsure of.
+* `\change{blah}` : Inserts a blue notes to remind the author to
+  change somehting.
+* `\info{blah}` : Inserts a green note to add some information
+  to the text.
+* `\improvement{blah}` : Inserts a plum colored note to remember the
+   author of a needed improvement.
+
+Additionally, after the table of contents there will be a list of all
+the todo notes that still remain in the text. Again, this section will
+only appear if the document is generated as a draft.

@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{microtype}
 \usepackage{fix-cm}
-\usepackage[hidelinks]{hyperref}
+\usepackage[hidelinks, bookmarks, draft=false]{hyperref}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
@@ -24,6 +24,17 @@
 \usepackage{xspace}
 \usepackage{natbib}
 \usepackage{cdsty}
+\usepackage[obeyDraft,colorinlistoftodos]{todonotes}
+\setlength{\marginparwidth}{2.7cm} % as per section 1.6.7 of the todonotes manual
+
+% ---------------------------------------------------------------------------
+% ------------------------------ Todo commmands -----------------------------
+% ---------------------------------------------------------------------------
+
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
 
 % ---------------------------------------------------------------------------
