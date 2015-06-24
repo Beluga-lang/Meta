@@ -1,6 +1,9 @@
 \documentclass[12pt]{article}
-\input{prelude}
 
+% LaTeX magic
+\newcounter{chapter}
+\input{prelude}
+\renewcommand{\theExercise}{\if@ExeStared\else{\thesection.\arabic{\@ExerciseCounter}}\fi}
 
 \begin{document}
 This document describes how to use macros defined in \verb#prelude.tex# and how to define new ones. It also mentions conventions used in the tutorial, to keep it consistent. And, you know, other stuff.
@@ -124,9 +127,58 @@ There are examples of this environment in use in chapters 2 and 3.
 \item Some keywords in \beluga code are automatically highlighted/coloured etc -- if you feel there's something missing, ``Contextual ML'' section of \verb#prelude.tex# contains all the settings. It will get a proper cleanup at some point, right now some more advanced settings are voodoo (to me anyway).
 \end{itemize}
 
-\section{Exercises}
-\begin{itemize}
-\item \emph{FIXME} describe how to give exercises / solutions / additional explanations
-\end{itemize}
 
+
+\section{Exercises}
+The following code is a way to add exercises and their solutions.\todo{How to extract beluga sourcecode to a separate directory? Does it just work as-is?}
+\begin{verbatim}
+\begin{Exercise}[title=Some named exercise,label=exerc1]
+Extend the language with a let-value-construct
+\end{Exercise}
+
+\begin{Exercise}
+Write the \bel!step! data-type
+\end{Exercise}
+\begin{Answer}
+\begin{lstlisting}
+datatype step: term -> term -> type =
+| e_app_1    : step M M'
+             -> step (app M N) (app M' N)
+| e_app_2    : step N N' -> value V
+              -> step (app V N) (app V N')
+| e_app_abs : value V
+              -> step (app (lam M) V) (M V)
+;
+\end{lstlisting}
+\end{Answer}
+\begin{Answer}[ref=exerc1]
+Presumably some beluga code with highlighted changes
+\end{Answer}
+\end{verbatim}
+Produces the following exercises.\todo{How does highlighting interact with extraction} By default, the answer is to the latest exercise defined. In order to mix the order, you need to use \verb!label! and a matchin \verb!ref!. However, note that the answers will be printed in the order they were given, not in the order the exercises were defined.\todo{Is there a way to sort them?}.
+\begin{Exercise}[title=Some named exercise,label=exerc1]
+Extend the language with a let-value-construct
+\end{Exercise}
+\begin{Exercise}
+Write the \bel!step! data-type
+\end{Exercise}
+\begin{Answer}
+\begin{lstlisting}
+datatype step: term -> term -> type =
+| e_app_1    : step M M'
+             -> step (app M N) (app M' N)
+| e_app_2    : step N N' -> value V
+              -> step (app V N) (app V N')
+| e_app_abs : value V
+              -> step (app (lam M) V) (M V)
+;
+\end{lstlisting}
+\end{Answer}
+\begin{Answer}[ref=exerc1]
+Presumably some beluga code with highlighted changes
+\end{Answer}
+
+To show the solutions we use \verb|\shipoutAnswer|, this is now done in the appendix.
+
+\shipoutAnswer
 \end{document}

@@ -1,16 +1,6 @@
 \documentclass[12pt,draft]{book}
 \input{prelude}
 
-\ifdefined\studentversion
-  \excludecomment{exercise}
-  \excludecomment{solution}
-  \excludecomment{additional}
-\else
-  \includecomment{exercise}
-  \includecomment{solution}
-  \includecomment{additional}
-\fi
-
 \begin{document}
 
 \pagestyle{empty}
@@ -23,6 +13,10 @@
 \input{chap-introduction}
 \input{chap-minml}
 \input{chap-binders}
+
+\appendix
+\input{chap-solutions}
+
 
 \bibliographystyle{abbrvnat}
 \bibliography{bibi}

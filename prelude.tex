@@ -26,6 +26,8 @@
 \usepackage{cdsty}
 \usepackage[obeyDraft,colorinlistoftodos]{todonotes}
 \setlength{\marginparwidth}{2.7cm} % as per section 1.6.7 of the todonotes manual
+\usepackage[answerdelayed,lastexercise]{exercise}
+\usepackage{appendix}
 
 % ---------------------------------------------------------------------------
 % ------------------------------ Todo commmands -----------------------------
@@ -361,3 +363,25 @@
 \bibpunct{[}{]}{;}{a}{}{,} % citations style
 
 \newcommand{\bel}{\lstinline}
+
+% ---------------------------------------------------------------------------
+% ------------------------ Exercises and solutions --------------------------
+% ---------------------------------------------------------------------------
+
+% Nicer style for numbering the exercises : ChapterNo.ExerciseNo
+\renewcounter{Exercise}[chapter]
+\gdef\@ExerciseCounter{Exercise}
+\renewcommand{\theExercise}{\if@ExeStared\else{\thechapter.\arabic{\@ExerciseCounter}}\fi}
+
+% Nicer style for exercises and answers
+\def\listexercisename{List of exercises}
+\def\ExerciseName{Ex.}
+\def\AnswerName{Sol.}
+
+\renewcommand{\ExerciseHeaderTitle}{\ExerciseTitle\ }
+\renewcommand{\ExerciseHeader}
+  {\ExerciseHeaderDifficulty\textbf{\ExerciseName\ \ExerciseHeaderNB \ : \ \ExerciseHeaderTitle}\ExerciseHeaderOrigin}
+\renewcommand{\AnswerHeader}{\textbf{\AnswerName\ \ExerciseHeaderNB\ : \ \ExerciseHeaderTitle} }
+
+\setlength{\ExerciseSkipBefore}{0.5\baselineskip}
+\setlength{\ExerciseSkipAfter}{0.5\baselineskip}
