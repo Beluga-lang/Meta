@@ -17,8 +17,8 @@
 \usepackage{enumerate}
 \usepackage{latexsym}
 \usepackage{comment}
-\usepackage{color}
-\usepackage{svgcolor}
+\usepackage{xargs}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{proof}
 \usepackage{url}
 \usepackage{xspace}
@@ -99,10 +99,10 @@
                  {\\gamma}{{$\gamma$}}1 %
                  {\\psi}{{$\psi$}}1 %
                  {FN}{{$\Lambda$}}1 %
-                 {<<}{\color{forestgreen}}1 %
-                 {<<r}{\color{firebrick}}1 %
-                 {<*}{\color{forestgreen}}1 %
-                 {<dim}{\color{dimgrey}}1 %
+                 {<<}{\color{ForestGreen}}1 %
+                 {<<r}{\color{FireBrick}}1 %
+                 {<*}{\color{ForestGreen}}1 %
+                 {<dim}{\color{DimGrey}}1 %
                  {>>}{\color{black}}1 %
                  {?}{\bf{?}}1,
         columns=[l]fullflexible,
@@ -358,7 +358,7 @@
 % --------------------------------- Other -----------------------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\emphFact}[1]{{\color{forestgreen}{#1}}}
+\newcommand{\emphFact}[1]{{\color{ForestGreen}{#1}}}
 
 \bibpunct{[}{]}{;}{a}{}{,} % citations style
 

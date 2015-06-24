@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[12pt,draft]{article}
 
 % LaTeX magic
 \newcounter{chapter}
@@ -6,6 +6,8 @@
 \renewcommand{\theExercise}{\if@ExeStared\else{\thesection.\arabic{\@ExerciseCounter}}\fi}
 
 \begin{document}
+\listoftodos
+
 This document describes how to use macros defined in \verb#prelude.tex# and how to define new ones. It also mentions conventions used in the tutorial, to keep it consistent. And, you know, other stuff.
 
 \section{General}
