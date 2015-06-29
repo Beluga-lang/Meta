@@ -54,12 +54,14 @@ LF term : type =
 
 To illustrate consider a few examples:
 
+\begin{center}
 \begin{tabular}{l@{\quad is represented as \quad}l}
 %\multicolumn{1}{c}{On paper} & & \multicolumn{1}{c}{Code}\\[0.5em]
 $\tmif \tmfalse \tmzero {\tmsucc \tmzero}$ &
 \lstinline!if_then_else false z (succ z)!\\
 $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
-\end{tabular}
+\end{tabular}  
+\end{center}
 
 % We can declare infix
 % operator by using the keyword \lstinline!%infix!.
