@@ -81,7 +81,7 @@ can give a derivation for $t \Value$.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$e \NumValue$}: \mbox{Expression $e$ is a numeric value}}\\[1em]
+\multicolumn{1}{l}{\fbox{$t \NumValue$}: \mbox{Term $t$ is a numeric value}}\\[1em]
 \infer[\NVZero]{\tmzero \NumValue}{} \qquad
 \infer[\NVSucc]{(\tmsucc t) \NumValue}{t \NumValue} \qquad
 \end{array}
@@ -100,7 +100,7 @@ Here, we identify $\tmzero$ as a numeric value; in addition, $\tmsucc t$ is a
 numeric value provided that $t$ is a numeric value. We also identify $\tmtrue$
 and $\tmfalse$ as values, and say that every numeric value is a value.
 
-We are now ready to define when a term $t_1$ steps to an other term $t_1'$ using
+We are now ready to define when a term $t_1$ steps to another term $t_1'$ using
 the judgment $t_1 \Steps t_1'$ using congruence rules and reduction rules.
 
 \[
@@ -132,14 +132,14 @@ Our  goal  is  to  represent  the  relation  $t_1 \Steps t_1'$ and  describe the
 derivation trees which correspond to evaluating a given sub-term.
 To accomplish this we also must be able to construct derivation trees that prove
 that  a given  term is  a value  or a  numeric  value. Recall  that a  data-type
-provides us with inductive definition of constructing elements.
+provides us with definition of constructing elements.
 Clearly,  terms  are  inductively  defined  and  are  easily  translated  into a
 data-type definition. However,  we also defined inductively  what it means for a
 term  to be a value or a numeric value:  we use the  axioms $\NVZero$, $\VTrue$,
 $\VFalse$  together  with  the   inference  rules  $\NVSucc$  and  $\VNumValue$.
 Similarly,  we defined inductively  what it means for a term $t_1$  to step to a
 term $t_1'$.
-In \beluga, data-types are powerfull enough to encode such inductive definitions
+In \beluga, data-types are powerfull enough to encode such definitions
 about  predicates  and  relations.  To represent the judgment  $t \NumValue$  we
 define  a predicate (type family) \lstinline!num_value!  and state that it takes
 terms as argument  by declaring its type as \lstinline!term -> type!.  Then each
@@ -149,25 +149,25 @@ then corresponds to an expression formed by these constructors.
 \begin{lstlisting}
 LF num_value : term -> type =
 | nv_zero     : num_value z
-| nv_succ     : num_value T -> num_value (succ T)
+| nv_succ     : num_value V -> num_value (succ V)
 ;
 
 LF value : term -> type =
-| v_num_value : num_value T -> value T
+| v_num_value : num_value M -> value M
 | v_true      : value true
 | v_false     : value false
 ;
 \end{lstlisting}
 
 In our definition  of  the constructor \lstinline!nv_succ!, the  capital  letter
-\lstinline!T! is thought  to be  universally quantified  at the outside.  We can
-hence read the constructor \lstinline!nv_succ! as follows:
+\lstinline!M! describes numerical values and is thought  to be  universally
+quantified  at the outside.  We can hence read the constructor \lstinline!nv_succ! as follows:
 
 \begin{center}
 \begin{tabular}{p{12cm}}
-``For  all  terms   \lstinline$T$,   if   \lstinline!D!  is  a  derivation   for
-\lstinline!num_value T!,      then      we     can     form     a     derivation
-\lstinline!(nv_succ <<T>> D)! for \lstinline!num_value (succ N)!.''
+``For  all  terms   \lstinline$M$,   if   \lstinline!D!  is  a  derivation   for
+\lstinline!num_value M!,      then      we     can     form     a     derivation
+\lstinline!(nv_succ <<M>> D)! for \lstinline!num_value (succ M)!.''
 \end{tabular}
 \end{center}
 
@@ -198,9 +198,12 @@ is represented as &
 \end{tabular}
 
 In \beluga, we simply write
+
 \begin{lstlisting}
   let v : [|- num_value (succ (succ z))] = [|- nv_succ (nv_succ nv_zero)];
-\end{lstlisting}
+\end{lstlisting}  
+
+
 
 We bind the derivation to the name \lstinline!v!  and declare that \lstinline!v!
 has type \lstinline![|- num_value (succ (succ z))]!.  Note,  we in general write
@@ -223,22 +226,22 @@ terms $t_1$ and $t_1'$ using the type family/relation \lstinline!step!.
 
 \begin{lstlisting}
 LF step: term -> term -> type =
-| e_if_true      : step (if_then_else true T2 T3) T2
-| e_if_false     : step (if_then_else false T2 T3) T3
+| e_if_true      : step (if_then_else true M2 M3) M2
+| e_if_false     : step (if_then_else false M2 M3) M3
 | e_pred_zero    : step (pred z) z
 | e_pred_succ    : num_value NV1
                    -> step (pred (succ NV1)) NV1
 | e_iszero_zero  : step (iszero z) true
 | e_iszero_succ  : num_value NV1
                    -> step (iszero (succ NV1)) false
-| e_if_then_else : step T1 T1'
-                   -> step (if_then_else T1 T2 T3) (if_then_else T1' T2 T3)
-| e_succ         : step T1 T1'
-                   -> step (succ T1) (succ T1')
-| e_pred         : step T1 T1'
-                   -> step (pred T1) (pred T1')
-| e_iszero       : step T1 T1'
-                   -> step (iszero T1) (iszero T1')
+| e_if_then_else : step M1 M1'
+                   -> step (if_then_else M1 M2 M3) (if_then_else M1' M2 M3)
+| e_succ         : step M1 M1'
+                   -> step (succ M1) (succ M1')
+| e_pred         : step M1 M1'
+                   -> step (pred M1) (pred M1')
+| e_iszero       : step M1 M1'
+                   -> step (iszero M1) (iszero M1')
 ;
 \end{lstlisting}
 
@@ -264,23 +267,24 @@ Here \lstinline!e1! stands for the derivation
 \]
 
 The name \lstinline!e2! stands for the derivation consisting of only
-the axiom $\EPredZ$.
+the rule $\EPredSucc$.
 
 \section{Typing Rules}
 
 Finally, we remark that following these ideas, we can encode typing rules for
 our term language by representing the typing judgment $t : T$ using the type
-family (relation) \lstinline!hastype!.
+family (relation) \lstinline!hastype!. Our language so far has only two types,
+namely $\Bool$ and $\Nat$.
 
-We define two types nat and bool:
 \[
 \begin{array}{lll}
-\mbox{Types} & T \bnfas & \Bool \\
-             &          & \Nat
+\mbox{Types} & T \bnfas & \Bool \mid \Nat
 \end{array}
 \]
 
-which in \beluga gives:
+We encode these types in \beluga using the LF type \lstinline!tp! together with
+two constants \lstinline!bool! and \lstinline!nat!.
+
 \begin{lstlisting}
 LF tp : type =
 | bool : tp
@@ -288,54 +292,62 @@ LF tp : type =
 ;
 \end{lstlisting}
 
-Then we add typing rules:
+The typing rules relate terms to types. We recall here simply the typing rules from \cite{TAPL}.
+
 \[
 \begin{array}{c}
+\multicolumn{1}{l}{\fbox{$t \hastype T$}: \mbox{Term $t$ has type $T$}}\\[1em]
   \infer[\TTrue]{\tmtrue \hastype \Bool}{} \qquad
   \infer[\TFalse]{\tmfalse \hastype \Bool}{} \qquad
   \infer[\TIf]{\tmif{t_1}{t_2}{t_3} \hastype T}{t_1 \hastype \Bool & t_2 \hastype T & t_3 \hastype T}
-\\
-  \infer[\TZero]{\tmzero \hastype \Nat}{}\qquad
-  \infer[\TSucc]{\tmsucc t_1 \hastype \Nat}{t_1 \hastype \Nat} \qquad
-  \infer[\TPred]{\tmpred t_1 \hastype \Nat}{t_1 \hastype \Nat} \qquad
+\\[0.5em]
+  \infer[\TZero]{\tmzero \hastype \Nat}{}\quad
+  \infer[\TSucc]{\tmsucc t_1 \hastype \Nat}{t_1 \hastype \Nat} \quad
+  \infer[\TPred]{\tmpred t_1 \hastype \Nat}{t_1 \hastype \Nat} \quad
   \infer[\TIsZero]{\tmiszero t_1 \hastype \Bool}{t_1 \hastype \Nat}
 \\
 \end{array}
 \]
 
-which in \beluga gives:
+The typing relation between terms and types is encoded in \beluga using a
+predicate (type family) \lstinline!hastype! which is declared with
+\lstinline!term -> tp -> type!. Each typing rule corresponds to a constructor in
+our data-type definition. 
+
 \begin{lstlisting}
-Lf hastype : term -> tp -> type =
-| t_zero:
-      hastype z nat
-| t_succ:
-      hastype T1 nat
-      -> hastype (succ T1) nat
-| t_pred:
-      hastype T1 nat
-      -> hastype (pred T1) nat
-| t_true:
-      hastype true bool
-| t_false:
-      hastype false bool
-| t_iszero:
-      hastype T1 nat
-      -> hastype (iszero T1) bool
-| t_if_then_else:
-      hastype T1 bool -> hastype T2 T -> hastype T3 T
-      -> hastype (if_then_else T1 T2 T3) T
+LF hastype : term -> tp -> type =
+| t_zero  : hastype z nat
+| t_succ  : hastype M nat
+         -> hastype (succ M) nat
+| t_pred  : hastype M nat
+         -> hastype (pred M) nat
+| t_true  : hastype true bool
+| t_false : hastype false bool
+| t_iszero: hastype M nat
+         -> hastype (iszero M) bool
+| t_if_then_else: hastype M1 bool -> hastype M2 T -> hastype M3 T
+         -> hastype (if_then_else M1 M2 M3) T
 ;
-\end{lstlisting} % todo: find an other name than T for types
+\end{lstlisting} 
 
 \section{Encoding Proofs}
 
-We now revisit some of the properties we investigated about languages
-and how we can represent such proofs as functions that manipulate and
-analyze derivation trees.
+We now discuss some standard properties about languages which are also discussed
+in \cite{TAPL} and show how we can represent such proofs as total functions that
+manipulate and analyze derivation trees. In particular, we illustrate:
+
+\begin{itemize}
+\item How to represent inductive proofs about derivations as total functions 
+\item How to prove that a case is impossible
+\item How to state a property universally about terms and reason by induction on
+  terms (rather than derivations)
+\end{itemize}
+
+We develop each example step-wise using the interactive programming features in \beluga.
 
 \subsection{Type preservation: A Simple Proof by Structural Induction} The first property we re-visit is type
 preservation. In particular, we write $\vdash t : T$ and $\vdash t
-\Steps t'$ to clearly state that we only consider closed terms
+\Steps t'$ to clearly state that we only consider closed terms.
 
 \begin{theorem}
 If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\S}{t \Steps t'}$ then $\vdash t' : T$.
@@ -374,11 +386,14 @@ in \beluga. This is straightforward keeping in mind that
 \begin{tabular}{l|l}
 On paper judgment~~ & ~~Type in \beluga \\
 \hline
-$\vdash M :T$ & \lstinline![ |-hastype M T]! \\
-$\vdash M \Steps M'$ & \lstinline![ |-steps M M']! \\
+$\vdash t :T$ & \lstinline![ |-hastype M T]! \\
+$\vdash t \Steps t'$ & \lstinline![ |-steps M M']! \\
 \end{tabular}
 \end{center}
 
+Note that we represent terms, written on paper using $t$ and $s$, using capital
+letters \lstinline!M! and \lstinline!N! to differentiate better between types
+and terms.
 
 \begin{lstlisting}
 rec tps: [|-hastype M T] -> [|-step M M'] -> [|-hastype M' T] = ? ;
@@ -408,7 +423,7 @@ Let's fill in some of the details.
 
 \paragraph{Introducing assumptions - Writing functions} Since we are proving an
 implication, we introduce two assumptions \lstinline!d:[|-hastype M T]! and
-\lstinline!s:[|-step M M'! and try to establish
+\lstinline!s:[|-step M M']! and try to establish
 \lstinline![|-hastype M' T]!. From a programmer's point of view, we need
 to build a function that when given \lstinline!d:[|-hastype M T]! and
 \lstinline!s:[|-step M M']! returns a derivation of type
@@ -747,9 +762,9 @@ fn s1 => fn s2 => case s1 of
 ;
 \end{lstlisting}
 
-Let us consider the case where \lstinline!s1! describes the derivation
-\lstinline![|-step (if_then_else true N1 N2) N1]!, i.e. we consider the case
-\lstinline![|-e_if_true]!. At this point we know that \lstinline!s2! stands
+Let us consider the case where \lstinline!s1! is a derivation ending in
+\lstinline![|-e_if_true]!, i.e. \lstinline!s1! stands for a derivation of 
+\lstinline![|-step (if_then_else true N1 N2) N1]!. At this point we know that \lstinline!s2! stands
 for a derivation \lstinline![|-step (if_then_else true N1 N2) M2]!. Splitting
 \lstinline!s2! into cases gives us two sub-cases:
 \begin{enumerate}
@@ -970,24 +985,15 @@ fn d => case d of
 ;
 \end{lstlisting}
 
+% \section{Exercise 3.5.17}
+\subsection{Relating small-step and big-step semantics}
 
 
-\section{How to Trust Proof Environments}
-How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
-
-In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
-
-The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
-
-
-
-\section{Exercise 3.5.17}
-
-\subsection{Definition of the big-step semantics}
+\paragraph{Definition of the big-step semantics}
 
 % Almost taken from TAPL:
 Two styles of operational semantics are in common use. The one used so far and
-in the TAPL is called the {\em small-step} style, because the definition of the
+most commonly used in \cite{TAPL} is called the {\em small-step} style, because the definition of the
 evaluation relation shows how individual steps of computation are used to
 rewrite a term, bit by bit, until it eventually becomes a value. On top of this,
 we define a multi-step evaluation relation that allows us to talk about terms
@@ -995,61 +1001,62 @@ evaluating (in many steps) to values. An alternative style, called
 {\em big-step} semantics (or sometimes {\em natural} semantics), directly
 formulates the notion of ``this term evaluates to that final value'', written
 $t \Downarrow v$. The big-step evaluation rules for our language of boolean and
-arithmetic expressions look like this:
+arithmetic expressions can be described as follows:
 
 % If someone can do something nicer than that:
 \[
 \begin{array}{c}
-  \infer[\BValue]{v \Downarrow v}{v \Value} \\
-  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} \\
+\multicolumn{1}{l}{\fbox{$t \Downarrow v$}: \mbox{Term $t$ evaluates to value $v$}}\\[1em]
+  \infer[\BValue]{v \Downarrow v}{v \Value} \qquad
+  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc nv_1}{t_1 \Downarrow nv_1 & nv_1 \NumValue} \\[0.5em]
+  \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} \qquad
+  \infer[\BPredSucc]{\tmpred t_1 \Downarrow nv_1}{t_1 \Downarrow \tmsucc nv_1}
+\\[0.5em]
+  \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} \qquad
+  \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc nv_1} 
+\\[0.5em]
+  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} \qquad
   \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3 & v_3 \Value} \\
-  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc nv_1}{t_1 \Downarrow nv_1 & nv_1 \NumValue} \\
-  \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} \\
-  \infer[\BPredSucc]{\tmpred t_1 \Downarrow nv_1}{t_1 \Downarrow \tmsucc nv_1} \\
-  \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} \\
-  \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc nv_1} \\
+
 \end{array}
 \]
 
-Here is the corresponding Beluga code for this definition:
+Following the previous principle of encode judgments such as $t \Downarrow v$
+using predicates (type families), we define in \beluga the relation
+\lstinline!bigstep! between two terms. The fact that the result is always a
+value is enforced and checked in each rule - this is unnecessary, since we can
+in fact prove that the result of evaluating a term always yields a value
+(i.e. value soundness property)\todo{Remove extra checks and state value
+  soundness. -bp}. 
 
 \begin{lstlisting}
 LF bigstep : term -> term -> type =
-| b_value :
-      value v ->
-      bigstep v v
-| b_switchtrue :
-      bigstep T1 true -> bigstep T2 V2 -> value V2
-      -> bigstep (switch T1 T2 T3) V2
-| b_switchfalse :
-      bigstep T1 false -> bigstep T3 V3 -> value V3
-      -> bigstep (switch T1 T2 T3) V3
-| b_succ :
-      bigstep T1 NV1 -> num_value NV1
-      -> bigstep (succ T1) (succ NV1)
-| b_predzero :
-      bigstep T1 zero
-      -> bigstep (pred T1) zero
-| b_predsucc :
-      bigstep T1 (succ NV1) -> num_value NV1
-      -> bigstep (pred T1) NV1
-| b_iszerozero :
-      bigstep T1 zero
-      -> bigstep (iszero T1) true
-| b_iszerosucc :
-      bigstep T1 (succ NV1) -> num_value NV1
-      -> bigstep (iszero T1) false
+| b_value       : value V 
+               -> bigstep V V
+| b_switchtrue  : bigstep M1 true -> bigstep M2 V2 -> value V2
+               -> bigstep (switch M1 M2 M3) V2
+| b_switchfalse : bigstep M1 false -> bigstep M3 V3 -> value V3
+               -> bigstep (switch M1 M2 M3) V3
+| b_succ        : bigstep M1 NV1 -> num_value NV1
+               -> bigstep (succ M1) (succ NV1)
+| b_predzero    : bigstep M1 zero
+               -> bigstep (pred M1) zero
+| b_predsucc    : bigstep M1 (succ NV1) -> num_value NV1
+               -> bigstep (pred M1) NV1
+| b_iszerozero : bigstep M1 zero
+              -> bigstep (iszero M1) true
+| b_iszerosucc : bigstep M1 (succ NV1) -> num_value NV1
+              -> bigstep (iszero M1) false
 ;
 \end{lstlisting}
 
-Let's show that the small-step and big-step semantics for this language
+We now prove that the small-step and big-step semantics for this language
 coincide, {\em i.e.} $t \rightarrow^* v$ if and only if $t \Downarrow v$, for
 any value $v$.
 
 We will prove the two directions of the ``if and only if'' separately.
 
-\subsection{If $t \Downarrow v$ then $t \rightarrow^* v$}
-
+\paragraph{Part1: If $t \Downarrow v$ then $t \rightarrow^* v$}
 This part of the proof is exactly the one described in TAPL. We firstly need a
 little lemma that prooves that $\longrightarrow^*$ passes to the context:
 %                                                  ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
@@ -1169,12 +1176,12 @@ Let's now write the actual proof:
   \end{lstlisting}
 \end{proof}
 
-\subsection{If $t \longrightarrow^* v$ then $t \Downarrow v$ }
+\paragram{If $t \longrightarrow^* v$ then $t \Downarrow v$ }
 
 For this direction, we will see two proofs. The first one will be a simple proof
 easy to write in \beluga. The second one will be the proof describe by the TAPL.
 
-\subsubsection{A simple proof}
+\paragraph{A simple proof}
 
 Let's first proove something weaker, but that can easely imply what we want to
 proove:
@@ -1267,6 +1274,14 @@ And then:
 \end{proof}
 
 \subsubsection{A proof following the TAPL}
+
+\section{How to Trust Proof Environments}
+How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
+
+In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
+
+The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
+
 
 %%% Local Variables:
 %%% mode: latex
