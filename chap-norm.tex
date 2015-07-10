@@ -1,0 +1,271 @@
+\chapter{Normalization}
+
+In chapter~\ref{chap:binders}, we discussed the Simply Typed Lambda
+Calculus (STLC), its grammar, operational semantics and typing
+judgement. Additionally, we studied some meta-theoretic properties of
+this formalism, namely: Type Preservation, the fact that type is
+preserved under evaluation of the operational semantics and Type
+Uniqueness, the fact that each well-typed term has only one type. In
+this chapter we will explore another meta-theoretical property,
+normalization --i.e., the evaluation of well-typed terms always
+terminates.
+
+\section{Representing Well-typed Terms}
+
+Let's revisit the definition of STLC, starting with the grammar of terms, values and types:
+
+\[
+\begin{array}{ll@{\bnfas}l}
+\mbox{Terms} & M, N & x \bnfalt \lam x{:}T.M \bnfalt M \app N \bnfalt c\\
+\mbox{Types} & T, S & B \bnfalt T \arrow S\\
+\mbox{Values} & V & \lam x{:}T.M \bnfalt c
+\end{array}
+\]
+
+Please note that in this presentation, we added to the language base
+type and a constant term.
+
+Then we define the small-step operational semantics. In this
+particular presentation we use rules are different to
+chapter~\ref{chap:binders}. This presentation corresponds to what is
+typically referred to as a Call-By-Name operational semantics.
+
+\[
+\begin{array}{c}
+\multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\\[1em]
+\infer[\EAppBeta]{(\lam x.M) \app N \Steps [N/x]M}{} \qquad
+\infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \\[1em]
+% \infer[\EAppFnStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
+\end{array}
+\]
+
+Finally, we define the typing judgement. Note that we added the rule
+\TBase for the new type and term.
+
+\[
+\begin{array}{c@{\qquad}c}
+\multicolumn{2}{l}{\mbox{Typing rules \fbox{$M:T$}}} \\[1em]
+\infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
+                 {\infer*{M:S}{\infer[u]{x:T}{}}} &
+\infer[\TApp]{M\;N : S}{M : T \arrow S & N:T} \\[1em]
+\multicolumn{2}{c}{\infer[\TBase]{c : B}{}}
+\end{array}
+\]
+
+In Chapter~\ref{chap:binders}, the formalization in Beluga followed
+very closely the paper presentation, in this case we will take a
+slightly different approach in which we combine the syntax of terms
+and the typing rules to obtain and \emph{intrinsically typed
+  representation} of the language.
+
+%\begin{extract}[norm.bel]
+\begin{lstlisting}
+LF tp : type =
+| b :  tp
+| arr : tp -> tp -> tp
+;
+%name tp T.
+
+LF tm : tp -> type =
+| app : tm (arr T S) -> tm T -> tm S
+| lam : (tm T -> tm S) -> tm (arr T S)
+| c : tm b
+;
+%name tm E.
+\end{lstlisting}
+%\end{extract}
+
+The type \bel{tm} defines our family of simply-typed lambda terms
+indexed by their type as an LF signature. In typical higher-order
+abstract syntax (HOAS) fashion, lambda abstraction takes a function
+representing the abstraction of a term over a variable. There is no
+case for variables, as they are treated implicitly in HOAS.
+
+We now encode the step relation of the operational semantics. In
+particular, we create the \bel{step} type indexed by two terms that
+represent each step of the computation.
+
+\begin{lstlisting}
+LF step : tm A -> tm A -> type =
+| beta : step (app (lam M) N) (M N)
+| stepapp : step M M' -> step (app M N) (app M' N)
+;
+\end{lstlisting}
+
+Notice how the \bel{beta} rule re-uses the LF notion of substitution by
+computing the application of \bel{M} to \bel{N}.
+
+Finally, because we want to prove that every chain of evaluation steps
+terminates, we need to define:
+\begin{itemize}
+\item a multiple step reduction \bel{mstep}.
+\item values \bel{val}
+\item and \bel{halts} to encode that a term halts if it steps into a value.
+\end{itemize}
+
+\begin{lstlisting}
+LF mstep : tm A -> tm A -> type =
+| refl : mstep M M
+| onestep : step M M' -> mstep M' M'' -> mstep M M''
+;
+%name mstep S.
+\end{lstlisting}
+
+In \bel{mstep} we say that ever term steps to itself, and that you can
+always add another small-step to a chain of steps.
+
+\begin{lstlisting}
+LF val : tm A -> type =
+| val/c : val c
+| val/lam : val (lam M)
+;
+%name val V.
+\end{lstlisting}
+
+To characterize values, instead of directly implementing the grammar
+of values, we define a predicate on well-typed terms that selects the
+values.
+
+\begin{lstlisting}
+LF halts : tm A -> type =
+| halts/m : mstep M M' -> val M' -> halts M
+;
+%name halts H.
+\end{lstlisting}
+
+Finally, \bel{halts} is also a predicate on terms, and only terms that
+eventually step into a value are in it. Thus, the proof of
+normalization needs to establish that all terms are in \bel{halts}. At
+this point, one might be tempted to prove this by induction on the
+structure of terms. However, the na\"if approach fails here because
+the induction hypothesis we get is not strong
+enough. \improvement{Perhaps one could add an exercise as in TAPL for this}
+
+\section{Proving Normalization}
+
+In order to have an induction hypothesis that is strong enough we need
+to define an inductive predicate on types that specifies what terms
+can be candidates to be reducible.
+
+\improvement{Add the ``on paper'' definition here}
+
+Reducibility cannot be directly encoded at the LF layer, since it
+involves a strong, computational function space. Hence we move to the
+computation layer of Beluga, and employ an indexed recursive
+type. Contextual LF objects and contexts which are embedded into
+computation-level types and programs are written inside \bel{[ ]}.
+
+\begin{lstlisting}
+stratified Reduce : {A:[|- tp]}{M:[|- tm A]} ctype =
+| Rb : [|- halts M] -> Reduce [|- b ] [|- M]
+| Rarr :  [|- halts M] ->
+    ({N:[|- tm A]} Reduce [|- A ] [|- N] -> Reduce [|- B ] [|- app M N])
+    -> Reduce [|- arr A B ] [|- M]
+;
+\end{lstlisting}
+
+A term of type \bel{b} is reducible if it halts, and a \bel{term M} of type
+\bel{arr A B} is reducible if it halts, and moreover for every reducible
+\bel{N} of type \bel{A}, the application \bel{app M N} is reducible. We write
+\lstinline!{N:[|-tm A]}! for explicit $\Pi$-quantification over \bel{N}, a closed term
+of type \bel{A}. To the left of the turnstile in \bel{[|- tm A]} is where one
+writes the context the term is defined in -- in this case, it is empty.
+
+In this definition, the arrows represent the usual computational
+function space, not the weak function space of LF. We note that this
+definition is not (strictly) positive, since \bel{Reduce} appears to the
+left of an arrow in the \bel{Rarr} case. Allowing unrestricted such
+definitions destroys the soundness of our system. Here we note that
+this definition is stratified by the type: the recursive occurrences
+of \bel{Reduce} are at types \bel{A} and \bel{B} which are smaller than \bel{arr A B}.
+\bel{Reduce} is defined by induction on the type of the reducible
+term(additionally this is why we cannot leave the type implicit).
+
+Now, we need to prove some more or less trivial lemmas that are
+usually omitted in paper presentations.
+
+First, we prove that halts is closed under expansion in the \bel{halts_step} lemma.
+
+\begin{lstlisting}
+rec halts_step : {S:[|- step M M']} [|- halts M'] -> [|- halts M] =
+mlam S => fn h =>
+let [|- halts/m MS' V] = h in
+ [|- halts/m (onestep S MS') V]
+;
+\end{lstlisting}
+
+Next we prove closure of Reduce under expansion. This follows the
+handwritten proof, proceeding by induction on the type A which is an
+implicit argument. In the base case we appeal to \bel{halts_step}, while
+in the \bel{Rarr} case we must also appeal to the induction hypothesis at
+the range type, going inside the function position of applications.
+
+\begin{lstlisting}
+rec bwd_closed : {S:[|- step M M']} Reduce [|- T] [|- M'] -> Reduce [|- T] [|- M] =
+mlam MS => fn r => case r of
+| Rb ha => Rb (halts_step [|- MS] ha)
+| Rarr ha f => Rarr (halts_step [|- MS] ha)
+  (mlam N => fn rn =>
+   bwd_closed [|- stepapp MS] (f [|- N] rn))
+;
+\end{lstlisting}
+
+The trivial fact that reducible terms halt has a corresponding
+trivial proof, analyzing the construction of the the proof of
+\bel{Reduce[|- T] [|- M]}
+
+\begin{lstlisting}
+rec reduce_halts : Reduce [|- T] [|- M] -> [|- halts M] =
+fn r => case r of
+| Rb h => h
+| Rarr h f => h
+;
+\end{lstlisting}
+
+\subsection{Reducibility of Substitutions}
+
+\begin{lstlisting}
+schema ctx = tm T;
+
+inductive RedSub : {g:ctx}{#S:[|- g]} ctype =
+| Nil : RedSub  [ ] [|- ^ ]
+| Dot : RedSub  [g] [|- #S[^] ] → Reduce [|- A] [|- M]
+     → RedSub [g, x:tm A[]] [|- #S,M ]
+;
+
+rec lookup : {g:ctx}{#p:[g |- tm A[]]}RedSub [g] [|- #S[^]] ->
+             Reduce [|- A] [|- #p[#S[^]]] =
+mlam g => mlam #p => fn rs => case [g |- #p[..]] of
+ | [g',x:tm A |-  x] =>    let (Dot rs' rN) = rs in rN
+ | [g',x:tm A |-  #q[..]] => let Dot rs' rN = rs in
+                      lookup [g'] [g' |-  #q[..]] rs'
+;
+\end{lstlisting}
+
+Now, we have all the elements in place, so we can proceed to prove the
+main lemma, that all terms under reducible grounding substitutions are
+in the \bel{Reduce} relation.
+\begin{lstlisting}
+rec main : {g:ctx}{M:[g |- tm A[]]} RedSub [g] [|- #S[^]] ->
+           Reduce [|- A] [|- M[#S[^]]] =
+ mlam g => mlam M => fn rs => case [g |- M[..]] of
+| [g |- #p[..]] => lookup [g] [g |- #p[..]] rs
+| [g |- lam (\x. M1)] =>
+ Rarr [|- halts/m refl val/lam]
+   (mlam N => fn rN =>
+    bwd_closed [|- beta] (main [g,x:tm _] [g,x |- M1] (Dot rs rN)))
+ | [g |- app (M1[..]) (M2[..])] =>
+  let Rarr ha f = main [g] [g |- M1[..]] rs in
+  f [|- _ ] (main [g] [g |- M2[..]] rs)
+| [g' |-  c] => Rb [|- halts/m refl val/c]
+;
+\end{lstlisting}
+
+And finally we prove that all well typed terms eventually reduce to a
+value:
+\begin{lstlisting}
+rec weakNorm : {M:[|- tm A]} [|- halts M] =
+mlam M => reduce_halts (main [] [|- M] Nil)
+;
+\end{lstlisting}
