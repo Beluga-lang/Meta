@@ -70,7 +70,7 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 
 Next,  we define  the small-step semantics  for our  little language.  This will
 describe  how  we evaluate  a  given term.  To give  a  deterministic evaluation
-strategy,  it is convenient to first define what the values of our language.  In
+strategy,  it is convenient to first define the values of our language.  In
 \cite{TAPL}, we distinguished between terms and values in the grammar itself and
 we think of values  as a sub-class of terms;  here we take  a slightly different
 approach and define explicitly  what it means  to be a value using the judgments
@@ -472,7 +472,7 @@ case.
 in the type preservation proof we discussed earlier. We start with the
 case \lstinline![e_pred_zero]! which corresponds to the base case in
 our proof. Pattern matching in \lstinline!s! has not only generated
-all the caes, but more importantly it has refined what $M$ and $M'$
+all the cases, but more importantly it has refined what $M$ and $M'$
 stand for. In this particular case, \lstinline!M = (pred z)! and
 \lstinline!M' = z!. As a first step in the proof, we analyzed the assumption
 \lstinline!d:[|-hastype (pred z) T]! further. We case-analyzed this
@@ -574,14 +574,14 @@ function, i.e. it must be defined on all inputs and it must be
 terminating. We can check that the function is total in \beluga by
 writing the following annotation before we start writing the body of
 the function:\lstinline!/ total s (tps m t m' d s) /!. This
-annotations states that we claim to implement program \lstinline!tps! that is
+annotation states that we claim to implement program \lstinline!tps! that is
 recursive in \lstinline!s!. Since in the statement we implicitly
 quantify over term \lstinline!M! and \lstinline!M'! as well as the
 type \lstinline!T! at the outside, we write in the totality
 declaration \lstinline!(tps m t m' d s)! indicating that we are
 recursively analyzing the 4th argument (three of them are passed
 implicitly) passed to \lstinline!tps!. The order in which the
-implicite arguments are listed is irrelevant; what is important is
+implicit arguments are listed is irrelevant; what is important is
 that their number is correct.
 The full proof is then written as follows:
 
@@ -625,7 +625,7 @@ fn d => fn s => case s of
 \subsection{Uniquenss of Small-step Evaluation: Proving something is impossible}
 Next, we consider the proof that evaluation using the small-step rules yields a
 unique value. This is an interesting proof because we must argue that values do
-not step, i.e. there are not rules that apply. For \lstinline!zero!,
+not step, i.e. there aren't any rules that apply. For \lstinline!zero!,
 \lstinline!true! and \lstinline!false! this should be easy, since there is no
 rule that applies. But how do we argue that \emph{every number} that is a value
 does not step? - We prove a contradiction. We show inductively that if $M$ is a
@@ -722,11 +722,11 @@ answer is no, since there is no way to provide a derivation
 
 
 We are now ready to prove that evaluation yields a unique result given the
-small-step semantics. This will illustrate how we can use the lemma \lstinline!values_dont_step!.We only show two cases, but the whole program is
+small-step semantics. This will illustrate how we can use the lemma \lstinline!values_dont_step!. We only show two cases, but the whole program is
 implemented in file \lstinline!evaluation.bel!.
 
 \begin{lstlisting}
-datatype equal: term -> term -> type =
+LF equal: term -> term -> type =
 | ref: equal T T
 ;
 
@@ -941,7 +941,7 @@ splitting on the assumption \lstinline!d!. We show below the cases we discussed
 in detail above, however the full proof is implemented in the file
 \lstinline!evaluation.bel!.
 
-For the case, where we have \lstinline!d:[|- hastype z nat]! by
+For the case where we have \lstinline!d:[|- hastype z nat]! by
 \lstinline![|-t_zero]!, we return \lstinline![|-result ms_ref (v_num v_z)]! that
 stands for a proof \lstinline![|- halts z]!. For the case where we have
 \lstinline!d:[|-hastype (pred N) nat]! by \lstinline![|-t_pred D]! and
@@ -1021,7 +1021,7 @@ arithmetic expressions can be described as follows:
 \end{array}
 \]
 
-Following the previous principle of encode judgments such as $t \Downarrow v$
+Following the previous principle of encoding judgments such as $t \Downarrow v$
 using predicates (type families), we define in \beluga the relation
 \lstinline!bigstep! between two terms. The fact that the result is always a
 value is enforced and checked in each rule - this is unnecessary, since we can
@@ -1051,7 +1051,7 @@ We will prove the two directions of the ``if and only if'' separately.
 
 \paragraph{Part1: If $t \Downarrow v$ then $t \rightarrow^* v$}
 This part of the proof is exactly the one described in TAPL. We firstly need a
-little lemma that prooves that $\longrightarrow^*$ passes to the context:
+little lemma that proves that $\longrightarrow^*$ passes to the context:
 \todo{make this sentence english… ``passes to the context''? -nj}
 
 \begin{lemma}[A.6]
@@ -1066,7 +1066,7 @@ little lemma that prooves that $\longrightarrow^*$ passes to the context:
 \end{lemma}
 
 \begin{proof}
-  We'll only proove the fourth one, by induction on the proof
+  We'll only prove the fourth one, by induction on the proof
   $t_1 \longrightarrow^* t_1'$. By definition of $\longrightarrow^*$ as the
   reflexive transitive closure or $\longrightarrow$, we have three cases:
   \begin{enumerate}
@@ -1075,7 +1075,7 @@ little lemma that prooves that $\longrightarrow^*$ passes to the context:
       \longrightarrow \tmif{t_1'}{t_2}{t_3}$ and thus $\tmif{t_1}{t_2}{t_3}
       \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$.
       
-    \item the case where $t_1 = t1'$ gives us
+    \item the case where $t_1 = t_1'$ gives us
       $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$ by
       reflexivity of $\rightarrow^*$
     
@@ -1092,7 +1092,7 @@ little lemma that prooves that $\longrightarrow^*$ passes to the context:
 The \beluga proof can seem really straightforward, but infact there's a little
 problem: when we say ``if $t_1 \rightarrow^* t_1'$ then {\bf for all terms
 $t_2$ and $t_3$,} $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$,
-we quantify over $t_2$ and $t_3$. This is often said implicitely, which can be
+we quantify over $t_2$ and $t_3$. This is often said implicitly, which can be
 even more misleading\todo{Is misleading a correct word here? -nj}.
 
 In \beluga, we will have to write this quantification explicitely. Have a look:
