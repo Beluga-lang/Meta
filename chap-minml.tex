@@ -1,10 +1,6 @@
-\chapter{The Basics: Mechanizing languages and proofs}
 
-\begin{quote}
-``A language that doesn't affect the way you think about programming, is
-not worth knowing.''
-\hfill - Alan Perlis
-\end{quote}
+
+\chapter{Encoding the language and its definitions}
 
 Definitions of programming languages  typically cover three fundamental aspects:
 the grammar  of the language,  i.e. what are syntactically  well-formed terms in
@@ -13,10 +9,7 @@ given term,  and its  type structure, i.e. what are  well-typed expressions.  We
 revisit  these concepts  for  a small language  containing booleans  and numbers
 following \citep[Ch 3,Ch 8]{TAPL} in  preparation for representing this language
 together with its operational semantics and type system in \beluga.
-
-\section{Encoding the language and its definitions}
-
-\subsection{Terms: Booleans and Numbers}
+\section{Terms: Booleans and Numbers}
 
 Let  us  consider  a simple language  containing booleans,  if-expressions,  and
 numbers together  with simple operations  that allow us  to test whether a given
@@ -66,7 +59,7 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 % We can declare infix
 % operator by using the keyword \lstinline!%infix!.
 
-\subsection{Small Step Semantics}
+\section{Small Step Semantics}
 
 Next,  we define  the small-step semantics  for our  little language.  This will
 describe  how  we evaluate  a  given term.  To give  a  deterministic evaluation
@@ -269,7 +262,7 @@ Here \lstinline!e1! stands for the derivation
 The name \lstinline!e2! stands for the derivation consisting of only
 the rule $\EPredSucc$.
 
-\subsection{Typing Rules}
+\section{Typing Rules}
 
 Finally, we remark that following these ideas, we can encode typing rules for
 our term language by representing the typing judgment $t : T$ using the type
@@ -330,7 +323,7 @@ LF hastype : term -> tp -> type =
 ;
 \end{lstlisting} 
 
-\section{Encoding Proofs}
+\chapter{Encoding Proofs by Structural Induction}
 
 We now discuss some standard properties about languages which are also discussed
 in \cite{TAPL} and show how we can represent such proofs as total functions that
@@ -345,7 +338,7 @@ manipulate and analyze derivation trees. In particular, we illustrate:
 
 We develop each example step-wise using the interactive programming features in \beluga.
 
-\subsection{Type preservation: A Simple Proof by Structural Induction} The first property we re-visit is type
+\section{Type preservation} The first property we re-visit is type
 preservation. In particular, we write $\vdash t : T$ and $\vdash t
 \Steps t'$ to clearly state that we only consider closed terms.
 
@@ -622,7 +615,7 @@ fn d => fn s => case s of
 \end{lstlisting}
 
 
-\subsection{Uniquenss of Small-step Evaluation: Proving something is impossible}
+\section{Uniquenss of Small-step Evaluation}
 Next, we consider the proof that evaluation using the small-step rules yields a
 unique value. This is an interesting proof because we must argue that values do
 not step, i.e. there aren't any rules that apply. For \lstinline!zero!,
@@ -813,7 +806,7 @@ stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.
 \end{enumerate}
 
 
-\subsection{Termination of Well-typed Terms}
+\section{Termination of Well-typed Terms}
 Our goal is to prove that the evaluation of well-typed terms halts. In
 fact we already proved progress, i.e. evaluation cannot get stuck on
 well-typed terms, i.e. either a well-typed term yields a value or we
@@ -985,8 +978,8 @@ fn d => case d of
 ;
 \end{lstlisting}
 
-% \section{Exercise 3.5.17}
-\subsection{Relating small-step and big-step semantics}
+% \chapter{Exercise 3.5.17}
+\section{Relating small-step and big-step semantics}
 
 
 \paragraph{Definition of the big-step semantics}
@@ -1296,12 +1289,12 @@ $\tmif$ cannot be a value. No rule of value can apply except the
 
 The full proof can be found\todo{where? -nj}.
 
-\section{How to Trust Proof Environments}
-How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
+% \chapter{How to Trust Proof Environments}
+% How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
 
-In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
+% In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
 
-The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
+% The ultimate goal is to translate \beluga programs to a primitive recursive core language that would not only guarantee that the given program is well-typed but also that it is total. Again we would not trust the elaboration, but verify after the fact by type-checking our primitive recursive core and proving the elaboration sound.
 
 
 %%% Local Variables:
