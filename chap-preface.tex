@@ -1,33 +1,46 @@
 \chapter*{Preface}
 This book provides an introduction to mechanizing the meta-theory of programming languages. Mechanizing formal systems and proofs about them plays an increasingly important role in this area and being literate in mechanizing formal systems and proofs about them  has become essential for students and researchers in programming languages and type systems. More importantly, mechanizing programming language theory will provide a deeper understanding, allows easy  exploration of variations and extensions, and provides immediate feedback.
 
-This exposition is intended for a broad range of readers, from advanced undergraduates to PhD students and researchers.  It is written as a companion to B. Pierce's book ``Types and Programming Languages (TAPL)'' that provides an introduction to how to mechanize the meta-theory of types and programming languages. While it is meant to be read  at the same time as TAPL, we provide enough context and background that it should also be easily accessible to a reader who has read TAPL in the past or has already basic knowledge of types and programming languages. 
+This exposition is intended for a broad range of readers, from
+advanced undergraduates to PhD students and researchers.  It is
+written as a companion to B. Pierce's book ``Types and Programming
+Languages (TAPL)'' that provides an introduction to how to mechanize
+the meta-theory of types and programming languages. While it is meant
+to be read  at the same time as TAPL, we provide enough context and
+background that it should also be easily accessible to a reader who
+has read TAPL in the past or has already basic knowledge of types and
+programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}.
 
-Here is a roadmap to the core:
 
-\begin{center}
-\begin{tabular}{p{9cm}|p{2.25cm}|p{2.75cm}}
+\begin{figure}
+  \centering
+\begin{tabular}{p{8cm}|p{2.4cm}|p{3.25cm}}
  Topic & TAPL & META \\
 \hline  
-Preliminaries & CH1, CH2 & CH 1\\
-Basic Arith. Terms, Types and Proofs & CH3, CH8 &  \\
+\textbf{Basics} & & \\\hline\hline
+Preliminaries & CH~1, CH~2 & CH \ref{chap:basic}\\
+Basic Arith. Terms, Types and Proofs & CH~3, CH~8 &  \\
 \hline  
-Encoding Basic Terms and Types & & CH 2.1, CH2.2 \\
-Encoding Basic Proofs as Functions & & CH 2.3 \\
-\hline  
+Encoding Basic Terms and Types & & CH \ref{sec:terms-basic}, CH \ref{sec:types-basic} \\
+Encoding Basic Proofs as Functions & & CH \ref{chap:proofs-basic} \\
+\hline  \hline
+\textbf{Intermediate} & & \\\hline \hline
 Untyped Lambda-calculus & CH 5  & \\
-Encoding Variables and Binders & & CH 3.2 \\
+Encoding Variables and Binders & & CH \ref{sec:debruijn}, CH \ref{sec:HOAS-var} \\
 \hline  
 Typed Lambda-Calculus & CH 8  & \\
-Encoding Hypothetical Derivations, i.e. Derivations that depend on Assumptions & & CH3.3\\
-Encoding Proofs about Closed Derivations & & CH3.4 \\
-Encoding Proofs about Hypothetical Derivations & & CH3.5 \\
-\hline
-Normalization & CH 12 & \\
-Encoding Normalization Proofs & & CH 4 \\
-\end{tabular}
-\end{center}
-
+Encoding Hypothetical Derivations, i.e. Derivations that depend on
+Assumptions & & CH \ref{sec:HOAS-Assumptions}\\
+Encoding Proofs about Closed Derivations & & CH \ref{chap:proofs-closed-derivations} \\
+Encoding Proofs about Hypoth. Derivations & & CH \ref{chap:proofs-open-derivations} \\
+\hline\hline
+\textbf{Advanced} & & \\\hline \hline
+Normalization & CH 12 & CH \ref{chap:normalization}\\
+% Encoding Normalization Proofs & & CH \ref{chap:normalization} \\
+\end{tabular} 
+  \caption{Roadmap}
+  \label{fig:roadmap}
+\end{figure}
 There are also interesting further extensions to explore; for those only Beluga code exists at this point without a detailled explanation. 
 
 \begin{center}

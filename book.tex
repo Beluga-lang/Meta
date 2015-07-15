@@ -1,29 +1,27 @@
-\documentclass[12pt, draft]{book}
+\documentclass[12pt,draft]{book}
 \input{prelude}
 
 \begin{document}
-
+% \makeindex
 \pagestyle{empty}
 \input{top}
+
 \tableofcontents
+
 \listoftodos % only appears if the document was generated as a draft
 
 \pagestyle{plain}
 \input{chap-preface}
 \input{chap-introduction}
-\part{The Basics: Mechanizing languages and proofs}
-\begin{quote}
-``A language that doesn't affect the way you think about programming, is
-not worth knowing.''
-\hfill - Alan Perlis
-\end{quote}
+\part{Basics: Mechanizing Simple Languages and Proofs}
 
 \input{chap-minml}
 
-\part{}
+\part{Intermediate: Mechanizing Languages with Binders}
 \input{chap-binders}
 
-\part{}
+\part{Advanced}
+%:
 \input{chap-norm}
 
 \appendix
