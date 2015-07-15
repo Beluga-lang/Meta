@@ -9,7 +9,8 @@ the meta-theory of types and programming languages. While it is meant
 to be read  at the same time as TAPL, we provide enough context and
 background that it should also be easily accessible to a reader who
 has read TAPL in the past or has already basic knowledge of types and
-programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}.
+programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}. The material from the core covers about one semester's worth of material and has been used at McGill University for teaching the course ``Language-based security'', a course open to advanced undergraduates and beginning graduate students and leaves room to either explore more in depth some mechanizations or explore extensions.
+
 
 
 \begin{figure}
@@ -57,7 +58,6 @@ Bounded Quantification & CH 26 & Beluga Code \\
 \end{center}
 
 
-The material from the core covers about one semester's worth of material and has been used at McGill University for teaching the course ``Language-based security'', a course open to advanced undergraduates and beginning graduate students and leaves room to either explore more in depth some mechanizations or explore extensions.
 
 A key question when mechanizing formal systems and proofs is the choice of proof environment.  We have chosen here Beluga, a dependently typed programming and proof environment as it directly supports key and common concepts that frequently arise when describing formal systems and derivations within them; in particular it provides infrastructure for modelling variable binders and their scope, it supports first-class contexts to abstract, manage, and manipulate a set of assumptions, it support modelling derivations that depend on assumptions, and has built-in first-class (simultaneous) substitutions.  As such it provides one of the most advanced infrastructures for such an endeavor. As we will show,  the theory of programming languages does
 not require a deep and complicated mathematical apparatus, but can be carried out in a concrete, intuitive, and computational way, when the right abstractions are provided. 

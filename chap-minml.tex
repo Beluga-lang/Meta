@@ -8,15 +8,18 @@ not worth knowing.''
 \hfill - Alan Perlis
 \end{quote}
 
-Definitions of programming languages  typically cover three fundamental aspects:
+We beging our gentle introduction mechanizing languages and proofs by
+considering a simple language with arithmetic and boolean
+expressions. In general, definitions of programming languages
+typically cover three fundamental aspects: 
 the grammar  of the language,  i.e. what are syntactically  well-formed terms in
 the language,  its operational semantics,  i.e. how do we execute and evaluate a
 given term,  and its  type structure, i.e. what are  well-typed expressions.  We
 revisit  these concepts  for  a small language  containing booleans  and numbers
 following \citep[Ch 3,Ch 8]{TAPL} in  preparation for representing this language
 together with its operational semantics and type system in \beluga.
-\section{Terms}\label{sec:terms-basic}
 
+\section{Terms}\label{sec:terms-basic}
 Let  us  consider  a simple language  containing booleans,  if-expressions,  and
 numbers together  with simple operations  that allow us  to test whether a given
 number is zero (see \cite[Ch 3, Fig 3-1,Fig 3-2]{TAPL}). We define numbers using
@@ -51,7 +54,9 @@ LF term : type =
 ;
 \end{lstlisting}
 
-To illustrate consider a few examples:
+To illustrate consider a few examples. We write in sanserif font what
+we would write on paper and use type writer font for its equivalent
+representation in \beluga.
 
 \begin{center}
 \begin{tabular}{l@{\quad is represented as \quad}l}
@@ -66,9 +71,8 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 % operator by using the keyword \lstinline!%infix!.
 
 \section{Semantics}
-
-Next,  we define  the small-step semantics  for our  little language.  This will
-describe  how  we evaluate  a  given term.  To give  a  deterministic evaluation
+Next, we define how to evaluate and execute a given term. Following
+\cite{TAPL}, we define  a small-step semantics  for our  little language. To give  a  deterministic evaluation
 strategy,  it is convenient to first define the values of our language.  In
 \cite{TAPL}, we distinguished between terms and values in the grammar itself and
 we think of values  as a sub-class of terms;  here we take  a slightly different
