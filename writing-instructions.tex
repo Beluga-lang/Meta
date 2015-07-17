@@ -46,7 +46,7 @@ In particular, use \verb#\bnfas# and \verb#\bnfalt# rather than \verb#::=# \verb
 \multicolumn{2}{l}
   {\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
 \infer[\VZero]{\tmzero \Value}{} &
-\infer[\VSuc]{(\tmsucc t) \Value}{t \Value} \\[1em]
+\infer[\VSucc]{(\tmsucc t) \Value}{t \Value} \\[1em]
 \infer[\VTrue]{\tmtrue \Value}{} &
 \infer[\VFalse]{\tmfalse \Value}{}
 \end{array}
@@ -57,7 +57,7 @@ The resulting array is:
 \begin{array}{l@{\quad}l}
 \multicolumn{2}{l}{\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
 \infer[\VZero]{\tmzero \Value}{} &
-\infer[\VSuc]{(\tmsucc t) \Value}{t \Value} \\[1em]
+\infer[\VSucc]{(\tmsucc t) \Value}{t \Value} \\[1em]
 \infer[\VTrue]{\tmtrue \Value}{} &
 \infer[\VFalse]{\tmfalse \Value}{}
 \end{array}

@@ -3,9 +3,11 @@
 So far we have considered the representation of a simple language with
 arithmetic expressions and booleans together with proofs about it. In this
 chapter, we grow this language to include variables, functions, and function applications,
-or more generally constructs that allow us to abstract over variables.
-
-Let's recall our grammar for lambda-terms:
+or more generally constructs that allow us to abstract over
+variables. We begin by considering a small fragment of the
+lambda-calculus where we define terms using variables, function
+abstraction, and function application. We refer the reader to for
+example \citep[Ch 5]{TAPL} for a more detailed introduction.
 
 \[
 \begin{array}{ll@{\bnfas}l}
@@ -13,11 +15,11 @@ Let's recall our grammar for lambda-terms:
 \end{array}
 \]
 
-The main question we are interested in is the following: How do we
-represent this grammar in an implementation? - Clearly, we need to
+The main question we are interested here in is the following: How do we
+represent this grammar in an proof assistant or programming environment? - Clearly, we need to
 face the issue of how to represent variables.
 
-The first option is to use a standard "named" representation of
+The most straightforward answer to this question is to use a standard "named" representation of
 $\lambda$-terms, where variables are treated as labels or strings. In
 this approach, one has to explicitly handle $\alpha$-conversion when
 defining any operation on the terms. The standard Variable Convention
@@ -31,9 +33,9 @@ that:
 \end{enumerate}
 
 In practice this approach is cumbersome, inefficient, and often error-prone. It
-has therefore led to the search for different representations of such terms.
-
-We will focus on two approaches here:
+has therefore led to the search for different representations of such
+terms. Many such approaches exist (see \cite{Aydemir:TechReport09} for
+a good overview), but we will focus on two approaches here:
 
 \begin{itemize}
 \item De Bruijn indices: As the name already indicate, this approach
@@ -47,36 +49,38 @@ We will focus on two approaches here:
 
 \item Higher-order abstract syntax
   \cite{Pfenning88pldi}\index{Higher-order abstract syntax}: an appeal to
-  higher-order representations where the binder is treated as a true
-  function. In such representations, the issues of
-  $\alpha$-equivalence, substitution, etc. are identified with the
+  higher-order representations where the binder are modelled using 
+  function. These functions are typically very weak and only model the
+  scope of variables in an abstract syntax tree, but do not allow recursion or pattern
+  matching. In such representations, the issues of
+  $\alpha$-equivalence, substitution, etc. are identified with the 
   same operations in a meta-logic.
 \end{itemize}
 
 It is worth pointing out that although we may prefer one of these two
-representations for internally working with binders, the named
-representation of $\lambda$-terms is more pervasive and can be more
-immediately understandable by others because the variables can be
+representations for modelling binders in a proof and programming environment, the named
+representation of $\lambda$-terms has one important advantage: it can be 
+immediately understood by others because the variables can be
 given descriptive names. Thus, even if a system uses De Bruijn indexes
 internally, it will present a user interface with names.
 
 
-\paragraph{Alternative name representations:}
-De Bruijn indexes are not the only representation of binders that
-obviates the problem of $\alpha$-conversion. Among named
-representations, the nominal approaches of Pitts and Gabbay
-\cite{Gabbay:LICS99} is one approach, where the representation of a
-binder is treated as an equivalence class of all terms rewritable to
-it using variable permutations. This approach is taken by the Nominal
-Datatype Package of Isabelle/HOL.
+% \paragraph{Alternative name representations:}
+% De Bruijn indexes are not the only representation of binders that
+% obviates the problem of $\alpha$-conversion. Among named
+% representations, the nominal approaches of Pitts and Gabbay
+% \cite{Gabbay:LICS99} is one approach, where the representation of a
+% binder is treated as an equivalence class of all terms rewritable to
+% it using variable permutations. This approach is taken by the Nominal
+% Datatype Package of Isabelle/HOL.
 
-When reasoning about the meta-theoretic properties of a deductive
-system in a proof assistant, it is sometimes desirable to limit
-oneself to first-order representations and to have the ability to
-(re)name assumptions. The locally nameless approach
-\cite{Aydemir:POPL08} uses a mixed representation of variables - De Bruijn indexes for bound variables and
-names for free variables - that is able to benefit from the
-$\alpha$-canonical form of De Bruijn indexed terms when appropriate.
+% When reasoning about the meta-theoretic properties of a deductive
+% system in a proof assistant, it is sometimes desirable to limit
+% oneself to first-order representations and to have the ability to
+% (re)name assumptions. The locally nameless approach
+% \cite{Aydemir:POPL08} uses a mixed representation of variables - De Bruijn indexes for bound variables and
+% names for free variables - that is able to benefit from the
+% $\alpha$-canonical form of De Bruijn indexed terms when appropriate.
 
 
 \section{De Bruijn Indices}\label{sec:debruijn}
@@ -165,40 +169,40 @@ assume that we have a context where we already accumulated variables,
 i.e. we may have already generated some variable names for indices we
 encountered.
 
-\subsection*{Substitution} Substitution for de Bruijn terms is tedious
-and crucially relies on properly shifting variables.
+% \subsection*{Substitution} Substitution for de Bruijn terms is tedious
+% and crucially relies on properly shifting variables.
 
 
-$\ShiftBy n c T$ means we shift all free variables in T (i.e. all
-variables greater than $c$) by $n$.
+% $\ShiftBy n c T$ means we shift all free variables in T (i.e. all
+% variables greater than $c$) by $n$.
 
-For example, $\shiftn 2 (\lamdb \lamdb 1 \app (2 \app 4))$ should yield
-$(\lamdb \lamdb 1 \app (2 \app 6))$. We assume some simplification rules
-such as: $\shiftn n (\shiftn k I) = \shiftn {n+k} I$
+% For example, $\shiftn 2 (\lamdb \lamdb 1 \app (2 \app 4))$ should yield
+% $(\lamdb \lamdb 1 \app (2 \app 6))$. We assume some simplification rules
+% such as: $\shiftn n (\shiftn k I) = \shiftn {n+k} I$
 
-\[
-\begin{array}{l@{\;=\;}ll}
-\ShiftBy n c I & I  & \mbox{if } k < c \\
-               & \shiftn n I &\mbox{if } k \geq c \\
-\ShiftBy n c (\lamdb T) & \lamdb (\ShiftBy n {(c+1)} T)\\
-\ShiftBy n c (T \app S) & (\ShiftBy n c T) \app (\ShiftBy n c S)
-\end{array}
-\]
+% \[
+% \begin{array}{l@{\;=\;}ll}
+% \ShiftBy n c I & I  & \mbox{if } k < c \\
+%                & \shiftn n I &\mbox{if } k \geq c \\
+% \ShiftBy n c (\lamdb T) & \lamdb (\ShiftBy n {(c+1)} T)\\
+% \ShiftBy n c (T \app S) & (\ShiftBy n c T) \app (\ShiftBy n c S)
+% \end{array}
+% \]
 
 
-Shifting terms is expensive. Therefore different mechanisms have
-been devised, such as the explicit substitution calculus, where we
-apply substitutions lazily, i.e. only when needed. In the explicit
-substitution calculus we always think of a term $T$ together with a
-simultaneous substitution $\sigma$. Only when we need to compare a term
-$T[\sigma]$ with another term $S[\sigma']$, will we start to apply
-$\sigma$ to $T$ and  apply $\sigma'$ to $S$. However, we will not
-eagerly \change{Reword}apply first compute the result of applying $\sigma$ to the
-term $T$ and similarly compute the result of applying $\sigma'$ to
-$S$. If $T$ and $S$ are large terms, this may require us to traverse
-two large terms; yet, if $T$ and $S$ differ with respect to their top
-symbol, we can detect early, before pushing the substitutions through
-that these two terms are different.
+% Shifting terms is expensive. Therefore different mechanisms have
+% been devised, such as the explicit substitution calculus, where we
+% apply substitutions lazily, i.e. only when needed. In the explicit
+% substitution calculus we always think of a term $T$ together with a
+% simultaneous substitution $\sigma$. Only when we need to compare a term
+% $T[\sigma]$ with another term $S[\sigma']$, will we start to apply
+% $\sigma$ to $T$ and  apply $\sigma'$ to $S$. However, we will not
+% eagerly \change{Reword}apply first compute the result of applying $\sigma$ to the
+% term $T$ and similarly compute the result of applying $\sigma'$ to
+% $S$. If $T$ and $S$ are large terms, this may require us to traverse
+% two large terms; yet, if $T$ and $S$ differ with respect to their top
+% symbol, we can detect early, before pushing the substitutions through
+% that these two terms are different.
 
 
 
@@ -213,7 +217,7 @@ syntax}: our foundation, called the logical framework LF
 \cite{Harper93jacm} allows us to represent binders via binders in our
 data-language.
 
-For example, we can declare a data-type \lstinline!term! in Beluga,
+For example, we can declare a type \lstinline!term! in Beluga,
 which has two constructors.
 
 \begin{lstlisting}
@@ -228,7 +232,7 @@ must be expressions. The constructor \lstinline!lam! takes in one
 argument which is in fact a function! Note that for simplicity, we do
 not represent the type annotation on the function which is present in
 our grammar.
-
+%
 Let's look at a few examples:
 % \begin{center}
 %   \begin{tabular}{lp{0.25cm}l}
@@ -257,7 +261,7 @@ Let's look at a few examples:
 \end{tabular}
 \end{center}
 
-Note that the type of \lstinline!\x. x! is \lstinline!exp -> exp!. So,
+Note that the type of \lstinline!\x.x! is \lstinline!exp -> exp!. So,
 we represent binders  via lambda-abstractions in our
 meta-language. This idea goes back to Church. One major advantage is
 that we push all $\alpha$-renaming issues to the Beluga developer. It
@@ -271,7 +275,8 @@ Why is this great for the user of Beluga (or any other such system such as Twelf
 have \lstinline!lam \x. lam \y. app x y! and we would like to replace
 \lstinline!x! in \lstinline!lam \y. app x y! with the term
 \lstinline!lam \z.z!, then we simply say
-\lstinline!(\y. lam \y. app x y) (lam \z.z)!.
+\lstinline!(\y. lam \y. app x y) (lam \z.z)!, i.e. we apply the
+LF-abstraction \lstinline!(\y. lam \y. app x y)! to an argument.
 
 This will come in particularly handy when we are representing our small-step
 evaluation rules. Let us recall our rules for evaluating function application.
@@ -287,7 +292,7 @@ evaluation rules. Let us recall our rules for evaluating function application.
 \end{array}
 \]
 
-To represent evaluation, we again revisit our data-type
+To represent evaluation, we revisit our type family
 \lstinline!step! and define three constructors, each one corresponding to one of
 the rules in the operational semantics. The representation for $\EAppArgStep$
 and $\EAppFnStep$ follows the previous ideas and is straightforward. For
@@ -314,11 +319,10 @@ correspond directly to derivations using the rules $\EAppArgStep$,
 $\EAppFnStep$, and  $\EAppBeta$. This follows the same principles as in the
 previous chapter.
 
-We can also revisit and prove uniqueness of evaluation and the fact that values
-do not step. The proofs are encoded as recursive functions.
+% We can also revisit and prove uniqueness of evaluation and the fact that values
+% do not step. The proofs are encoded as recursive functions.
 
-Let's practice:
-
+\paragraph{Exercises}$\;$\\
 \begin{Exercise}
 Extend the language with a let-value-construct.
 \end{Exercise}
@@ -348,6 +352,10 @@ This exercise needs a solution.
 \end{Answer}
 
 
+\begin{Exercise}
+Extend the proof for uniqueness of evaluation we developed in the
+previous Chapter in Section \ref{sec:unique-eval}.
+\end{Exercise}
 
 \subsection{Representing Assumptions }\label{sec:HOAS-Assumptions}
 We now consider how to represent typing derivations. Recall that we can
@@ -356,9 +364,9 @@ represent typing derivations with explicit contexts and without
 
 \[
 \begin{array}{c@{\qquad}c}
-\multicolumn{2}{l}{\mbox{Typing rules with implicit contexts using the judgment \fbox{$M:T$}}} \\[1em]
+\multicolumn{2}{l}{ \fbox{$M:T$} \quad \mbox{$M$ has type $T$ (implicit contexts)}} \\[1em]
 \infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
-                 {\infer*{M:S}{\infer[u]{x:T}{}}} &
+                 {\hypo{\quad\infer[u]{x:T}{}}{M:S~~}} &
 \infer[\TApp]{M\;N : S}{M : T \arrow S & N:T}
 \end{array}
 \]
@@ -381,18 +389,22 @@ assumptions.
 
 As an alternative, we can re-state the rules using an explicit context for
 book-keeping; this also is often useful when we want to state properties about
-our system and about contexts in particular. We will use for the judgment $M:T$
-the clearer judgment $\tmhastype M T$.
-
-
+our system and about contexts in particular. To make also the
+relationship between the term $M$ and the type $T$ more explicit, we
+re-formulate the previous typing rules using the judgment: $\Gamma
+\vdash \tmhastype M T$ which can be read as: ``term $M$ has type $T$
+in the context $\Gamma$.''
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\mbox{Typing rules with explicit contexts using the judgment
-    \fbox{$\Gamma \vdash \tmhastype M T$}}} \\[1em]
+\multicolumn{1}{l}{\fbox{$\Gamma \vdash \tmhastype M
+    T$}\quad\mbox{Term $M$ has type $T$ in the context $\Gamma$
+    (explicit context)} } 
+\\[1em]
 \infer[u]{\Gamma \vdash \tmhastype x T}{u:\tmhastype x T \in \Gamma} \qquad
 \infer[\TFn^{x,u}]{\Gamma \vdash \tmhastype {(\lam x.M)} {(T \arrow S)}}
-                 {\Gamma, u:\tmhastype x T \vdash \tmhastype M S}\\[1em]
+                 {\Gamma, u:\tmhastype x T \vdash \tmhastype M S}
+\\[1em]
 \infer[\TApp]{\Gamma \vdash \tmhastype {(M \app N)} S}
              {\Gamma \vdash \tmhastype M (T \arrow S)
   & \Gamma \vdash \tmhastype N T}
@@ -406,7 +418,7 @@ assumptions explicit and provides an explicit rule for looking up variables.
 
 When we encode typing rules as a data-type, the first formulation with implicit
 contexts is particularly interesting and elegant. Why? - Because, we can read the
-rule $\TFn$ as follows: $\lam x.M$ has type $T \arrow S$, if given a variable
+rule $\TFn$ in the implicit context formulation as follows: $\lam x.M$ has type $T \arrow S$, if given a variable
 $x$ and an assumption $u$ that stands for $x:T$ we can show that $M$ has type
 $S$, i.e. we can construct a derivation for $M:S$.
 
@@ -422,8 +434,8 @@ can be obtained for free by simply applying the function that stands for `Given
 $x$ and $u$, we can construct a derivation $M:S$''
 
 
-Let's make this idea concrete. We define the datatype \lstinline!hastype! as
-follows:
+Let's make this idea concrete. We define the relation \lstinline!hastype! as
+a type in LF follows:
 
 \begin{lstlisting}
 LF hastype: term -> tp -> type =
@@ -447,8 +459,7 @@ know that \lstinline!lam! takes in one argument that has type
 \lstinline!term -> term!, i.e. it is an LF-function. Hence writing \lstinline!hastype M S! would be
 giving you a type-error, since the relation \lstinline!hastype! expects an
 object of type \lstinline!term!, not of type \lstinline!term -> term!.
-But what \lstinline!(M x)! in \lstinline!hastype (M x) S! does not seem to
-correspond to anything in the informal rule? - This is a misconception. In the
+But is \lstinline!(M x)!? What does it correspond to in the informal rule? - In the
 informal rule, we required that $x$ is new. It might have been clearer to not
 re-use the variable name $x$ that was occurring bound in $\lam
 x.M$. We restate our previous rule $\TFn$ where we make the possibly necessary
@@ -456,8 +467,8 @@ renaming explicit below.
 
 \[
 \begin{array}{c}
-\infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
-                 {\infer*{[y/x]M:S}{\infer[u]{y:T}{}}}
+\infer[\TFn^{y,u}]{\lam x.M : T \arrow S}
+                 {\hypo{\quad\infer[u]{y:T}{}}{[y/x]M:S}}
 \end{array}
 \]
 

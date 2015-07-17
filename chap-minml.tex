@@ -34,7 +34,7 @@ provide a $\tmpred$-operator.
 \]
 
 The first question  we investigate is  how to define  and represent terms in the
-proof  enviroment  \beluga. To represent  terms  in \beluga,  we declare  a type
+proof  environment  \beluga. To represent  terms  in \beluga,  we declare  a type
 \lstinline!term!  for  terms   together  with  constants  corresponding  to  the
 constructors    $\tmfalse$,   $\tmtrue$,    $\tmzero$,   $\tmsucc$,   $\tmpred$,
 $\tmiszero$,  etc.   More   precisely   we   use   the   logical   framework  LF
@@ -96,15 +96,15 @@ needlessly more complex.
 \[
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
-\infer[\VZero]{\tmzero \Value}{} \qquad
-\infer[\VSucc]{(\tmsucc t) \Value}{t \Value} \qquad
-\infer[\VTrue]{\tmtrue \Value}{} \qquad
-\infer[\VFalse]{\tmfalse \Value}{} \qquad
+\infer[\VZero]{\tmzero \Value}{} \quad
+\infer[\VSucc]{(\tmsucc t) \Value}{t \Value} \quad
+\infer[\VTrue]{\tmtrue \Value}{} \quad
+\infer[\VFalse]{\tmfalse \Value}{} 
 \end{array}
 \]
 
 Here, we identify $\tmzero$ as a value; in addition, $\tmsucc t$ is a
-value provided that $t$ is avalue. We also identify $\tmtrue$
+value provided that $t$ is a value. We also identify $\tmtrue$
 and $\tmfalse$ as values, and say that every numeric value is a value.
 
 We are now ready to define when a term $t_1$ steps to another term $t_1'$ using
@@ -147,7 +147,7 @@ $\VFalse$  together  with  the   inference  rules  $\VSucc$  and  $\VNumValue$.
 Similarly,  we defined inductively  what it means for a term $t_1$  to step to a
 term $t_1'$.
 
-In \beluga, data-types are powerfull enough to encode such definitions
+In \beluga, data-types are powerful enough to encode such definitions
 about  predicates  and  relations.  To represent the judgment  $t \Value$  we
 define  a predicate (type family) \lstinline!value!  and state that it takes
 terms as argument  by declaring its type as \lstinline!term -> type!.  Then each
@@ -180,7 +180,7 @@ We mark here  the term \lstinline!<<N>>! in green  since in practice programmers
 can omit  writing it  and \beluga  will infer it.  The recipe is  ``if we do not
 explicitly quantify over variables in the definition of a constructor, we do not
 need  to pass instantiations  for them when constructing objects  using the said
-constructor.''\index{Type reconstruction}
+constructor.''\index{Type reconstruction}\index{Implicit Arguments}
 
 
 To illustrate consider the following concrete example of proving that
@@ -188,7 +188,7 @@ $\tmsucc (\tmsucc \tmzero)$ is a value and constructing a derivation
 for $\tmsucc (\tmsucc \tmzero) \Value$. %\\[1em]
 %\noindent\vspace{-0.5cm}
 \begin{center}
-\begin{tabular}{l@{~~}c@{}l}
+\begin{tabular}{l@{~}c@{}l}
 $
 \infer[\VSucc]
   { (\tmsucc (\tmsucc \tmzero)) \Value }
@@ -202,7 +202,7 @@ $
 $ & 
 is represented as &
 {\small{
-\lstinline!(v_succ <<(succ z)>> (v_succ <<z>> v_zero))!}}
+\lstinline!(v_succ$\;$<<(succ z)>>$\;$(v_succ$\;$<<z>>$\;$v_zero))!}}
 \end{tabular}  
 \end{center}
 \index{Encoding derivation trees}
@@ -211,10 +211,9 @@ In \beluga, we bind the derivation to the name \lstinline!v! by writing
 \begin{lstlisting}
   let v : [|- value (succ (succ z))] = [|- v_succ (v_succ v_zero)];
 \end{lstlisting}  
-Note,  we in general write
-derivations using \lstinline!|-!.  On the left hand side  of this symbol  we can
-list assumptions and the right hand side describes  what we claim can be derived
-from these assumptions.  For example, we might say:
+Note,  we write derivations using \lstinline!|-!.  On the left hand
+side  of this symbol  we can list assumptions and the right hand side
+describes  what we claim can be derived from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
   let w : [x: term, v: value x |- value (succ (succ x))] =
@@ -224,7 +223,10 @@ from these assumptions.  For example, we might say:
 The  right  hand  side   can  be  read  as:   Assuming  \lstinline!x: term!  and
 \lstinline!v: value x!,  i.e. \lstinline!nv!  is the derivation that states
 that \lstinline!x! is  a numerical value,  then \lstinline!v_succ (v_succ v)!
-is the witness for the fact that \lstinline!succ (succ x)! is a value.
+is the witness for the fact that \lstinline!succ (succ x)! is a
+value. On paper we usually omit $\vdash$, if there are no assumptions,
+i.e. the objects or derivations we describe are closed.
+
 
 We can similarly  encode the small-step relation  $t_1 \Steps t_1'$  between the
 terms $t_1$ and $t_1'$ using the type family/relation \lstinline!step!.
@@ -277,7 +279,7 @@ the rule $\EPredSucc$.
 \section{Typing}\label{sec:types-basic}
 Types allow us to approximate the runtime behaviour of programs. Types
 classify expressions according to their values, i.e. the value they
-compute. In our simple language with arithmentic and boolean expresions, we have
+compute. In our simple language with arithmetic and boolean expressions, we have
 only two types, namely $\Bool$ and $\Nat$, corresponding to the two
 kinds of values.
 
@@ -389,7 +391,7 @@ recursive call. We also note that we wrote $t : T$ (or $t \Steps t'$
 resp.), but to emphasize that both the typing derivation and the
 stepping derivation are closed and do not depend on any assumptions we
 write $\vdash t:T$ and $\vdash t \Steps t'$ respectively.  This will
-scale as we generalize our language in Chapter \ref{chal:binders} to
+scale as we generalize our language in Chapter \ref{chap:binders} to
 include also variables, functions, recursion, and other constructs
 variable-binding constructs.
 
@@ -479,7 +481,7 @@ not need a name for it, since it does not play a role in the
 proof. For example, when representing
 $\S =
 \ianc{v \Value}{\tmpred ({\tmsucc v}) \Steps v}{\EPredSucc}$ we simply
-write \lstinline![|-e_pred_suc _]! since the subderivation
+write \lstinline![|-e_pred_suc _]! since the sub-derivation
 representing $v \Value$ is not used in proving that types are preserved.
 \\[1em]
 \emph{Convention:} Variables describing sub-derivations,
@@ -499,7 +501,7 @@ stand for. In this particular case, \lstinline!M = (pred z)! and
 assumption and we stated ``by inversion on $\TPred$'' which indicated
 that there was exactly one case.
 
-While we certainly can write another case-expression analyzing
+While we can write another case-expression analyzing
 \lstinline!d! in the proof, \beluga provides syntactic sugar for
 case-expressions with one case; instead of writing
 
@@ -507,7 +509,7 @@ case-expressions with one case; instead of writing
 \lstinline!case d of [ |-t_pred D'] => ? ! we simply write
 \lstinline!let [ |-t_pred D'] = e in ?!.
 
-
+\noindent
 We now have learned that \lstinline!T = nat!.
 
 \begin{lstlisting}
@@ -641,10 +643,10 @@ fn d => fn s => case s of
 \end{lstlisting}
 
 The full proof can be found online in the example directory
-corresponding to this chapter. %  \lstinline!evaluation.bel!.
+corresponding to this chapter (see \lstinline!Part1/type-preservation.bel!). %  \lstinline!evaluation.bel!.
 
 
-\section{Uniquenss of Small-step Evaluation}
+\section{Uniqueness of Small-step Evaluation}\label{sec:unique-eval}
 Next, we consider the proof that evaluation using the small-step rules yields a
 unique value. This is an interesting proof because we must argue that values do
 not step, i.e. there are no rules that apply. For \lstinline!zero!,
@@ -734,8 +736,7 @@ fn s => fn v => case v of
 | [ |-v_true]   => impossible s 
 | [ |-v_false]  => impossible s 
 | [ |-v_z ]     => impossible s 
-| [ |-v_s V']   => let [ |-e_succ S'] = s in values_dont_step [ |-S'] [ |-V']
-;
+| [ |-v_s V']   => let [ |-e_succ S'] = s in values_dont_step [ |-S'] [ |-V'];
 \end{lstlisting}
 
 One may wonder whether we can actually ever execute and run this program; the
@@ -745,12 +746,11 @@ answer is no, since there is no way to provide a derivation
 
 We are now ready to prove that evaluation yields a unique result given the
 small-step semantics. This will illustrate how we can use the lemma \lstinline!values_dont_step!. We only show two cases, but the whole program is
-implemented in file \lstinline!evaluation.bel!.
+available in the example directory corresponding to this chapter (see \lstinline!Part1/unique.bel!).
 
 \begin{lstlisting}
 LF equal: term -> term -> type =
-| ref: equal T T
-;
+| ref: equal T T;
 
 
 rec unique : [|-step M M1] -> [|-step M M2] -> [ |-equal M1 M2] =
@@ -794,17 +794,16 @@ for a derivation \lstinline![|-step (if_then_else true N1 N2) M2]!. Splitting
 using \lstinline![ |-ref]! as a witness.
 
 \item We have used the rule \lstinline!e_if_then_else!. In this case, we have a
-  sub-derivation \lstinline!D: |-step true N'! and \lstinline!M2 = (if_then_else N' N1 N2)!.
-We now use the lemma \lstinline!values_dont_step! passing \lstinline![|-D]! (a
-proof for \lstinline![|-step true N']!) and \lstinline![|-v_true]! (a witness
+  sub-derivation \lstinline!D! that stands for \lstinline![ |-step true N']! and \lstinline!M2 = (if_then_else N' N1 N2)!.
+We now use the lemma \lstinline!values_dont_step! passing \lstinline![|-D]! and \lstinline![|-v_true]! (a witness
 for \lstinline![|-value true]!.
 We therefore obtain an object of type \lstinline![|-not_possible]!; but no
-elements of this type exist.
+elements of this type exist. This case is hence impossible.
 \end{enumerate}
 
-Next, consider the case where \lstinline!s1! describes the derivation
-\lstinline![|-step (if_then_else N N1 N2) (if_then_else N' N1 N2)]! and we pattern match on
-\lstinline![|-e_if_then_else D]! where \lstinline!D! stands for the sub-derivation
+Next, consider the case where \lstinline!s1! is a derivation ending in 
+\lstinline![|-e_if_then_else D]!, i.e. \lstinline!s1! has type 
+\lstinline![|-step (if_then_else N N1 N2) (if_then_else N' N1 N2)]!. Hence \lstinline!D! stands for the sub-derivation 
 \lstinline![|-step N N']!. At this point we know that \lstinline!s2! stands
 for a derivation \lstinline![|-step (if_then_else N N1 N2) M2]!. Splitting
 \lstinline!s2! into cases gives us three sub-cases:
@@ -814,22 +813,28 @@ for a derivation \lstinline![|-step (if_then_else N N1 N2) M2]!. Splitting
   \lstinline!N = true! and \lstinline!M2 = N1!. Moreover,
   \lstinline!D! now stands for the sub-derivation \lstinline![|-step true N']!.
   Using again the lemma \lstinline!values_dont_step!, we show that this is impossible.
-\item We have used the rule \lstinline!e_if_false!. This case is similar to
-  the one for \lstinline!e_if_true!.
-\item We have used the rule \lstinline!e_if_then_else! and we pattern match on
-\lstinline![|-e_if_then_else E]! where \lstinline!E! stands for a sub-derivation
+
+\item We have used the rule \lstinline!e_if_false!. This case is
+  similar to the above.
+
+\item We have used the rule \lstinline!e_if_then_else! and 
+  \lstinline!s2! stands for the derivation tree 
+\mbox{\lstinline![|-e_if_then_else E]!} where \lstinline!E! stands for a sub-derivation
 \lstinline![|-step N N'']! and \lstinline!M2 = (if_then_else N' N1 N2)!.
-We now call recursively \lstinline!unique [|-D] [|-E]! giving us a proof
-\lstinline![|-equal N N']!. By inversion using \lstinline!ref!, we learn that
-\lstinline!N = N'!. We still need to provide a witness for
+We now make a recursive call on the sub-derivations \lstinline!D! and
+\lstinline!E!, i.e. \lstinline!unique [|-D] [|-E]!, which gives us a
+witness for 
+\mbox{\lstinline![|-equal N N']!}. By inversion using \lstinline!ref!, we learn that
+\lstinline!N = N'!. To conclude the proof we need to provide a witness for
 \lstinline![|-equal (if_then_else N N1 N2) (if_then_else N N1 N2)]!. This is easily
 accomplished by \lstinline![|-ref]!. \\[0.5em]
-It might look like we should be able to simply make a recursive call. This is
+It might look like we should be able to simply make a recursive call
+and be done. This is
 however a fallacy, since the type is incorrect. Recall that \lstinline!ref!
 takes in an implicit argument for the term we are actually comparing; therefore
 in the first occurrence \lstinline![|-ref]! stands actually for
 \lstinline![|-ref <<N>>]!, while in the second occurrence it % \lstinline![|-ref]!
-stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.
+stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.\index{Implicit Arguments}
 \end{enumerate}
 
 
@@ -978,7 +983,9 @@ obtain a proof that \lstinline![|- halts N]!.  By inversion, we know that this
 proof has the following shape: \lstinline![|-result MS W]! where \lstinline!MS!
 stands for \lstinline![|-multistep N R]! and \lstinline!W!
 stands for a proof \lstinline![|-value R]!. We now case-analyze
-\lstinline![|-value R]!. If \lstinline!R=z! and we have a derivation
+\mbox{\lstinline![|-value R]!}. 
+
+If \lstinline!R=z! and we have a derivation
 \lstinline![|-v_zero]!, we call our lemma \lstinline!mstep_pred! with
 \lstinline!MS! to obtain a derivation \lstinline!MS'! for
 \lstinline![|-multi_step (pred N) (pred z)]!. What remains is to build a proof
@@ -986,7 +993,22 @@ for \lstinline![|-halts (pred N)]!. First, we build a proof \lstinline![|-v_zero
 that \lstinline![|-value z]!. Second, we build a proof for
 \lstinline![|-multi_step (pred N) z]! using transitivity together with
 \lstinline!MS'! and the derivation \lstinline![|-ms_step e_pred_zero]! for
-\lstinline![|-multi_step (pred z) z]!.
+\mbox{\lstinline![|-multi_step (pred N) z]!}.
+
+If \lstinline!R=succ W! and we have a derivation 
+\lstinline!(v_succ V)!, we call our lemma \lstinline!mstep_pred! with
+\lstinline!MS! to obtain a derivation \lstinline!MS'! for 
+\lstinline![|-multi_step (pred N) (pred (succ W))]!. What remains is to build a proof
+for \lstinline![|-halts (pred N)]! using transitivity together with
+\lstinline!MS'! and the derivation 
+\lstinline![|-ms_step (e_pred_succ V)]!. 
+%for
+%\mbox{\lstinline![|-multi_step (pred N) W]!}.
+
+If \lstinline!R=true! or \lstinline!R=false! then we know by the type
+preservation lemma for multi-step relations implemented by the
+function \lstinline!multi_tps! that we cannot take a step.
+
 
 
 \begin{lstlisting}
@@ -1025,23 +1047,23 @@ rewrite a term, bit by bit, until it eventually becomes a value. On top of this,
 we define a multi-step evaluation relation that allows us to talk about terms
 evaluating (in many steps) to values. An alternative style, called
 {\em big-step} semantics (or sometimes {\em natural} semantics), directly
-formulates the notion of ``this term evaluates to that final value'', written
+formulates the notion of ``the term $t$ evaluates to the final value $v$'', written
 $t \Downarrow v$. The big-step evaluation rules for our language of boolean and
 arithmetic expressions can be described as follows:
 
 % If someone can do something nicer than that:
 \[
-\begin{array}{c}
-\multicolumn{1}{l}{\fbox{$t \Downarrow v$}: \mbox{Term $t$ evaluates to value $v$}}\\[1em]
-  \infer[\BValue]{v \Downarrow v}{v \Value} \qquad
+\begin{array}{c@{\qquad}c}
+\multicolumn{2}{l}{\fbox{$t \Downarrow v$}: \mbox{Term $t$ evaluates to value $v$}}\\[1em]
+  \infer[\BValue]{v \Downarrow v}{v \Value} &
   \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc v_1}{t_1 \Downarrow v_1 & v_1 \NumValue} \\[0.5em]
-  \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} \qquad
+  \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} &
   \infer[\BPredSucc]{\tmpred t_1 \Downarrow v_1}{t_1 \Downarrow \tmsucc v_1}
 \\[0.5em]
-  \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} \qquad
+  \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} &
   \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc v_1} 
 \\[0.5em]
-  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} \qquad
+  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} &
   \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3 & v_3 \Value} \\
 
 \end{array}
@@ -1049,12 +1071,15 @@ arithmetic expressions can be described as follows:
 
 Following the previous principle of encoding judgments such as $t \Downarrow v$
 using predicates (type families), we define in \beluga the relation
-\lstinline!bigstep! between two terms. The fact that the result is always a
-value is enforced and checked in each rule - this is unnecessary, since we can
-in fact prove that the result of evaluating a term always yields a value
-(i.e. value soundness property)\todo{Remove extra checks and state value
-  soundness. -bp}\todo{Problem is that there are the $value$ things, so
-  I'm not sure how to make it clean. I'll take a look. -nj}.
+\lstinline!bigstep! between two terms. In the rules, we do not enforce
+that we always return a value. Rather this is a property we can prove
+and often referred to as value soundness.
+% The fact that the result is always a
+% value is enforced and checked in each rule - this is unnecessary, since we can
+% in fact prove that the result of evaluating a term always yields a value
+% (i.e. value soundness property)\todo{Remove extra checks and state value
+%  soundness. -bp}\todo{Problem is that there are the $value$ things, so
+%  I'm not sure how to make it clean. I'll take a look. -nj}.
 
 \begin{lstlisting}
 LF bigstep : term -> term -> type =
@@ -1115,13 +1140,13 @@ little lemma that proves that $\longrightarrow^*$ passes to the context:
   $\tmiszero$.
 \end{proof}
 
-The \beluga proof can seem really straightforward, but infact there's a little
+The \beluga proof can seem really straightforward, but in fact there's a little
 problem: when we say ``if $t_1 \rightarrow^* t_1'$ then {\bf for all terms
 $t_2$ and $t_3$,} $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$,
 we quantify over $t_2$ and $t_3$. This is often said implicitly, which can be
 even more misleading\todo{Is misleading a correct word here? -nj}.
 
-In \beluga, we will have to write this quantification explicitely. Have a look:
+In \beluga, we will have to write this quantification explicitly. Have a look:
 \todo{Please, can someone explain mlam here or under the proof? -nj}
 
 \begin{lstlisting}
@@ -1156,14 +1181,14 @@ Let's now write the actual proof:
   \item Case $\infer{v \Downarrow v}{}\ \BValue$. By reflexivity of $\rightarrow^*$,
     $v \longrightarrow^* v$.
   \item Case $\infera{\BPredZero}{\tmpred{t_1} \Downarrow \tmzero}
-    {t_1 \Downarrow \tmzero}$. The proof in premice is smaller, and the
+    {t_1 \Downarrow \tmzero}$. The proof in premise is smaller, and the
     proposition applies and gives us one proof: $t_1 \longrightarrow^* \tmzero$.
     We then use it with the lemma A6: $\tmpred{t_1} \longrightarrow^*
     \tmpred{\tmzero} \longrightarrow \tmzero$. And we can conclude thanks to
     transitivity.
   \item Case $\inferaaa{\BIfTrue}{\tmif{t_1}{t_2}{t_3}\Downarrow v_2}
     {t_1 \Downarrow \tmtrue}{t_2 \Downarrow v_2}{v_2 \Value}$. The proofs in the
-    premices are smaller than this one, so the proposition applies and gives us
+    primacies are smaller than this one, so the proposition applies and gives us
     two proofs: $t_1 \longrightarrow^* \tmtrue$ and $t_2 \longrightarrow^* v_2$.
     Using the lemma A6 and the $\EIfTrue$ rule, we have:
     $$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{\tmtrue}{t_2}{t_3}
@@ -1196,8 +1221,8 @@ Let's now write the actual proof:
 
 For this direction, we will not be following the TAPL proof\todo{explain why}.
 
-Let's first proove something weaker, but that can easely imply what we want to
-proove:
+Let's first prove something weaker, but that can easily imply what we want to
+prove:
 
 \begin{proposition}[A9-aux-step]\label{prop_a9_aux_step}
   If $t_1 \longrightarrow t_1' \Downarrow v$ (with $v$ a value),
@@ -1209,7 +1234,7 @@ proove:
   \end{lstlisting}
 \end{proposition}
 
-Indeed, if we have this property, we can easely obtain:
+Indeed, if we have this property, we can easily obtain:
 
 \begin{proposition}[A9-aux]\label{prop_a9_aux}
   If $t_1 \longrightarrow^* t_1' \Downarrow v$ then $t_1 \Downarrow v$.
@@ -1314,16 +1339,16 @@ Let's now proof the hard part:
 \end{proof}
 
 You should have noticed that there's one more subcase in the \beluga code than
-in the writen proof. This case can seem useless, but it must remain here. The
+in the written proof. This case can seem useless, but it must remain here. The
 \BValue rule indeed matches $\tmif{t_1'}{t_2}{t_3} \Downarrow v$ (because the
-\BValue rule can match everythin). We only have to explain then that this
+\BValue rule can match everything). We only have to explain then that this
 $\tmif$ cannot be a value. No rule of value can apply except the
 \lstinline!numeric_value! one, and after that, nothing.
 
 The full proof can be found\todo{where? -nj}.
 
 % \chapter{How to Trust Proof Environments}
-% How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independenlty.
+% How can we trust systems such as \beluga? - This leads to a larger question: how do we trust programming and proof environments? how do we trust theorem provers or other reasoning tools? - Many tools do not provide any witness that would explain how they have arrived at the given result and could be checked independently.
 
 % In \beluga, a given program is elaborated into a core language and all elaborated programs are type-checked in a small core kernel language. We do not trust that elaboration is correct - we verify after the fact. In fact this kernel language and the source code that implements type checking for it is so small that it can be easily verified by directly looking at the source code and the theoretical foundations describing \beluga. Verifying that all recursive calls are well-founded can also be fairly easily verified in this manner; coverage is however more complex.
 
