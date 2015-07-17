@@ -1,3 +1,9 @@
+%{
+  CH 3: Encoding Proofs by Induction
+  CH 3.3: Termination
+  Author: Brigitte Pientka
+
+}%
 
 
 % ----------------------------------------------------------------------------
@@ -99,12 +105,12 @@ fn ms => case ms of
 
 }%
 
-LF steps_to_val: term -> type = 
+LF halts: term -> type = 
 | result: multi_step T T' -> value T'
-       -> steps_to_val T;
+       -> halts T;
 
 
-rec terminate : [|- hastype M T] -> [ |- steps_to_val M] =
+rec terminate : [|- hastype M T] -> [ |- halts M] =
 / total d (terminate m t d)/
 fn d => case d of 
 | [ |- t_true] => [ |- result ms_ref v_true]
