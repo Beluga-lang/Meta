@@ -285,7 +285,7 @@ evaluation rules. Let us recall our rules for evaluating function application.
 \]
 
 To represent evaluation, we again revisit our data-type
-\lstinline!step! and define three constructor, each one corresponding to one of
+\lstinline!step! and define three constructors, each one corresponding to one of
 the rules in the operational semantics. The representation for $\EAppArgStep$
 and $\EAppFnStep$ follows the previous ideas and is straightforward. For
 representing the rule $\EAppBeta$, we take advantage of the fact that
@@ -370,7 +370,7 @@ assumptions.
 {\infer[\TFn^{y,v}]{\lam y.x \app y : \Nat \arrow \Nat}{
  \infer[\TApp]{x \app y : \Nat}
    {\infer[u]{x:\Nat \arrow \Nat}{} &
-    \infer[v]{y:\Nat \arrow \Nat}{}
+    \infer[v]{y:\Nat}{}
    }
  }
 }
@@ -402,7 +402,7 @@ representation the second set of rules makes the context of
 assumptions explicit and provides an explicit rule for looking up variables.
 
 When we encode typing rules as a data-type, the first formulation with implicit
-contexts is particular interesting and elegant. Why? - Because, we can read the
+contexts is particularly interesting and elegant. Why? - Because, we can read the
 rule $\TFn$ as follows: $\lam x.M$ has type $T \arrow S$, if given a variable
 $x$ and an assumption $u$ that stands for $x:T$ we can show that $M$ has type
 $S$, i.e. we can construct a derivation for $M:S$.
@@ -410,10 +410,10 @@ $S$, i.e. we can construct a derivation for $M:S$.
 Note that ``Given $x$ and $u$, we can construct a derivation $M:S$'' is our
 informal description of a function that takes $x$ and $u$ as input and returns a
 derivation $M:S$. This is a powerful idea, since viewing it as a function
-directly enforces that the sope of $x$ and $u$ is only in the derivation for
+directly enforces that the scope of $x$ and $u$ is only in the derivation for
 $M:S$. It also means that if we prove a term $N$ for $x$ and $N:T$ for $u$, we
-should be able to return a derivation $M:S$ where all the $x$ have been replaced
-by $N$ and all the uses of $u$ have been replaced by the proof that $N:T$. As a
+should be able to return a derivation $M:S$ where every $x$ has been replaced
+by $N$ and every use of $u$ has been replaced by the proof that $N:T$. As a
 consequence, the substitution lemma that we have proved for typing derivations
 can be obtained for free by simply applying the function that stands for `Given
 $x$ and $u$, we can construct a derivation $M:S$''
@@ -690,8 +690,8 @@ first describe the shape (i.e. type) of our context using a
 classify contexts. We observe that in our typing rules, we always
 introduce a variable $x$ and the assumption $\tmhastype x T$ at the same
 time.
-To denote that these two assumptions always come in pairs, we are
-writing the keyword \lstinline!block!.
+To denote that these two assumptions always come in pairs, we
+write the keyword \lstinline!block!.
 
 \begin{lstlisting}
 schema tctx = some [t:tp] block (x:exp, _t:type_of x t);
@@ -758,13 +758,13 @@ fn d => fn f => case d of
 \end{lstlisting}
 
 
-We can read this type as follows: For all context \lstinline!\gamma! of
+We can read this type as follows: For every context \lstinline!\gamma! of
 schema \lstinline!tctx!, given a derivation for
 \lstinline!hastype (M ..) T! in the context \lstinline!\gamma! and a derivation for
 \lstinline!hastype (M ..) S! in the context \lstinline!\gamma!, we return a
 derivation showing that \lstinline!eq T S! in the empty context.
 Although we quantified over the context \lstinline!\gamma! at the outside,
-it need not be passed explicitely to a function of this type, but
+it need not be passed explicitly to a function of this type, but
 Beluga will be able to reconstruct it.
 
 We call the type \lstinline![\gamma |-hastype (M ..) T! a contextual type and
@@ -813,7 +813,7 @@ The result of the recursive call is a contextual object of type
 could derive such an object is \lstinline{ref}, and pattern matching
 establishes that \lstinline!arr T S!$=$\lstinline!arr T' S'! and hence
 \lstinline!T! $=$ \lstinline!T'! and \lstinline!S! $=$ \lstinline!S'!.
-Therefore, there is a proof of \lstinline![ |-eq S S'! using the
+Therefore, there is a proof of \lstinline![ |-eq S S']! using the
 rule \lstinline!ref!.
 
  \paragraph{Abstraction case:}
