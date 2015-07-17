@@ -193,7 +193,7 @@ substitution calculus we always think of a term $T$ together with a
 simultaneous substitution $\sigma$. Only when we need to compare a term
 $T[\sigma]$ with another term $S[\sigma']$, will we start to apply
 $\sigma$ to $T$ and  apply $\sigma'$ to $S$. However, we will not
-eagerly apply first compute the result of applying $\sigma$ to the
+eagerly \change{Reword}apply first compute the result of applying $\sigma$ to the
 term $T$ and similarly compute the result of applying $\sigma'$ to
 $S$. If $T$ and $S$ are large terms, this may require us to traverse
 two large terms; yet, if $T$ and $S$ differ with respect to their top
@@ -217,7 +217,7 @@ For example, we can declare a data-type \lstinline!term! in Beluga,
 which has two constructors.
 
 \begin{lstlisting}
-datatype term : type =
+LF term : type =
 | app : term  -> term  -> term
 | lam : (term -> term) -> term
 ;
@@ -280,9 +280,10 @@ evaluation rules. Let us recall our rules for evaluating function application.
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
 \\[1em]
-\infer[\EAppBeta]{(\lam x.M) \app V \Steps [V/x]M}{} \qquad
-\infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \\[1em]
-\infer[\EAppFnStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
+\infer[\EAppFnStep]{M \app N \Steps M'\;N}{M \Steps M'} \qquad
+\infer[\EAppArgStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
+\\[1em]
+\infer[\EAppBeta]{(\lam x.M) \app V \Steps [V/x]M}{V \Value}
 \end{array}
 \]
 
@@ -297,7 +298,7 @@ argument. Hence, we can model the substitution $[V/x]M$ by simply writing
 \lstinline!M V!.
 
 \begin{lstlisting}
-datatype step: term -> term -> type =
+LF step: term -> term -> type =
 | e_app_1    : step M M'
              -> step (app M N) (app M' N)
 | e_app_2    : step N N' -> value V
@@ -425,7 +426,7 @@ Let's make this idea concrete. We define the datatype \lstinline!hastype! as
 follows:
 
 \begin{lstlisting}
-datatype hastype: term -> tp -> type =
+LF hastype: term -> tp -> type =
 | t_lam : ({x:term} hastype x T -> hastype (M x) S)
 	-> hastype (lam M) (arr T S)
 | t_app:  hastype M1 (arr T S) -> hastype M2 T
@@ -590,19 +591,19 @@ highlighting the new parts in green. We also define equality
 explicitly using reflexivity.
 
 \begin{lstlisting}
-datatype term : type =
+LF term : type =
 | app : term  -> term  -> term
 | lam : <<tp>> ->(term -> term) -> term
 ;
 
-datatype hastype: term -> tp -> type =
+LF hastype: term -> tp -> type =
 | t_lam : ({x:term} hastype x T -> hastype (M x) S)
 	-> hastype (lam <<T>> M) (arr T S)
 | t_app:  hastype M1 (arr T S) -> hastype M2 T
 	-> hastype (app M1 M2) S
 ;
 
-datatype eq: term -> term -> type =
+LF eq: term -> term -> type =
 | refl: eq  M M ;
 \end{lstlisting}
 
@@ -901,14 +902,14 @@ Therefore, Beluga supports first class contexts.
 
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
-datatype term   : type =
+LF term   : type =
 | app   : term  -> term  -> term
 | lam   : (term -> term) -> term;
   \end{lstlisting}
 \end{minipage}
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
-datatype term'   : type
+LF term'   : type
 | one    : term'
 | shift  : term'  -> term'
 | lam'   : term'  -> term'
