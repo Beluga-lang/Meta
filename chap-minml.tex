@@ -874,7 +874,7 @@ By structural induction  on $M \MSteps M'$.
 Moreover, we lift type preservation to multi-step relations.
 
 \begin{lemma}[Type preservation for multi-step relation]
-If $M : T$ and $M \MSteps M'$ then $\vdash M':T$.
+If $M : T$ and $M \MSteps M'$ then $M':T$.
 \end{lemma}
 \begin{proof}
 By structural induction on $M \MSteps M'$.
@@ -901,44 +901,47 @@ $M \MSteps V$ and $V \Value$ then $M \Halts$.
 By structural induction on $\proofderiv{\D}{M : T}$. We show a few
 representative cases.
 
-\begin{case}{$\D = \ianc{}{\vdash \tmzero :\Nat}{\TZero}$}
+\begin{case}{$\D = \ianc{}{ \tmzero :\Nat}{\TZero}$}
 $\tmzero \Value$ \hfill by $\VZero$ rule \\
 $\tmzero \MSteps \tmzero$ \hfill by $\MRef$\\
 $\tmzero \Value$ \hfill by definition $\VZero$\\
 $\tmzero \Halts$ \hfill by definition of $\Halts$
 \end{case}
 
-\begin{case}{$\D = \ianc{\above{\D'}{\vdash N : \Nat}}{\vdash (\tmpred N) : \Nat}{\TPred}$}
+\begin{case}{$\D = \ianc{\above{\D'}{ N : \Nat}}{ (\tmpred N) : \Nat}{\TPred}$}
 $N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\S':N \MSteps V$ \hfill by i.h. $\D'$\\[1em]
 %
 \fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$}\\[1em]
 %
 \begin{subcase}{$\V' = \ianc{}{\tmzero \Value}{\VZero}$ \quad and \quad $V = \tmzero$}
-$\S': N \MSteps \tmzero$ \hfill restating assumption $\S'$\\
-$\S_0: (\tmpred N) \MSteps (\tmpred \tmzero)$ \hfill by lemma mstep-pred \\
-$\S_1: (\tmpred \tmzero) \MSteps \tmzero$ \hfill by $\MStep$ using $\EPredZ$\\
-$\S~: (\tmpred N) \MSteps \tmzero$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\proofderiv{\S'}{N \MSteps \tmzero}$ \hfill restating assumption $\S'$\\
+$\proofderiv{\S_0}{(\tmpred N) \MSteps (\tmpred \tmzero)}$ \hfill by lemma mstep-pred \\
+$\proofderiv{\S_1}{(\tmpred \tmzero) \MSteps \tmzero}$ \hfill by $\MStep$ using $\EPredZ$\\
+$\proofderiv{\S}{(\tmpred N) \MSteps \tmzero}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
 $\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
 $W = \tmzero$\\
-$(\tmpred N)\Halts$ \hfill by definition of $\Halts$
+$(\tmpred N)\Halts$ \hfill by definition of $\Halts$\\[1em]
 \end{subcase}
-
+%
+\noindent
 \begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSucc}$ \quad and \quad $V = \tmsucc V'$}
-$\S': N \MSteps (\tmsucc V')$ \hfill restating assumption $\S'$\\
-$\S_0: (\tmpred N) \MSteps (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
-$\S_1: (\tmpred (\tmsucc V')) \MSteps V'$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
-$\S~: (\tmpred N) \MSteps V'$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\proofderiv{\S'}{N \MSteps (\tmsucc V')}$ \hfill restating assumption $\S'$\\
+$\proofderiv{\S_0}{(\tmpred N) \MSteps (\tmpred (\tmsucc V'))}$ \hfill by lemma mstep-pred \\
+$\proofderiv{\S_1}{(\tmpred (\tmsucc V')) \MSteps V'}$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
+$\proofderiv{\S}{(\tmpred N) \MSteps V'}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
 $\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
 $W = V'$\\
-$(\tmpred N)\Halts$ \hfill by definition of $\Halts$
+$(\tmpred N)\Halts$ \hfill by definition of $\Halts$\\[1em]
 \end{subcase}
-
+%
+\noindent
 \begin{subcase}{$\V' = \ianc{}{\tmtrue \Value}{\VTrue}$ \quad and \quad  $V = \tmtrue$}
-$\S': N \MSteps \tmtrue$ \hfill restating assumption $\S'$\\
-$\F~:~ \vdash \tmtrue : \Nat$ \hfill by type preservation for multi-step relations using $\D'$\\
-$~~~ \bot$ \hfill
+$\proofderiv{\S'}{N \MSteps \tmtrue}$ \hfill restating assumption $\S'$\\
+$\proofderiv{\F}{\tmtrue : \Nat}$ \hfill by type preservation for multi-step relations using $\D'$\\
+$~~~ \bot$ \hfill \\[1em]
 \end{subcase}
-
+%
+\noindent
 \begin{subcase}{$\V' = \ianc{}{\tmfalse \Value}{\VFalse}$ \quad and \quad $V = \tmfalse$}
 Similar to the case where $V = \tmtrue$.
 \end{subcase}
@@ -955,11 +958,9 @@ datatype halts: term -> type =
 | result: multi_step M V -> value V
        -> halts M;
 
-
 rec terminate : [|- hastype M T] -> [ |- halts M] =
 / total d (terminate m t d)/
 fn d => ? ;
-
 \end{lstlisting}
 
 Again we encode the case analysis in the proof as a case analysis in the program
@@ -968,7 +969,7 @@ in detail above, however the full proof is implemented in the file
 \lstinline!evaluation.bel!.
 
 For the case where we have \lstinline!d:[|- hastype z nat]! by
-\lstinline![|-t_zero]!, we return \lstinline![|-result ms_ref (v_num v_z)]! that
+\lstinline![|-t_zero]!, we return \lstinline![|-result ms_ref (v_zero)]! that
 stands for a proof \lstinline![|- halts z]!. For the case where we have
 \lstinline!d:[|-hastype (pred N) nat]! by \lstinline![|-t_pred D]! and
 \lstinline!D! stands for a sub-derivation \lstinline![|- hastype N nat]!. By the
@@ -978,10 +979,10 @@ proof has the following shape: \lstinline![|-result MS W]! where \lstinline!MS!
 stands for \lstinline![|-multistep N R]! and \lstinline!W!
 stands for a proof \lstinline![|-value R]!. We now case-analyze
 \lstinline![|-value R]!. If \lstinline!R=z! and we have a derivation
-\lstinline![|-v_num v_z]!, we call our lemma \lstinline!mstep_pred! with
+\lstinline![|-v_zero]!, we call our lemma \lstinline!mstep_pred! with
 \lstinline!MS! to obtain a derivation \lstinline!MS'! for
 \lstinline![|-multi_step (pred N) (pred z)]!. What remains is to build a proof
-for \lstinline![|-halts (pred N)]!. First, we build a proof \lstinline![|-v_num vz]!
+for \lstinline![|-halts (pred N)]!. First, we build a proof \lstinline![|-v_zero]!
 that \lstinline![|-value z]!. Second, we build a proof for
 \lstinline![|-multi_step (pred N) z]! using transitivity together with
 \lstinline!MS'! and the derivation \lstinline![|-ms_step e_pred_zero]! for
@@ -995,20 +996,19 @@ fn d => case d of
 | [ |-t_true]  => ?
 | [ |-t_false] => ?
 | [ |-t_if_then_else D D1 D2] => ?
-| [ |-t_zero] => [ |-result ms_ref (v_num v_z)]
+| [ |-t_zero] => [ |-result ms_ref v_zero]
 | [ |-t_succ D] => ?
 | [ |-t_pred D] => (case terminate [ |-D ] of
-   | [ |-result MS (v_num v_z)] =>
+   | [ |-result MS (v_zero)] =>
      let [ |-MS']         = mstep_pred [ |-MS] in
-       [ |-result (ms_tr MS' (ms_step e_pred_zero)) (v_num v_z)]
-   | [ |-result MS (v_num (v_s V))] =>
+       [ |-result (ms_tr MS' (ms_step e_pred_zero)) v_zero]
+   | [ |-result MS (v_succ V)] =>
      let [ |-MS']         = mstep_pred [ |-MS] in
-       [ |-result (ms_tr MS' (ms_step (e_pred_succ V))) (v_num V)]
+       [ |-result (ms_tr MS' (ms_step (e_pred_succ V)))  V]
    | [ |-result MS v_true] => impossible multi_tps [|-D] [|-MS] 
    | [|-result MS v_false] => impossible multi_tps [|-D] [|-MS] 
  )
-| [|-t_iszero D] => ?
-;
+| [|-t_iszero D] => ? ;
 \end{lstlisting}
 
 % \chapter{Exercise 3.5.17}
