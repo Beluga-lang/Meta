@@ -719,7 +719,7 @@ fn s => fn v => case v of
 Let's consider the case \lstinline![|-v_z] : [|-value zero]!. We argued in the
 proof by ``By inspecting all the existing rules, there exists no $M'$.'' This
 corresponds to case-analyzing \lstinline!s!; however, there are no cases. In
-\beluga, we write \lstinline!impossible s in []! for splitting \lstinline!s! in
+\beluga, we write \lstinline!impossible s! for splitting \lstinline!s! in
 the empty context. It is effectively a case-expression without branches.
 
 For the step-case, the translation of the proof to a program is more
@@ -731,9 +731,9 @@ recursive call.
 rec values_dont_step : [ |-step M M'] -> [ |-value M] -> [ |-not_possible] =
 / total v (values_dont_step m m' s v) /
 fn s => fn v => case v of
-| [ |-v_true]   => impossible s in []
-| [ |-v_false]  => impossible s in []
-| [ |-v_z ]     => impossible s in []
+| [ |-v_true]   => impossible s 
+| [ |-v_false]  => impossible s 
+| [ |-v_z ]     => impossible s 
 | [ |-v_s V']   => let [ |-e_succ S'] = s in values_dont_step [ |-S'] [ |-V']
 ;
 \end{lstlisting}
@@ -758,21 +758,19 @@ rec unique : [|-step M M1] -> [|-step M M2] -> [ |-equal M1 M2] =
 fn s1 => fn s2 => case s1 of
 | [ |-e_if_true]  =>
   (case s2 of
-   | [|-e_if_true]  =>  [ |-ref]
-   | [|-e_if_then_else D]      => impossible values_dont_step [|-D] [|-v_true] in []
-)
+   | [|-e_if_true]        => [|-ref]
+   | [|-e_if_then_else D] => impossible values_dont_step [|-D] [|-v_true] )
+
 | [ |-e_if_false] =>
   (case s2 of
-   | [|-e_if_false] =>  [ |-ref]
-   | [|-e_if_then_else D]      => impossible values_dont_step [|-D] [|-v_false] in []
-)
+   | [|-e_if_false]       => [|-ref]
+   | [|-e_if_then_else D] => impossible values_dont_step [|-D] [|-v_false] )
 
 | [ |-e_if_then_else D] =>
   (case s2 of
-  | [|-e_if_then_else E] =>
-    let [ |-ref] = unique [|-D] [|-E] in  [ |-ref]
-  | [|-e_if_true] => impossible values_dont_step [|-D] [|-v_true] in []
-  | [|-e_if_false] => impossible values_dont_step [|-D] [|-v_false] in [])
+  | [|-e_if_true]        => impossible values_dont_step [|-D] [|-v_true] 
+  | [|-e_if_false]       => impossible values_dont_step [|-D] [|-v_false]
+  | [|-e_if_then_else E] => let [ |-ref] = unique [|-D] [|-E] in  [|-ref] )
 
 | [ |-e_succ D]        => ?
 | [ |-e_pred_zero]     => ?
@@ -843,7 +841,7 @@ can take another step. In this section we prove that we can always
 evaluate a well-typed term to a final value.
 
 \begin{theorem}
-If $\proofderivc{\D}{}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
+If $\proofderiv{\D}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
 \MSteps V$.
 \end{theorem}
 
@@ -876,7 +874,7 @@ By structural induction  on $M \MSteps M'$.
 Moreover, we lift type preservation to multi-step relations.
 
 \begin{lemma}[Type preservation for multi-step relation]
-If $\vdash M : T$ and $M \MSteps M'$ then $\vdash M':T$.
+If $M : T$ and $M \MSteps M'$ then $\vdash M':T$.
 \end{lemma}
 \begin{proof}
 By structural induction on $M \MSteps M'$.
@@ -900,7 +898,7 @@ $M \MSteps V$ and $V \Value$ then $M \Halts$.
 
 
 \begin{proof}
-By structural induction on $\proofderivc{\D}{}{M : T}$. We show a few
+By structural induction on $\proofderiv{\D}{M : T}$. We show a few
 representative cases.
 
 \begin{case}{$\D = \ianc{}{\vdash \tmzero :\Nat}{\TZero}$}
@@ -1006,8 +1004,8 @@ fn d => case d of
    | [ |-result MS (v_num (v_s V))] =>
      let [ |-MS']         = mstep_pred [ |-MS] in
        [ |-result (ms_tr MS' (ms_step (e_pred_succ V))) (v_num V)]
-   | [ |-result MS v_true] => impossible multi_tps [|-D] [|-MS] in []
-   | [|-result MS v_false] => impossible multi_tps [|-D] [|-MS] in []
+   | [ |-result MS v_true] => impossible multi_tps [|-D] [|-MS] 
+   | [|-result MS v_false] => impossible multi_tps [|-D] [|-MS] 
  )
 | [|-t_iszero D] => ?
 ;
