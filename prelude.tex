@@ -32,6 +32,8 @@
 \usepackage{appendix}
 \usepackage{makeidx}
 
+\makeindex
+
 % ---------------------------------------------------------------------------
 % ------------------------------ Todo commmands -----------------------------
 % ---------------------------------------------------------------------------
@@ -303,7 +305,7 @@
 \newcommand {\VZero}         {\ruleName{V-Zero}}
 \newcommand {\VTrue}         {\ruleName{V-True}}
 \newcommand {\VFalse}        {\ruleName{V-False}}
-\newcommand {\VSuc}          {\ruleName{V-Succ}}                 % to be deleted
+\newcommand {\VSucc}         {\ruleName{V-Succ}}                 % to be deleted
 
 \newcommand {\BAnno}         {\ruleName{B-Anno}}
 \newcommand {\BAnnoFn}       {\ruleName{B-Anno-Fn}}
@@ -347,7 +349,7 @@
 % ------------------ Proofs and derivation trees, cases ---------------------
 % ---------------------------------------------------------------------------
 
-\newcommand{\proofderiv}[2]{\mathbin{#1 \; :: \; #2 }}
+\newcommand{\proofderiv}[2]{\mathbin{#1  :: #2 }}
 \newcommand{\proofderivc}[3]{\proofderiv{#1}{#2 \vdash #3}}
 \newenvironment{case}[1]{\paragraph{Case}{#1}\\[1em]}{}
 \newenvironment{basecase}[1]{\paragraph{Base case}{#1}\\[1em]}{}

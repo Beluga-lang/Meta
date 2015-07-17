@@ -1,0 +1,74 @@
+%{
+  CH 2.2:  Semantics
+  Author: Brigitte Pientka
+
+}%
+% ----------------------------------------------------------------------------
+% Small-step operational semantics
+LF step: term -> term -> type =
+| e_if_true      : step (if_then_else true M2 M3) M2
+| e_if_false     : step (if_then_else false M2 M3) M3
+| e_pred_zero    : step (pred z) z
+| e_pred_succ    : value V1
+                   -> step (pred (succ V1)) V1
+| e_iszero_zero  : step (iszero z) true
+| e_iszero_succ  : value V1
+                   -> step (iszero (succ V1)) false
+| e_if_then_else : step M1 M1'
+                   -> step (if_then_else M1 M2 M3) (if_then_else M1' M2 M3)
+| e_succ         : step M1 M1'
+                   -> step (succ M1) (succ M1')
+| e_pred         : step M1 M1'
+                   -> step (pred M1) (pred M1')
+| e_iszero       : step M1 M1'
+                   -> step (iszero M1) (iszero M1')
+;
+
+% ----------------------------------------------------------------------------
+%{
+Multi-step relation is the reflexive transitive closure over the
+single step relation.
+}%
+
+LF multi_step: term -> term -> type = 
+| ms_tr: multi_step M N' -> multi_step N' N
+       -> multi_step M N
+| ms_ref: multi_step M M
+| ms_step: step M N
+	 -> multi_step M N
+;
+
+
+% ----------------------------------------------------------------------------
+% Example:
+
+let t : [ |- step (if_then_else (if_then_else true false false)
+                      true
+                      true)
+              (if_then_else false true true)]
+= [ |- e_if_then_else e_if_true] ;
+
+let d : [ |- step (if_then_else (if_then_else (if_then_else true false false)
+                               true
+                               true)
+                       false
+                       false)
+
+              (if_then_else (if_then_else false true true)
+	              false
+                      false)]
+= [ |- e_if_then_else (e_if_then_else e_if_true)] ;
+
+
+let e1 : [ |- step (pred (succ (pred z))) (pred (succ z))]
+= [ |- e_pred (e_succ e_pred_zero)] ;
+
+
+let e2 : [ |- step (pred (succ z)) z]
+= [ |- e_pred_succ v_zero] ;
+
+
+
+
+
+

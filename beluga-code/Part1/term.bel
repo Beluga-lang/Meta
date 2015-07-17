@@ -1,0 +1,45 @@
+%{
+  CH 2:  Untyped arithmetic expressions
+  Author: Brigitte Pientka
+
+  SYNTAX
+}%
+
+
+LF term  : type = 
+| true         : term
+| false        : term
+| if_then_else : term -> term -> term -> term
+| z            : term
+| succ         : term -> term
+| pred         : term -> term
+| iszero       : term -> term
+;
+
+LF value : term -> type =
+| v_zero     : value z
+| v_succ     : value V -> value (succ V)
+| v_true     : value true
+| v_false    : value false
+;
+
+% Examples : Valid Terms
+
+let v1 = [ |- if_then_else false z (succ z)] ;
+let v2 = [ |- iszero (pred (succ z))]  ;
+
+% The following is still a valid term
+% although we may want to identify it as
+% ill-typed later. So far, we only are concerned
+% with syntax.
+
+let v3 = [ |- if_then_else (succ z) (succ z) false ] ;
+
+% Examples : Invalid Terms
+% (use keyword %not to say that the subsequent line is not true)
+
+%not
+let w1 = [ |- iszero] ;
+
+%not
+let w2 = [ |- if_then_else z z] ;

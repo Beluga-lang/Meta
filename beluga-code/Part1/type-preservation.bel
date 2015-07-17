@@ -1,0 +1,43 @@
+%{
+  CH 3: Encoding Proofs by Induction
+  CH 3.1: Type preservation
+  Author: Brigitte Pientka
+
+}%
+
+%{
+IF hastype M T and step M M' then hastype M' T.
+}%
+
+
+rec tps: [|- hastype M T] -> [|- step M M'] -> [|- hastype M' T] = 
+/ total s (tps m t m' d s) /
+fn d => fn s => case s of
+| [|- e_if_true] => let [|- t_if D D1 D2] = d in [|- D1]
+| [|- e_if_false] => 
+  let [|- t_if D D1 D2] = d in [|- D2]
+| [|- e_if_then_else S] => 
+  let [|- t_if D D1 D2] = d in 
+  let [|- D'] = tps [|- D] [|- S] in
+  [|- t_if D' D1 D2]
+| [|- e_pred_zero] => 
+  let [|- t_pred _ ] = d in [|- t_zero]
+| [|- e_pred_succ _ ] => 
+  let [|- t_pred (t_succ D) ] = d in [|- D]
+| [|- e_iszero_zero] => 
+  let [|- t_iszero _] = d in [|- t_true]
+| [|- e_iszero_succ _ ] => 
+  let [|- t_iszero _] = d in [|- t_false]
+| [|- e_pred S] => 
+  let [|- t_pred D] = d in 
+  let [|- D'] = tps [|- D] [|- S] in 
+  [|- t_pred D']
+| [|- e_succ S] => 
+  let [|- t_succ D] = d in 
+  let [|- D'] = tps [|- D] [|- S] in 
+  [|- t_succ D']
+| [|- e_iszero S] => 
+  let [|- t_iszero D] = d in 
+  let [|- D'] = tps [|- D] [|- S] in 
+  [|- t_iszero D']
+;
