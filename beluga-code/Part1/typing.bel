@@ -1,0 +1,25 @@
+%{
+  CH 2.3:  Typing
+  Author: Brigitte Pientka
+
+}%
+
+LF tp : type =
+| nat : tp
+| bool : tp
+;
+%name tp T.
+
+LF hastype: term -> tp -> type =
+| t_zero : hastype z nat
+| t_succ : hastype M nat 
+     -> hastype (succ M) nat
+| t_pred : hastype M nat
+      -> hastype (pred M) nat
+| t_true : hastype true bool
+| t_false: hastype false bool
+| t_iszero: hastype M nat
+          -> hastype (iszero M) bool
+| t_if: hastype M bool -> hastype M1 T -> hastype M2 T
+          -> hastype (if_then_else M M1 M2) T
+;

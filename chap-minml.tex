@@ -75,32 +75,36 @@ Next, we define how to evaluate and execute a given term. Following
 \cite{TAPL}, we define  a small-step semantics  for our  little language. To give  a  deterministic evaluation
 strategy,  it is convenient to first define the values of our language.  In
 \cite{TAPL}, we distinguished between terms and values in the grammar itself and
-we think of values  as a sub-class of terms;  here we take  a slightly different
-approach and define explicitly  what it means  to be a value using the judgments
-$t \NumValue$ and $t \Value$.  We can think of these judgments  as predicates on
+we think of values  as a sub-class of terms; moreover, we further
+distinguish between numerical values and boolean values. Here we take  a slightly different
+approach and define explicitly  what it means  to be a value using the judgment
+$t \Value$.  We can think of these judgments  as predicates on
 terms which are defined  {\em via}  axioms and inference rules.  A term $t$ is a
-numeric value iff we can give a derivation for $t \NumValue$, and a value iff we
-can give a derivation for $t \Value$.
+a value iff we can give a derivation for $t \Value$. We also do not further
+distinguish between numerical values and  booleans. Although this can
+be done, such a distinction makes many of the theoretical properties
+needlessly more complex.
 
-\[
-\begin{array}{c}
-\multicolumn{1}{l}{\fbox{$t \NumValue$}: \mbox{Term $t$ is a numeric value}}\\[1em]
-\infer[\NVZero]{\tmzero \NumValue}{} \qquad
-\infer[\NVSucc]{(\tmsucc t) \NumValue}{t \NumValue} \qquad
-\end{array}
-\]
+% \[
+% \begin{array}{c}
+% \multicolumn{1}{l}{\fbox{$t \NumValue$}: \mbox{Term $t$ is a numeric value}}\\[1em]
+% \infer[\NVZero]{\tmzero \NumValue}{} \qquad
+% \infer[\NVSucc]{(\tmsucc t) \NumValue}{t \NumValue} \qquad
+% \end{array}
+% \]
 
 \[
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$e \Value$}: \mbox{Expression $e$ is a value}}\\[1em]
-\infer[\VNumValue]{t \Value}{t \NumValue} \qquad
+\infer[\VZero]{\tmzero \Value}{} \qquad
+\infer[\VSucc]{(\tmsucc t) \Value}{t \Value} \qquad
 \infer[\VTrue]{\tmtrue \Value}{} \qquad
 \infer[\VFalse]{\tmfalse \Value}{} \qquad
 \end{array}
 \]
 
-Here, we identify $\tmzero$ as a numeric value; in addition, $\tmsucc t$ is a
-numeric value provided that $t$ is a numeric value. We also identify $\tmtrue$
+Here, we identify $\tmzero$ as a value; in addition, $\tmsucc t$ is a
+value provided that $t$ is avalue. We also identify $\tmtrue$
 and $\tmfalse$ as values, and say that every numeric value is a value.
 
 We are now ready to define when a term $t_1$ steps to another term $t_1'$ using
@@ -121,10 +125,10 @@ the judgment $t_1 \Steps t_1'$ using congruence rules and reduction rules.
 \multicolumn{1}{l}{\mbox{\text{Reduction Rules (Axioms)}}}
 \\[1em]
 \infer[\EPredZ]{\tmpred \tmzero \Steps \tmzero}{}\qquad
-\infer[\EPredSucc]{\tmpred (\tmsucc nv_1) \Steps nv_1}{nv_1 \NumValue}
+\infer[\EPredSucc]{\tmpred (\tmsucc v_1) \Steps v_1}{v_1 \Value}
 \\[1em]
 \infer[\EIsZeroZ]{\tmiszero \tmzero \Steps \tmtrue}{} \qquad
-\infer[\EIsZeroSucc]{\tmiszero (\tmsucc nv_1) \Steps \tmfalse}{nv_1 \NumValue}
+\infer[\EIsZeroSucc]{\tmiszero (\tmsucc v_1) \Steps \tmfalse}{v_1 \Value}
 \\[1em]
 \infer[\EIfT]{\tmif \tmtrue {t_2}{t_3} \Steps t_2}{}\qquad
 \infer[\EIfF]{\tmif \tmfalse {t_2}{t_3} \Steps t_3}{}
@@ -135,42 +139,39 @@ Our  goal  is  to  represent  the  relation  $t_1 \Steps t_1'$ and  describe the
 derivation trees which correspond to evaluating a given sub-term.
 To accomplish this we also must be able to construct derivation trees that prove
 that  a given  term is  a value  or a  numeric  value. Recall  that a  data-type
-provides us with definition of constructing elements.
+provides us with a definition of constructing elements.
 Clearly,  terms  are  inductively  defined  and  are  easily  translated  into a
 data-type definition. However,  we also defined inductively  what it means for a
-term  to be a value or a numeric value:  we use the  axioms $\NVZero$, $\VTrue$,
-$\VFalse$  together  with  the   inference  rules  $\NVSucc$  and  $\VNumValue$.
+term  to be a value:  we use the  axioms $\VZero$, $\VTrue$,
+$\VFalse$  together  with  the   inference  rules  $\VSucc$  and  $\VNumValue$.
 Similarly,  we defined inductively  what it means for a term $t_1$  to step to a
 term $t_1'$.
+
 In \beluga, data-types are powerfull enough to encode such definitions
-about  predicates  and  relations.  To represent the judgment  $t \NumValue$  we
-define  a predicate (type family) \lstinline!num_value!  and state that it takes
+about  predicates  and  relations.  To represent the judgment  $t \Value$  we
+define  a predicate (type family) \lstinline!value!  and state that it takes
 terms as argument  by declaring its type as \lstinline!term -> type!.  Then each
 rule corresponds to a constructor in our data-type definition. A derivation tree
 then corresponds to an expression formed by these constructors.
 
 \begin{lstlisting}
-LF num_value : term -> type =
-| nv_zero     : num_value z
-| nv_succ     : num_value V -> num_value (succ V)
-;
-
 LF value : term -> type =
-| v_num_value : num_value M -> value M
-| v_true      : value true
-| v_false     : value false
+| v_zero     : value z
+| v_succ     : value V -> value (succ V)
+| v_true     : value true
+| v_false    : value false
 ;
 \end{lstlisting}
 
-In our definition  of  the constructor \lstinline!nv_succ!, the  capital  letter
+In our definition  of  the constructor \lstinline!v_succ!, the  capital  letter
 \lstinline!M! describes numerical values and is thought  to be  universally
-quantified  at the outside.  We can hence read the constructor \lstinline!nv_succ! as follows:
+quantified  at the outside.  We can hence read the constructor \lstinline!v_succ! as follows:
 
 \begin{center}
 \begin{tabular}{p{12cm}}
 ``For  all  terms   \lstinline$M$,   if   \lstinline!D!  is  a  derivation   for
 \lstinline!num_value M!,      then      we     can     form     a     derivation
-\lstinline!(nv_succ <<M>> D)! for \lstinline!num_value (succ M)!.''
+\lstinline!(v_succ <<M>> D)! for \lstinline!num_value (succ M)!.''
 \end{tabular}
 \end{center}
 
@@ -179,50 +180,51 @@ We mark here  the term \lstinline!<<N>>! in green  since in practice programmers
 can omit  writing it  and \beluga  will infer it.  The recipe is  ``if we do not
 explicitly quantify over variables in the definition of a constructor, we do not
 need  to pass instantiations  for them when constructing objects  using the said
-constructor.''
+constructor.''\index{Type reconstruction}
 
-To illustrate consider the following concrete example.\\[1em]
 
-\begin{tabular}{l@{\qquad}l}
-The derivation &
+To illustrate consider the following concrete example of proving that
+$\tmsucc (\tmsucc \tmzero)$ is a value and constructing a derivation
+for $\tmsucc (\tmsucc \tmzero) \Value$. %\\[1em]
+%\noindent\vspace{-0.5cm}
+\begin{center}
+\begin{tabular}{l@{~~}c@{}l}
 $
-\infer[\NVSucc]
-  { (\tmsucc (\tmsucc \tmzero)) \NumValue }
-  { \infer[\NVSucc]
-      { (\tmsucc \tmzero)~\NumValue }
-      { \infer[\NVZero]
-          {\tmzero \NumValue}
+\infer[\VSucc]
+  { (\tmsucc (\tmsucc \tmzero)) \Value }
+  { \infer[\VSucc]
+      { (\tmsucc \tmzero)~\Value }
+      { \infer[\VZero]
+          {\tmzero \Value}
           {}
       }
   }
-$\\[1em]
+$ & 
 is represented as &
-\lstinline!(nv_succ <<(succ z)>> (nv_succ <<z>> v_zero))!\\[1em]
-\end{tabular}
+{\small{
+\lstinline!(v_succ <<(succ z)>> (v_succ <<z>> v_zero))!}}
+\end{tabular}  
+\end{center}
+\index{Encoding derivation trees}
 
-In \beluga, we simply write
-
+In \beluga, we bind the derivation to the name \lstinline!v! by writing 
 \begin{lstlisting}
-  let v : [|- num_value (succ (succ z))] = [|- nv_succ (nv_succ nv_zero)];
+  let v : [|- value (succ (succ z))] = [|- v_succ (v_succ v_zero)];
 \end{lstlisting}  
-
-
-
-We bind the derivation to the name \lstinline!v!  and declare that \lstinline!v!
-has type \lstinline![|- num_value (succ (succ z))]!.  Note,  we in general write
+Note,  we in general write
 derivations using \lstinline!|-!.  On the left hand side  of this symbol  we can
 list assumptions and the right hand side describes  what we claim can be derived
 from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
-  let w : [x: term, nv: num_value x |- num_value (succ (succ x))] =
-      [x: term, nv: num_value x |- nv_succ (nv_succ nv)];
+  let w : [x: term, v: value x |- value (succ (succ x))] =
+      [x: term, v: value x |- v_succ (v_succ v)];
 \end{lstlisting}
 
 The  right  hand  side   can  be  read  as:   Assuming  \lstinline!x: term!  and
-\lstinline!nv: num_value x!,  i.e. \lstinline!nv!  is the derivation that states
-that \lstinline!x! is  a numerical value,  then \lstinline!nv_succ (nv_succ nv)!
-is the witness for the fact that \lstinline!succ (succ x)! is a numerical value.
+\lstinline!v: value x!,  i.e. \lstinline!nv!  is the derivation that states
+that \lstinline!x! is  a numerical value,  then \lstinline!v_succ (v_succ v)!
+is the witness for the fact that \lstinline!succ (succ x)! is a value.
 
 We can similarly  encode the small-step relation  $t_1 \Steps t_1'$  between the
 terms $t_1$ and $t_1'$ using the type family/relation \lstinline!step!.
@@ -232,11 +234,11 @@ LF step: term -> term -> type =
 | e_if_true      : step (if_then_else true M2 M3) M2
 | e_if_false     : step (if_then_else false M2 M3) M3
 | e_pred_zero    : step (pred z) z
-| e_pred_succ    : num_value NV1
-                   -> step (pred (succ NV1)) NV1
+| e_pred_succ    : value V1
+                   -> step (pred (succ V1)) V1
 | e_iszero_zero  : step (iszero z) true
-| e_iszero_succ  : num_value NV1
-                   -> step (iszero (succ NV1)) false
+| e_iszero_succ  : value V1
+                   -> step (iszero (succ V1)) false
 | e_if_then_else : step M1 M1'
                    -> step (if_then_else M1 M2 M3) (if_then_else M1' M2 M3)
 | e_succ         : step M1 M1'
@@ -255,7 +257,7 @@ concrete term steps to another.
 let e1 : [|- step (pred (succ (pred z))) (pred (succ z))] =
          [|- e_pred (e_succ e_pred_zero)] ;
 
-let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ nv_zero] ;
+let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ v_zero] ;
 \end{lstlisting}
 
 Here \lstinline!e1! stands for the derivation
@@ -273,11 +275,11 @@ The name \lstinline!e2! stands for the derivation consisting of only
 the rule $\EPredSucc$.
 
 \section{Typing}\label{sec:types-basic}
-
-Finally, we remark that following these ideas, we can encode typing rules for
-our term language by representing the typing judgment $t : T$ using the type
-family (relation) \lstinline!hastype!. Our language so far has only two types,
-namely $\Bool$ and $\Nat$.
+Types allow us to approximate the runtime behaviour of programs. Types
+classify expressions according to their values, i.e. the value they
+compute. In our simple language with arithmentic and boolean expresions, we have
+only two types, namely $\Bool$ and $\Nat$, corresponding to the two
+kinds of values.
 
 \[
 \begin{array}{lll}
@@ -295,7 +297,8 @@ LF tp : type =
 ;
 \end{lstlisting}
 
-The typing rules relate terms to types. We recall here simply the typing rules from \cite{TAPL}.
+Typing rules relate terms to types and are described by the typing
+judgment $t : T$. We recall here simply the typing rules from \cite{TAPL}.
 
 \[
 \begin{array}{c}
@@ -311,6 +314,7 @@ The typing rules relate terms to types. We recall here simply the typing rules f
 \\
 \end{array}
 \]
+
 
 The typing relation between terms and types is encoded in \beluga using a
 predicate (type family) \lstinline!hastype! which is declared with
@@ -328,10 +332,11 @@ LF hastype : term -> tp -> type =
 | t_false : hastype false bool
 | t_iszero: hastype M nat
          -> hastype (iszero M) bool
-| t_if_then_else: hastype M1 bool -> hastype M2 T -> hastype M3 T
+| t_if    : hastype M1 bool -> hastype M2 T -> hastype M3 T
          -> hastype (if_then_else M1 M2 M3) T
 ;
 \end{lstlisting} 
+
 
 \chapter{Encoding Proofs by Induction}\label{chap:proofs-basic}
 
@@ -340,7 +345,7 @@ in \cite{TAPL} and show how we can represent such proofs as total functions that
 manipulate and analyze derivation trees. In particular, we illustrate:
 
 \begin{itemize}
-\item How to represent \index{inductive proofs about derivations} as total functions 
+\item How to represent inductive proofs about derivations \index{Inductive proofs about derivations} as total functions 
 \item How to prove that a case is impossible
 \item How to state a property universally about terms and reason by induction on
   terms (rather than derivations)
@@ -349,27 +354,29 @@ manipulate and analyze derivation trees. In particular, we illustrate:
 We develop each example step-wise using the interactive programming features in \beluga.
 
 \section{Type preservation} The first property we re-visit is type
-preservation. In particular, we write $\vdash t : T$ and $\vdash t
-\Steps t'$ to clearly state that we only consider closed terms.
+preservation. In particular, we write $t : T$ and $t \Steps t'$ to
+clearly state that we only consider closed terms. We label here
+derivations with $\D$ and $\S$ writing $\proofderiv{\D}{t:T}$ and
+$\proofderiv{\S}{t \Steps t'}$ respectively.
 
 \begin{theorem}
-If   $\proofderivc{\D}{}{t : T}$ and $\proofderiv{\S}{t \Steps t'}$ then $\vdash t' : T$.
+If   $\proofderiv{\D}{t : T}$ and $\proofderiv{\S}{t \Steps t'}$ then $t' : T$.
 \end{theorem}
 \begin{proof}
 By structural induction on the derivation $\proofderiv{\S}{t \Steps t'}$. We
 consider here only a few cases.
 
 \begin{case}{$\S = \ianc{}{\tmpred \tmzero \Steps \tmzero}{\EPredZ}$}
-$\proofderivc{\D~}{}{\tmpred {\tmzero} : T}$ \hfill by assumption\\
-$\proofderivc{\D'}{}{\tmzero : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
-$\proofderivc{~~~~}{}{\tmzero : \Nat}$ \hfill by rule $\TZero$.
+$\proofderiv{\D~}{\tmpred {\tmzero} : T}$ \hfill by assumption\\
+$\proofderiv{\D'}{\tmzero : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
+$\proofderiv{~~~~}{\tmzero : \Nat}$ \hfill by rule $\TZero$.
 \end{case}
 
-\begin{case}{$\S = \ianc{\above{\S '}{M \Steps M'}}{(\tmpred M) \Steps (\tmpred M')}{\EPred}$}
-$\proofderivc{\D~}{}{\tmpred M : T}$ \hfill by assumption \\
-$\proofderivc{\D'}{}{M : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
-$\proofderivc{\F~}{}{M' : \Nat}$ \hfill by IH using $\D'$ and $\S'$\\
-$\proofderivc{~~~~}{}{\tmpred M' : \Nat}$ \hfill by rule $\TPred$.
+\begin{case}{$\S = \ianc{\above{\S '}{t \Steps t'}}{(\tmpred t) \Steps (\tmpred t')}{\EPred}$}
+$\proofderiv{\D~}{\tmpred t : T}$ \hfill by assumption \\
+$\proofderiv{\D'}{t : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
+$\proofderiv{\F~}{t' : \Nat}$ \hfill by IH using $\D'$ and $\S'$\\
+$\proofderiv{~~~~}{\tmpred t' : \Nat}$ \hfill by rule $\TPred$.
 \end{case}
 
 \end{proof}
@@ -378,7 +385,15 @@ $\proofderivc{~~~~}{}{\tmpred M' : \Nat}$ \hfill by rule $\TPred$.
 An inductive proof as the one here can be interpreted as recursive
 function where case-analysis in the proof corresponds to case analysis
 in the program and the appeal to the IH corresponds to making a
-recursive call. From a program point of view, we can read the type
+recursive call. We also note that we wrote $t : T$ (or $t \Steps t'$
+resp.), but to emphasize that both the typing derivation and the
+stepping derivation are closed and do not depend on any assumptions we
+write $\vdash t:T$ and $\vdash t \Steps t'$ respectively.  This will
+scale as we generalize our language in Chapter \ref{chal:binders} to
+include also variables, functions, recursion, and other constructs
+variable-binding constructs.
+
+From a program point of view, we can read the type
 preservation theorem as: Given a typing derivation $\vdash t:T$ and a derivation
 for $\vdash t \Steps t'$, we return a typing derivation $\vdash t':T$.
 
@@ -412,11 +427,11 @@ structures.
 
 In \beluga, we strictly separate between the objects we are
 constructing (such as derivation trees, terms, etc.) from proofs about
-them. The type preservation statement makes a claim about typing
-stepping derivations. In the type of the function \lstinline!tps! the
+them. The type preservation statement \emph{makes a claim about the type of
+the term we obtain when taking a single step}. In the type of the function \lstinline!tps! the
 function type \lstinline!->! is much stronger; it for example allows us to write
 recursive functions which analyze objects of type \lstinline![|-hastype M T]! and
-\lstinline![|-step M M'! by pattern matching.
+\lstinline![|-step M M']! by pattern matching.
 
 Last, we wrote \lstinline!?!. This is very useful when developing and
 debugging proofs/programs, since it allows us to describe incomplete
@@ -440,7 +455,7 @@ fn d => fn s = ? ;
 
 
 \paragraph{Case analysis - Pattern matching} Next, we split the proof
-into different cases analyzing $\S : M \Steps M'$. This corresponds
+into different cases analyzing $\proofderiv{\S}{t \Steps t'}$. This corresponds
 to pattern matching on \lstinline!s:[|-step M M']! in our program.
 
 \begin{lstlisting}
@@ -458,15 +473,17 @@ fn d => fn s => case s of
 ;
 \end{lstlisting}
 
+\index{Underscore}
 We sometimes use \lstinline!_! (underscore) for an argument, if we do
 not need a name for it, since it does not play a role in the
-proof. For example, when we represent the derivation\\[1em] $\S =
-\ianc{M \Value}{\tmpred ({\tmsucc M}) \Steps M}{\EPredSucc}$ we simply
+proof. For example, when representing
+$\S =
+\ianc{v \Value}{\tmpred ({\tmsucc v}) \Steps v}{\EPredSucc}$ we simply
 write \lstinline![|-e_pred_suc _]! since the subderivation
-representing $M \Value$ is not used in proving that types are preserved.
+representing $v \Value$ is not used in proving that types are preserved.
 \\[1em]
 \emph{Convention:} Variables describing sub-derivations,
-i.e. variables occurring inside \lstinline![   ]! must be
+i.e. variables occurring inside \lstinline![  ]! must be
 upper-case. Variables describing proper assumptions in the proof,
 i.e. variables introduced by \lstinline!fn!-abstraction, must be lower
 case.
@@ -475,7 +492,7 @@ case.
 in the type preservation proof we discussed earlier. We start with the
 case \lstinline![e_pred_zero]! which corresponds to the base case in
 our proof. Pattern matching in \lstinline!s! has not only generated
-all the cases, but more importantly it has refined what $M$ and $M'$
+all the cases, but more importantly it has refined what \lstinline!M! and \lstinline!M'!
 stand for. In this particular case, \lstinline!M = (pred z)! and
 \lstinline!M' = z!. As a first step in the proof, we analyzed the assumption
 \lstinline!d:[|-hastype (pred z) T]! further. We case-analyzed this
@@ -569,7 +586,6 @@ fn d => fn s => case s of
 ;
 \end{lstlisting}
 
-The full proof can be found in the attached file \lstinline!evaluation.bel!.
 
 \paragraph{When is a program a proof?} So far we have just written a
 functional program; for it to be a proof it needs to be a total
@@ -580,7 +596,7 @@ the function:\lstinline!/ total s (tps m t m' d s) /!. This
 annotation states that we claim to implement program \lstinline!tps! that is
 recursive in \lstinline!s!. Since in the statement we implicitly
 quantify over term \lstinline!M! and \lstinline!M'! as well as the
-type \lstinline!T! at the outside, we write in the \index{totality}
+type \lstinline!T! at the outside, we write in the totality \index{Totality}
 declaration \lstinline!(tps m t m' d s)! indicating that we are
 recursively analyzing the 4th argument (three of them are passed
 implicitly) passed to \lstinline!tps!. The order in which the
@@ -624,6 +640,9 @@ fn d => fn s => case s of
 ;
 \end{lstlisting}
 
+The full proof can be found online in the example directory
+corresponding to this chapter. %  \lstinline!evaluation.bel!.
+
 
 \section{Uniquenss of Small-step Evaluation}
 Next, we consider the proof that evaluation using the small-step rules yields a
@@ -632,7 +651,7 @@ not step, i.e. there are no rules that apply. For \lstinline!zero!,
 \lstinline!true! and \lstinline!false! this should be easy, since there is no
 rule that applies. But how do we argue that \emph{every number} that is a value
 does not step? - We prove a contradiction. We show inductively that if $M$ is a
-value and $M \Steps M'$ then we can derive \index{falsehood} (written as $\bot$).
+value and $M \Steps M'$ then we can derive falsehood \index{Falsehood} (written as $\bot$).
 
 \begin{theorem}
 If $\proofderiv{\S}{M \Steps M'}$ and $\proofderiv{\V}{M \Value}$ then $\bot$.
@@ -672,7 +691,7 @@ not_possible: type.
 \end{lstlisting}
 
 We then can translate the theorem directly into a computation-level type in
-\beluga; we have also included the \index{totality} declaration, stating that this
+\beluga; we have also included the totality \index{Totality} declaration, stating that this
 function is recursively defined on values, i.e. object of type \lstinline![ |-value M]!.
 
 \begin{lstlisting}
@@ -872,7 +891,7 @@ terminates. We first define $M \Halts$ as follows:
 \end{array}
 \]
 
-Note that we are \index{encoding the existential quantification} in the proposition ``there exists a value
+Note that we are encoding existential quantification \index{Existential quantification} in the proposition ``there exists a value
 $V$ s.t. $M \MSteps V$  in the theorem by defining a separate judgment
 $M \Halts$. This trick allows us to turn an existential into a
 universal quantifier, as the rule can be read as: For all $M$, $V$, if
@@ -906,7 +925,7 @@ $W = \tmzero$\\
 $(\tmpred N)\Halts$ \hfill by definition of $\Halts$
 \end{subcase}
 
-\begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSuc}$ \quad and \quad $V = \tmsucc V'$}
+\begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSucc}$ \quad and \quad $V = \tmsucc V'$}
 $\S': N \MSteps (\tmsucc V')$ \hfill restating assumption $\S'$\\
 $\S_0: (\tmpred N) \MSteps (\tmpred (\tmsucc V'))$ \hfill by lemma mstep-pred \\
 $\S_1: (\tmpred (\tmsucc V')) \MSteps V'$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
@@ -1017,12 +1036,12 @@ arithmetic expressions can be described as follows:
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$t \Downarrow v$}: \mbox{Term $t$ evaluates to value $v$}}\\[1em]
   \infer[\BValue]{v \Downarrow v}{v \Value} \qquad
-  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc nv_1}{t_1 \Downarrow nv_1 & nv_1 \NumValue} \\[0.5em]
+  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc v_1}{t_1 \Downarrow v_1 & v_1 \NumValue} \\[0.5em]
   \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} \qquad
-  \infer[\BPredSucc]{\tmpred t_1 \Downarrow nv_1}{t_1 \Downarrow \tmsucc nv_1}
+  \infer[\BPredSucc]{\tmpred t_1 \Downarrow v_1}{t_1 \Downarrow \tmsucc v_1}
 \\[0.5em]
   \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} \qquad
-  \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc nv_1} 
+  \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc v_1} 
 \\[0.5em]
   \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} \qquad
   \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3 & v_3 \Value} \\
@@ -1036,7 +1055,7 @@ using predicates (type families), we define in \beluga the relation
 value is enforced and checked in each rule - this is unnecessary, since we can
 in fact prove that the result of evaluating a term always yields a value
 (i.e. value soundness property)\todo{Remove extra checks and state value
-  soundness. -bp}\todo{Problem is that there are the $num_value$ things, so
+  soundness. -bp}\todo{Problem is that there are the $value$ things, so
   I'm not sure how to make it clean. I'll take a look. -nj}.
 
 \begin{lstlisting}
@@ -1044,11 +1063,11 @@ LF bigstep : term -> term -> type =
    | b_value       : value v -> bigstep v v
    | b_switchtrue  : bigstep T1 true -> bigstep T2 V2 -> value V2 -> bigstep (switch T1 T2 T3) V2
    | b_switchfalse : bigstep T1 false -> bigstep T3 V3 -> value V3 -> bigstep (switch T1 T2 T3) V3
-   | b_succ        : bigstep T1 NV1 -> num_value NV1 -> bigstep (succ T1) (succ NV1)
+   | b_succ        : bigstep T1 NV1 -> value NV1 -> bigstep (succ T1) (succ NV1)
    | b_predzero    : bigstep T1 zero -> bigstep (pred T1) zero
-   | b_predsucc    : bigstep T1 (succ NV1) -> num_value NV1 -> bigstep (pred T1) NV1
+   | b_predsucc    : bigstep T1 (succ NV1) -> value NV1 -> bigstep (pred T1) NV1
    | b_iszerozero  : bigstep T1 zero -> bigstep (iszero T1) true
-   | b_iszerosucc  : bigstep T1 (succ NV1) -> num_value NV1 -> bigstep (iszero T1) false
+   | b_iszerosucc  : bigstep T1 (succ NV1) -> value NV1 -> bigstep (iszero T1) false
 ;
 \end{lstlisting}
 

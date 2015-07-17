@@ -45,7 +45,8 @@ We will focus on two approaches here:
   techniques such as \emph{explicit substitutions}
   \cite{Abadi:POPL90}.
 
-\item Higher-order abstract syntax \cite{Pfenning88pldi}: an appeal to
+\item Higher-order abstract syntax
+  \cite{Pfenning88pldi}\index{Higher-order abstract syntax}: an appeal to
   higher-order representations where the binder is treated as a true
   function. In such representations, the issues of
   $\alpha$-equivalence, substitution, etc. are identified with the
@@ -206,7 +207,8 @@ In general, managing binders and bound variables is a major pain. So,
 several alternatives have been and are being developed.
 
 \subsection{Representing Variables}\label{sec:HOAS-var}
-In Beluga (as in Twelf and Delphin), we support \index{higher-order abstract
+In Beluga (as in Twelf and Delphin), we support higher-order abstract
+syntax \index{Higher-order abstract
 syntax}: our foundation, called the logical framework LF
 \cite{Harper93jacm} allows us to represent binders via binders in our
 data-language.
