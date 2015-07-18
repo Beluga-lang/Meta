@@ -963,7 +963,6 @@ universal quantifier, as the rule can be read as: For all $M$, $V$, if
 $M \MSteps V$ and $V \Value$ then $M \Halts$.
 
 
-
 \begin{proof}
 By structural induction on $\proofderiv{\D}{M : T}$. We show a few
 representative cases.
@@ -976,7 +975,7 @@ $\tmzero \Halts$ \hfill by definition of $\Halts$
 \end{case}
 
 \begin{case}{$\D = \ianc{\above{\D'}{ N : \Nat}}{ (\tmpred N) : \Nat}{\TPred}$}
-$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\S':N \MSteps V$ \hfill by i.h. $\D'$\\[1em]
+$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\S':N \MSteps V$ \hfill by I.H. $\D'$\\[1em]
 %
 \fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$}\\[1em]
 %
@@ -1099,7 +1098,7 @@ fn d => case d of
 
 \section{Relating Small-step and Big-step Semantics}
 
-\subsection{Definition of the big-step semantics}
+% \subsection{Definition of the big-step semantics}
 
 % Almost taken from TAPL:
 Two styles of operational semantics are in common use. The one used so far and
