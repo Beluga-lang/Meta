@@ -846,8 +846,8 @@ can take another step. In this section we prove that we can always
 evaluate a well-typed term to a final value.
 
 \begin{theorem}
-If $\proofderiv{\D}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
-\MSteps V$.
+If $\proofderiv{\D}{t : T}$ then $t \Halts$, i.e.~there exists a value $v$ s.t. $t
+\MSteps v$.
 \end{theorem}
 
 We recap our definition of multi-step relations that was the
@@ -855,28 +855,90 @@ reflexive, transitive closure over the single step relation.
 
 \[
 \begin{array}{c@{\qquad}c@{\qquad}c}
-\infer[\MRef]{M \MSteps M}{} &
-\infer[\MTr]{M \MSteps N}{M \MSteps K & K \MSteps N} &
-\infer[\MStep]{M \MSteps N}{M \Steps N}
+\infer[\MRef]{t \MSteps t}{} &
+\infer[\MTr]{t \MSteps t'}{t \MSteps s & s \MSteps t'} &
+\infer[\MStep]{t \MSteps t'}{t \Steps t'}
 \end{array}
 \]
 
 Evaluation of a term $M$ may clearly not yield a value in one step; in fact we may need to chain multiple steps together.
 In the proof for showing that well-typed terms terminate, we will see the need for lemmas that justify bigger steps when we evaluate a term.
 
-\begin{lemma}[Multi Step Lemmas]~
+\begin{lemma}[Multi Step Lemmas]~\label{lem:multi-step}
   \begin{enumerate}
-  \item If $M \MSteps M'$ then $(\tmpred M) \MSteps (\tmpred M')$.
-  \item If $M \MSteps M'$ then $(\tmsucc M) \MSteps (\tmsucc M')$.
-  \item If $M \MSteps M'$ then $(\tmiszero M) \MSteps (\tmiszero M')$.
-  \item If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
+  \item If $t \MSteps t'$ then $(\tmpred t) \MSteps (\tmpred t')$.
+  \item If $t \MSteps t'$ then $(\tmsucc t) \MSteps (\tmsucc t')$.
+  \item If $t \MSteps t'$ then $(\tmiszero t) \MSteps (\tmiszero t')$.
+  \item If $t \MSteps t'$ then $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-By structural induction  on $M \MSteps M'$.
+By structural induction  on $\proofderiv{\S}{t \MSteps t'}$.  We'll only the last
+proposition. By definition of $\MSteps$, we consider three cases:
+
+\begin{basecase}{$\S = \ianc{t \Steps t'}{t \MSteps t'}{\MStep}$}
+$\tmif{t_1}{t_2}{t_3} \Steps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\EIf$ \\
+$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\MStep$        
+\end{basecase}
+
+\begin{basecase}{$\S = \ianc{}{t_1 \MSteps t_1}{\MRef}$}
+$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$ \hfill
+by rule $\MRef$
+\end{basecase}
+
+\begin{stepcase}{$\S = \ibnc{\above{\S_1}{t_1 \MSteps s}}{\above{\S_2}{s \MSteps t_1'}}{t_1 \MSteps t_1'}{\MTr}$}
+$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{s}{t_2}{t_3}$ \hfill by I.H. on $\S_1$\\
+$\tmif{s}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by I.H. on $\S_2$\\
+$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\MTr$  \\
+\end{stepcase}
 \end{proof}
 
-Moreover, we lift type preservation to multi-step relations.
+How would we mechanize this proof in \beluga? - This may seem
+straightforward, but there are some subtleties. In the last statement,
+we say 
+
+\begin{center}
+If $t \MSteps t'$ then $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.  
+\end{center}
+
+It is important to realize that $t$, $t'$, $t_1$, and $t_2$ are all
+univerally quantified.  When we appeal to the induction hypthtesis on
+$\S_1$ we in fact instantiate and choose the appropriate $t_2$ and
+$t_3$. It might be more precise to rewrite the statement to make this clearer.
+
+\begin{center}
+If $t \MSteps t'$ then for all $t_1$ and $t_2$, $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.  
+\end{center}
+
+Mechanizing proofs highlights such subtleties and forces us to
+understand them and be more precise than in the on paper proof. We can
+now translate the statement and the proof into 
+\beluga straitforwardly. We make explicite the quantification in the
+statement writing \lstinline!{M2:[|- term}{M3:[|- term}!. In the
+program, we use \lstinline!mlam!-abstraction as the corresponding
+proof term for introducing a universal quantifier.\index{Universal
+  quantification}\index{Explicit Arguments}
+
+\begin{lstlisting}
+rec mstep_if_then_else :  [ |- multi_step M M'] ->
+   {M1:[ |- term]}{M2:[ |- term]}
+   [ |- multi_step (if_then_else M M1 M2) (if_then_else M' M1 M2)] =
+/ total ms (mstep_if_then_else _ _ ms)/
+fn ms => case ms of
+| [ |- ms_ref]      => mlam M1 => mlam M2 => [ |- ms_ref]
+| [ |- ms_step S]   => mlam M1 => mlam M2 => [ |- ms_step (e_if_then_else S)]
+| [ |- ms_tr S1 S2] => mlam M1 => mlam M2 => 
+  let [ |- S1'] = mstep_if_then_else [ |- S1] [ |- M1 ] [ |- M2 ] in
+  let [ |- S2'] = mstep_if_then_else [ |- S2] [ |- M1 ] [ |- M2 ] in
+    [ |- ms_tr S1' S2']
+;
+\end{lstlisting}
+
+
+Let us return to the goal of this section, namely of proving that the
+evaluation of well-typed terms terminates. To prove this statement, we
+need an additional lemma which justifies that multi-step relations
+preserve types.
 
 \begin{lemma}[Type preservation for multi-step relation]
 If $M : T$ and $M \MSteps M'$ then $M':T$.
@@ -1056,22 +1118,22 @@ arithmetic expressions can be described as follows:
 \begin{array}{c@{\qquad}c}
 \multicolumn{2}{l}{\fbox{$t \Downarrow v$}: \mbox{Term $t$ evaluates to value $v$}}\\[1em]
   \infer[\BValue]{v \Downarrow v}{v \Value} &
-  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc v_1}{t_1 \Downarrow v_1 & v_1 \NumValue} \\[0.5em]
+  \infer[\BSucc]{\tmsucc t_1 \Downarrow \tmsucc v_1}{t_1 \Downarrow v_1} \\[0.5em]
   \infer[\BPredZero]{\tmpred t_1 \Downarrow \tmzero}{t_1 \Downarrow \tmzero} &
   \infer[\BPredSucc]{\tmpred t_1 \Downarrow v_1}{t_1 \Downarrow \tmsucc v_1}
 \\[0.5em]
   \infer[\BIszeroZero]{\tmiszero t_1 \Downarrow \tmtrue}{t_1 \Downarrow \tmzero} &
   \infer[\BIszeroSucc]{\tmiszero t_1 \Downarrow \tmfalse}{t_1 \Downarrow \tmsucc v_1} 
 \\[0.5em]
-  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2 & v_2 \Value} &
-  \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3 & v_3 \Value} \\
+  \infer[\BIfTrue]{\tmif {t_1}{t_2}{t_3} \Downarrow v_2}{t_1 \Downarrow true & t_2 \Downarrow v_2} &
+  \infer[\BIfFalse]{\tmif {t_1}{t_2}{t_3} \Downarrow v_3}{t_1 \Downarrow false & t_3 \Downarrow v_3} \\
 
 \end{array}
 \]
 
 Following the previous principle of encoding judgments such as $t \Downarrow v$
 using predicates (type families), we define in \beluga the relation
-\lstinline!bigstep! between two terms. In the rules, we do not enforce
+\lstinline!bigstep! between two terms using an LF type family. In the rules, we do not enforce
 that we always return a value. Rather this is a property we can prove
 and often referred to as value soundness.
 % The fact that the result is always a
@@ -1084,90 +1146,34 @@ and often referred to as value soundness.
 \begin{lstlisting}
 LF bigstep : term -> term -> type =
    | b_value       : value v -> bigstep v v
-   | b_switchtrue  : bigstep T1 true -> bigstep T2 V2 -> value V2 -> bigstep (switch T1 T2 T3) V2
-   | b_switchfalse : bigstep T1 false -> bigstep T3 V3 -> value V3 -> bigstep (switch T1 T2 T3) V3
-   | b_succ        : bigstep T1 NV1 -> value NV1 -> bigstep (succ T1) (succ NV1)
-   | b_predzero    : bigstep T1 zero -> bigstep (pred T1) zero
-   | b_predsucc    : bigstep T1 (succ NV1) -> value NV1 -> bigstep (pred T1) NV1
-   | b_iszerozero  : bigstep T1 zero -> bigstep (iszero T1) true
-   | b_iszerosucc  : bigstep T1 (succ NV1) -> value NV1 -> bigstep (iszero T1) false
+   | b_if_true     : bigstep M1 true -> bigstep M2 V2 -> value V2 
+                  -> bigstep (if_then_else M1 M2 M3) V2
+   | b_if_false    : bigstep M1 false -> bigstep M3 V3 -> value V3 
+                 -> bigstep (if_then_else M1 M2 M3) V3
+   | b_succ        : bigstep M1 NV1 -> bigstep (succ M1) (succ NV1)
+   | b_predzero    : bigstep M1 zero -> bigstep (pred M1) zero
+   | b_predsucc    : bigstep M1 (succ NV1) -> bigstep (pred M1) NV1
+   | b_iszerozero  : bigstep M1 zero -> bigstep (iszero M1) true
+   | b_iszerosucc  : bigstep M1 (succ NV1) -> bigstep (iszero M1) false
 ;
 \end{lstlisting}
 
 We now prove that the small-step and big-step semantics for this language
 coincide, {\em i.e.} $t \rightarrow^* v$ if and only if $t \Downarrow v$, for
 any value $v$.
-
 We will prove the two directions of the ``if and only if'' separately.
 
 \paragraph{Part1: If $t \Downarrow v$ then $t \rightarrow^* v$}
-This part of the proof is exactly the one described in TAPL. We firstly need a
-little lemma that proves that $\longrightarrow^*$ passes to the context:
-\todo{make this sentence english… ``passes to the context''? -nj}
+This part of the proof follows exactly the one described in
+\cite{TAPL}. In the proof, we rely on the Multi Step Lemmas (Lemma
+\ref{lem:multi-step}) which we proved in the last section. These
+lemmas justify bigger steps when evaluating a term with the
+small-steps semantics which will be useful when we translate a
+sequence of steps to a derivation tree in our big-step semantics. 
+Let us now write the actual proof:
 
-\begin{lemma}[A.6]
-  If $t_1 \rightarrow^* t_1'$ then
-  \begin{enumerate}
-    \item $\tmsucc t_1 \longrightarrow^* \tmsucc t_1'$
-    \item $\tmpred t_1 \longrightarrow^* \tmpred t_1'$
-    \item $\tmiszero t_1 \longrightarrow^* \tmiszero t_1'$
-    \item For all terms $t_2$ and $t_3$,
-      $\tmif {t_1} {t_2} {t_3} \longrightarrow^* \tmif {t_1'} {t_2} {t_3}$
-  \end{enumerate}
-\end{lemma}
-
-\begin{proof}
-  We'll only prove the fourth one, by induction on the proof
-  $t_1 \longrightarrow^* t_1'$. By definition of $\longrightarrow^*$ as the
-  reflexive transitive closure or $\longrightarrow$, we have three cases:
-  \begin{enumerate}
-    \item the case where $t_1 \rightarrow^* t_1' = t_1 \rightarrow t_1'$
-      is easy since the \EIf rule gives us $\tmif{t_1}{t_2}{t_3}
-      \longrightarrow \tmif{t_1'}{t_2}{t_3}$ and thus $\tmif{t_1}{t_2}{t_3}
-      \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$.
-      
-    \item the case where $t_1 = t_1'$ gives us
-      $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$ by
-      reflexivity of $\rightarrow^*$
-    
-    \item in the case $t_1 \rightarrow^* t_1'' \rightarrow^* t_1'$,
-      the $\rightarrow^*$ proofs are smaller so the lemma can be applied on
-      them, giving us $\tmif{t_1}{t_2}{t_3} \longrightarrow^*
-      \tmif{t_1''}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$, which,
-      by transitivity implies what we want.
-  \end{enumerate}
-  The proof is the same for other constructors $\tmsucc$, $\tmpred$ and
-  $\tmiszero$.
-\end{proof}
-
-The \beluga proof can seem really straightforward, but in fact there's a little
-problem: when we say ``if $t_1 \rightarrow^* t_1'$ then {\bf for all terms
-$t_2$ and $t_3$,} $\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$,
-we quantify over $t_2$ and $t_3$. This is often said implicitly, which can be
-even more misleading\todo{Is misleading a correct word here? -nj}.
-
-In \beluga, we will have to write this quantification explicitly. Have a look:
-\todo{Please, can someone explain mlam here or under the proof? -nj}
-
-\begin{lstlisting}
-rec lemma_a6_switch : [|- multistep T1 T1'] -> {T2: [|- term]} {T3: [|- term]} [|- multistep (switch T1 T2 T3) (switch T1' T2 T3)] =
-/ total m (lemma_a6_switch _ _ m _ _) /
-  fn m => mlam T2 => mlam T3 => case m of 
-  | [|- e*_ref] => [|- e*_ref]
-  | [|- e*_step S] => [|- e*_step (e_switch S)]
-  | [|- e*_trans S1 S2] =>
-    let [|- S1'] = lemma_a6_switch [|- S1] [|- T2] [|- T3] in
-    let [|- S2'] = lemma_a6_switch [|- S2] [|- T2] [|- T3] in
-    [|- e*_trans S1' S2']
-;
-\end{lstlisting}
-
-The other lemmas do not have to quantify over any terms and are thus
-straightforward to write.
-
-Let's now write the actual proof:
-\begin{proposition}[A7]
-  If $t \Downarrow v$ then $t \longrightarrow^* v.$
+\begin{proposition}[Big-step evaluations translate to small-step evaluations]
+  If $t \Downarrow v$ then $t \MSteps v.$
   \begin{lstlisting}
     rec proposition_a7 : [|- bigstep T V] -> [|- multistep T V] =
     / total b (proposition_a7 _ _ b) /
@@ -1179,20 +1185,20 @@ Let's now write the actual proof:
   By induction on the proof $t \Downarrow v$:
   \begin{itemize}
   \item Case $\infer{v \Downarrow v}{}\ \BValue$. By reflexivity of $\rightarrow^*$,
-    $v \longrightarrow^* v$.
+    $v \MSteps v$.
   \item Case $\infera{\BPredZero}{\tmpred{t_1} \Downarrow \tmzero}
     {t_1 \Downarrow \tmzero}$. The proof in premise is smaller, and the
-    proposition applies and gives us one proof: $t_1 \longrightarrow^* \tmzero$.
-    We then use it with the lemma A6: $\tmpred{t_1} \longrightarrow^*
+    proposition applies and gives us one proof: $t_1 \MSteps \tmzero$.
+    We then use it with the lemma A6: $\tmpred{t_1} \MSteps
     \tmpred{\tmzero} \longrightarrow \tmzero$. And we can conclude thanks to
     transitivity.
   \item Case $\inferaaa{\BIfTrue}{\tmif{t_1}{t_2}{t_3}\Downarrow v_2}
     {t_1 \Downarrow \tmtrue}{t_2 \Downarrow v_2}{v_2 \Value}$. The proofs in the
     primacies are smaller than this one, so the proposition applies and gives us
-    two proofs: $t_1 \longrightarrow^* \tmtrue$ and $t_2 \longrightarrow^* v_2$.
+    two proofs: $t_1 \MSteps \tmtrue$ and $t_2 \MSteps v_2$.
     Using the lemma A6 and the $\EIfTrue$ rule, we have:
-    $$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{\tmtrue}{t_2}{t_3}
-    \longrightarrow t_2 \longrightarrow^* v_2$$
+    $$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{\tmtrue}{t_2}{t_3}
+    \longrightarrow t_2 \MSteps v_2$$
     And we can conclude thanks to the transitivity.
   \item[\vdots]
   \end{itemize}
@@ -1207,17 +1213,17 @@ Let's now write the actual proof:
     let [|- E*1'] = lemma_a6_pred [|- E*1] in
     [|- e*_trans E*1' (e*_step e_predzero)]
 
-    | [|- b_switchtrue B1 B2 _] : [|- bigstep (switch T1 T2 T3) V] =>
+    | [|- b_if_true B1 B2 _] : [|- bigstep (if_then_else T1 T2 T3) V] =>
     let [|- E*1] = proposition_a7 [|- B1] in
-    let [|- E*1'] = lemma_a6_switch [|- E*1] [|- T2] [|- T3] in
+    let [|- E*1'] = lemma_a6_if [|- E*1] [|- T2] [|- T3] in
     let [|- E*2] = proposition_a7 [|- B2] in
-    [|- e*_trans (e*_trans E*1' (e*_step e_switchtrue)) E*2]
+    [|- e*_trans (e*_trans E*1' (e*_step e_if_true)) E*2]
 
     ..
   \end{lstlisting}
 \end{proof}
 
-\paragraph{Part 2. If $t \longrightarrow^* v$ then $t \Downarrow v$ }
+\paragraph{Part 2. If $t \MSteps v$ then $t \Downarrow v$ }
 
 For this direction, we will not be following the TAPL proof\todo{explain why}.
 
@@ -1237,7 +1243,7 @@ prove:
 Indeed, if we have this property, we can easily obtain:
 
 \begin{proposition}[A9-aux]\label{prop_a9_aux}
-  If $t_1 \longrightarrow^* t_1' \Downarrow v$ then $t_1 \Downarrow v$.
+  If $t_1 \MSteps t_1' \Downarrow v$ then $t_1 \Downarrow v$.
   \begin{lstlisting}
     rec proposition_a9_aux : [|- multistep T1 T1'] -> [|- bigstep T1' V] -> [|- value V] -> [|- bigstep T1 V] =
     / total m (proposition_a9_aux _ _ _ m _ _) /
@@ -1249,10 +1255,10 @@ Indeed, if we have this property, we can easily obtain:
   \begin{itemize}
   \item Case $t_1 \longrightarrow t_1' \Downarrow v$: We just apply the
     proposition \ref{prop_a9_aux_step} and get $t_1 \Downarrow v$.
-  \item Case $t_1 \longrightarrow^* t_1 \Downarrow v$: We have
+  \item Case $t_1 \MSteps t_1 \Downarrow v$: We have
     $t_1 \Downarrow v$.
-  \item Case $t_1 \longrightarrow^* t_1'' \longrightarrow^* t_1' \Downarrow v$:
-    We apply this proposition recursively and get $t_1 \longrightarrow^* t_1''
+  \item Case $t_1 \MSteps t_1'' \MSteps t_1' \Downarrow v$:
+    We apply this proposition recursively and get $t_1 \MSteps t_1''
     \Downarrow v$ then $t_1 \Downarrow v$.
   \end{itemize}
   \begin{lstlisting}
@@ -1268,7 +1274,7 @@ Indeed, if we have this property, we can easily obtain:
 And then:
 
 \begin{proposition}[A9]
-  If $t \longrightarrow^* v$ then $t \Downarrow v$.
+  If $t \MSteps v$ then $t \Downarrow v$.
   \begin{lstlisting}
     rec proposition_a9 : [|- multistep T V] -> [|- value V] -> [|- bigstep T V] =
     / total e* (proposition_a9 _ _ e* _) /
@@ -1276,7 +1282,7 @@ And then:
   \end{lstlisting}
 \end{proposition}
 \begin{proof}
-  We apply the proposition \ref{prop_a9_aux} for $t \longrightarrow^* v
+  We apply the proposition \ref{prop_a9_aux} for $t \MSteps v
   \Downarrow v$.
   \begin{lstlisting}
     let [|- V] = v in
@@ -1315,24 +1321,24 @@ Let's now proof the hard part:
   \begin{lstlisting}
   case s of 
 
-  | [|- e_switchtrue] =>
+  | [|- e_if_true] =>
     let [|- B] = b in
     let [|- V] = v in
-    [|- b_switchtrue (b_value true_value) B V]
+    [|- b_if_true (b_value true_value) B V]
 	
-  | [|- e_switch S] =>
+  | [|- e_if_then_else S] =>
     (case b of
      | [|- b_value V] =>
        let [|- numeric_value N] = [|- V] in
        impossible [|- N]
 
-     | [|- b_switchtrue B1' B2 V] =>
+     | [|- b_if_true B1' B2 V] =>
        let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- true_value] in
-       [|- b_switchtrue B1 B2 V]
+       [|- b_if_true B1 B2 V]
 
-     | [|- b_switchfalse B1' B3 V] =>
+     | [|- b_if_false B1' B3 V] =>
        let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- false_value] in
-       [|- b_switchfalse B1 B3 V]
+       [|- b_if_false B1 B3 V]
     )
 
   \end{lstlisting}

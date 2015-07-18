@@ -21,28 +21,28 @@ fn d => fn s => case s of
 
 
 %{
-Lemma: IF multi-step T T' THEN multi-step (if_then_else T T2 T3) (if_then_else T' T2 T3).
+Lemma: IF multi-step M M' THEN multi-step (if_then_else M M2 M3) (if_then_else M' M2 M3).
 }%
 
 rec mstep_if_then_else :
-  {T2:[ |- term]}{T3:[ |- term]}
-  [ |- multi_step T T'] ->
-  [ |- multi_step (if_then_else T T2 T3) (if_then_else T' T2 T3)] =
-/ total ms (mstep_if_then_else _ _ _ _ ms)/
-mlam T2 => mlam T3 =>
+  [ |- multi_step M M'] ->
+  {M2:[ |- term]}{M3:[ |- term]}
+  [ |- multi_step (if_then_else M M2 M3) (if_then_else M' M2 M3)] =
+/ total ms (mstep_if_then_else _ _ ms)/
 fn ms => case ms of
-| [ |- ms_ref] => [ |- ms_ref]
+| [ |- ms_ref] => mlam M2 => mlam M3 => [ |- ms_ref]
 | [ |- ms_step S] =>
-  [ |- ms_step (e_if_then_else S)]
+  mlam M2 => mlam M3 => [ |- ms_step (e_if_then_else S)]
 
-| [ |- ms_tr MS1 MS2] =>
-  let [ |- MS1'] = mstep_if_then_else [ |- T2 ] [ |- T3 ] [ |- MS1] in
-  let [ |- MS2'] = mstep_if_then_else [ |- T2 ] [ |- T3 ] [ |- MS2] in
-    [ |- ms_tr MS1' MS2']
+| [ |- ms_tr S1 S2] => 
+  mlam M2 => mlam M3 => 
+  let [ |- S1'] = mstep_if_then_else [ |- S1] [ |- M2 ] [ |- M3 ] in
+  let [ |- S2'] = mstep_if_then_else [ |- S2] [ |- M2 ] [ |- M3 ] in
+    [ |- ms_tr S1' S2']
 ;
 
 %{
-Lemma: IF multi-step T T' THEN multi-step (succ T) (succ T').
+Lemma: IF multi-step M M' THEN multi-step (succ M) (succ M').
 }%
 
 rec mstep_succ :
@@ -59,7 +59,7 @@ fn ms => case ms of
 ;
 
 %{
-Lemma: IF multi-step T T' THEN multi-step (pred T) (pred T').
+Lemma: IF multi-step M M' THEN multi-step (pred M) (pred M').
 }%
 
 
@@ -78,7 +78,7 @@ fn ms => case ms of
 
 
 %{
-Lemma: IF multi-step T T' THEN multi-step (pred T) (pred T').
+Lemma: IF multi-step M M' THEN multi-step (pred M) (pred M').
 }%
 
 
@@ -106,8 +106,8 @@ fn ms => case ms of
 }%
 
 LF halts: term -> type = 
-| result: multi_step T T' -> value T'
-       -> halts T;
+| result: multi_step M M' -> value M'
+       -> halts M;
 
 
 rec terminate : [|- hastype M T] -> [ |- halts M] =
@@ -122,12 +122,12 @@ fn d => case d of
   (case terminate [ |- D ] of 
    | [ |- result MS v_true] =>
        let [ |- result MS1 V1] = terminate [ |- D1 ] in
-       let [ |- MS']           = mstep_if_then_else [ |- M1 ] [ |- M2 ] [ |- MS] in
+       let [ |- MS']           = mstep_if_then_else [ |- MS] [ |- M1 ] [ |- M2 ] in
        [ |- result (ms_tr MS' (ms_tr (ms_step e_if_true) MS1)) V1]
 
    | [ |- result MS v_false] =>
        let [ |- result MS2 V2] = terminate [ |- D2 ] in
-       let [ |- MS']           = mstep_if_then_else [ |- M1 ] [ |- M2 ] [ |- MS] in
+       let [ |- MS']           = mstep_if_then_else [ |- MS]  [ |- M1 ] [ |- M2 ] in
        [ |- result (ms_tr MS' (ms_tr (ms_step e_if_false) MS2)) V2]
    | [ |- result MS v_zero]      => impossible multi_tps [|- D] [|- MS] in []
    | [ |- result MS (v_succ V)] => impossible multi_tps [|- D] [|- MS] in []
