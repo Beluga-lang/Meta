@@ -1,0 +1,21 @@
+%{
+  CH 6:  Lambda-terms
+  Author: Brigitte Pientka
+
+  Small-step Semantics
+}%
+
+LF value:  term -> type = 
+| v_lam: value (lam M);
+
+% ---------------------------------------------------------- %
+% Small-step operational semantics
+
+LF step: term -> term -> type = 
+| e_app_1    : step M1 M1'
+             -> step (app M1 M2) (app M1' M2)
+| e_app_2    : step M2 M2' -> value M1              
+              -> step (app M1 M2) (app M1 M2')
+| e_app_abs : value M2
+              -> step (app (lam M) M2) (M M2)
+;

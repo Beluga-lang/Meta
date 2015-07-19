@@ -1,0 +1,13 @@
+%{
+  CH 4: Encoding Languages with Binders
+     4.2 Higher-order Abstract Syntax
+     4.2.1 Representing Variables 
+  Author: Brigitte Pientka
+
+}%
+
+LF term: type = 
+| lam: (term -> term) -> term
+| app: term -> term -> term;
+
+             

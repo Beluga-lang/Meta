@@ -1,0 +1,78 @@
+%{
+  CH 5: Encoding Proofs by Induction - Revisited
+     5.1 Type Uniqueness
+
+  Author: Brigitte Pientka
+
+}%
+% ---------------------------------------------------------- %
+%{
+   We are redefining lambda-terms where we are annotating 
+   the variable in lambda-abstractions with its type.
+}%
+
+% Definition of types and terms
+LF tp: type =
+| arr: tp -> tp -> tp
+| nat: tp
+;
+%name tp T.
+
+LF term: type = 
+| lam : tp -> (term -> term) -> term
+| app : term -> term -> term
+;
+%name term E.
+
+% ---------------------------------------------------------- %
+% Typing judgment for annotated lambda-abstactions
+
+LF hastype: term -> tp -> type = 
+| t_lam: ({x:term}hastype x T1 -> hastype (M x) T2)
+        -> hastype (lam T1 M) (arr T1 T2)
+| t_app: hastype M1 (arr T2 T) -> hastype E2 T2
+       -> hastype (app M1 M2) T
+;
+%name hastype H.
+
+
+% Equality predicate
+LF equal: tp -> tp -> type = 
+| ref: equal T T ;
+
+% ---------------------------------------------------------- %
+% Uniqueness of typing
+%{Theorem:
+  IF  G |- hastype M T  AND G |- hastype M T'
+  THEN  equal T T'.
+
+Proof by induction on the first derivation
+}%
+
+schema tctx = some [t:tp] block (x:term,u:hastype x t);
+
+rec unique : (gamma:tctx)[gamma |- hastype M T[] ] -> [gamma |- hastype M S[] ] ->  [ |- equal T S] =  
+/ total d (unique _ _ _ _ d) /
+fn d => fn f => case d of
+| [gamma |- t_app D1 D2] =>
+  let [gamma |- t_app F1 F2] = f in
+  let [ |-ref]  = unique  [gamma |- D1] [gamma |- F1] in
+    [ |- ref]
+
+| [gamma |- t_lam \x.\u. D] =>
+  let [gamma |- t_lam \x.\u. F] = f in
+  let [ |- ref] = unique [gamma,b:block x:term, u:hastype x _ |-  D[..,b.1,b.2] ] [gamma,b |- F[..,b.1,b.2] ] in
+   [ |- ref]
+
+| [gamma |- #q.2] =>           % d : hastype #q.1 T
+  let [gamma |- #r.2] = f  in  % f : hastype #q.1 T'
+    [ |- ref]
+;
+
+
+% Example
+
+let v : [ |- equal (arr nat nat) (arr nat nat)] = 
+  unique [ |- t_lam \x.\u. u] [ |- t_lam \x.\u.u]
+;
+

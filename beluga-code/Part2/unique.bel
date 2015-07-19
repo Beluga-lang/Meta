@@ -1,0 +1,60 @@
+%{
+  CH 5: Encoding Proofs by Induction - Revisited
+        Uniqueness of Small-step Semantics
+  Author: Brigitte Pientka
+
+}%
+
+% ---------------------------------------------------------------------
+%{
+Theorem: if step M M1 and step M M2 then equal M1 M2.
+
+}%
+
+
+LF equal : term -> term -> type = 
+| refl: equal M M;
+
+not_possible : type.
+
+rec values_dont_step : [ |- step M M' ] -> [ |- value M  ] -> [ |- not_possible]=
+/ total v (values_dont_step m m' s v)/
+fn s => fn v => case v of
+| [ |- v_lam] => impossible s
+;
+
+
+rec unique : [|- step M M1] -> [|- step M M2] -> [|- equal M1 M2 ] =
+/ total s (unique m m1 m2 s)/
+fn s1 => fn s2 => case s1 of
+| [ |- e_app_1 DstepE1'] => 
+   (case s2 of 
+    | [|- e_app_1 DstepE1''] =>
+      let [ |- refl] = unique [ |- DstepE1'] [|- DstepE1''] in
+         [ |- refl]
+    | [|- e_app_2 DstepE2'' V1] => 
+      impossible values_dont_step [|- DstepE1'] [|- V1] 
+    | [|- e_app_abs V2] =>    
+      impossible values_dont_step [|- DstepE1'] [|- v_lam] 
+  )
+| [ |- e_app_2 DstepE2' V1 ] => 
+   (case s2 of 
+    | [|- e_app_2 DstepE2'' _] =>
+      let [ |- refl] = unique [ |- DstepE2'] [|- DstepE2''] in
+        [ |- refl]
+    | [|- e_app_1 DstepE1''] => 
+      impossible values_dont_step [|- DstepE1''] [|- V1] 
+    | [|- e_app_abs V2] => 
+      impossible values_dont_step [|- DstepE2'] [|- V2] 
+   )
+
+| [ |- e_app_abs V2] => 
+  (case s2 of 
+   | [|- e_app_abs _ ] =>  [ |- refl]
+   | [|- e_app_1 DstepE1'] =>
+      impossible values_dont_step [|- DstepE1'] [|- v_lam] 
+   | [|- e_app_2 DstepE2'' V1] => 
+      impossible values_dont_step [|- DstepE2''] [|- V2] 
+  )
+
+;

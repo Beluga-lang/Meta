@@ -1,0 +1,26 @@
+%{
+  CH 4: Encoding Languages with Binders
+     4.2 Higher-order Abstract Syntax
+     4.2.2 Representing Assumptions
+  Author: Brigitte Pientka
+
+}%
+
+
+%{
+ Types
+}%
+
+LF tp: type = 
+| nat: tp
+| arr: tp -> tp -> tp
+;
+
+% ---------------------------------------------------------- %
+LF hastype: term -> tp -> type =
+| t_lam : ({x:term} hastype x T -> hastype (M x) S)
+	-> hastype (lam M) (arr T S)
+| t_app:  hastype M1 (arr T S) -> hastype M2 T
+	-> hastype (app M1 M2) S
+;
+

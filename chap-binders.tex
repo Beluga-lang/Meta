@@ -539,46 +539,61 @@ use inversion to analyze our assumption
 \lstinline![|-hastype (app (lam M) V) T]!. We have written the two
 inversion steps as one nested pattern in Beluga. More importantly, the
 subderivation $\proofderivc{\D}{x:S}{M:T}$ in the proof is represented as
-\lstinline!\x.\u. D x u!. Recall that earlier we remarked that the
+\lstinline!\x.\u. D! where  
+\lstinline!D! has type \lstinline!hastype (M  x) T! in the context \lstinline!x:term, u:hastype x S!.
+
+Recall that earlier we remarked that the
 typing rule for functions does make two assumptions: that we have a
 fresh variable \lstinline!x! and an assumption \lstinline!hastype x S!
 which we call \lstinline!u! here. In the proof we then replaced all
 occurrences of $x$ by the value $V$ and all assumptions $V:S$ are
-replaced by the proof $\D_2$. This is how the derivation evolves
+replaced by the proof $\D_2$. 
 
+\begin{small}
+  
 \[
-\begin{array}{c@{\quad}l@{\quad}c}
-\infer[\TFn^{x,u}]
-      {\lam x. M : S \arrow T}
-      {\deduce[\vspace{2pt}]{M:T}
-              {\deduce[\vspace{2pt}]{\D^{x,u}}
-                      {\infer[u]{x:S}{}}}} &
+\begin{array}{l@{\quad}c@{\quad}l@{\quad}c}
+& \qquad\infer[\TFn^{x,u}]
+       {\vdash \tmhastype {(\lam x. M)}{(S \arrow T)}}
+       {\above{\D^x}{u:\tmhastype x T \vdash \tmhastype M S}} & & \\[1em]
 \mbox{replacing $x$ by $V$ in $\D$ yields} &
-\infer[\TFn^{x,u}]
-      {\lam x. M : S \arrow T}
-      {\deduce[\vspace{2pt}]{[V/x] M:T}
-              {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
-                      {\infer[u]{V:S}{}}}}\\[1em]
-\infer[\TFn^{x,u}]
-      {\lam x. M : S \arrow T}
-      {\deduce[\vspace{2pt}]{[V/x] M:T}
-              {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
-                      {\infer[u]{V:S}{}}}} &
-\mbox{replacing $u$ by $\D_2$ in $\D$ yields} &
-\infer[\TFn^{x,u}]
-      {\lam x. M : S \arrow T}
-      {\deduce[\vspace{2pt}]{[V/x] M:T}
-              {\deduce[\vspace{2pt}]{[V/x][\D_2/u]\D}
-                      {\deduce[\vspace{2pt}]{V:S}{\D_2}}}}
+       {\above{[V/x]\D}{u:\tmhastype V T \vdash \tmhastype {([V/x]M)} S}} & \\[1em]
+\mbox{replacing $u$ by $\D_2$ in $\D$ yields} & 
+\above{[\D_2/u, V/x]\D}{\tmhastype {([V/x]M)} S}
 \end{array}
 \]
 
-When we are interpreting the derivation $\D$ as a function that
-for any $x$ and any assumption $x:S$ returns a derivation for $M:T$,
-then substitution amounts to function application. This is effectively
-what happens in the implementation of the proof where we simply write
-\lstinline!D _ D2!; the underscore stands for the value $V$ whose name
-is not explicitly available in the program. Beluga's type
+\end{small}
+% This is how the derivation evolves
+
+% \[
+% \begin{array}{c@{\quad}l@{\quad}c}
+% \infer[\TFn^{x,u}]
+%       {\lam x. M : S \arrow T}
+%       {\deduce[\vspace{2pt}]{M:T}
+%               {\deduce[\vspace{2pt}]{\D^{x,u}}
+%                       {\infer[u]{x:S}{}}}} &
+% \mbox{replacing $x$ by $V$ in $\D$ yields} &
+% \infer[\TFn^{x,u}]
+%       {\lam x. M : S \arrow T}
+%       {\deduce[\vspace{2pt}]{[V/x] M:T}
+%               {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
+%                       {\infer[u]{V:S}{}}}}\\[1em]
+% \infer[\TFn^{x,u}]
+%       {\lam x. M : S \arrow T}
+%       {\deduce[\vspace{2pt}]{[V/x] M:T}
+%               {\deduce[\vspace{2pt}]{[V/x]\D^{u}}
+%                       {\infer[u]{V:S}{}}}} &
+% \mbox{replacing $u$ by $\D_2$ in $\D$ yields} &
+% \infer[\TFn^{x,u}]
+%       {\lam x. M : S \arrow T}
+%       {\deduce[\vspace{2pt}]{[V/x] M:T}
+%               {\deduce[\vspace{2pt}]{[V/x][\D_2/u]\D}
+%                       {\deduce[\vspace{2pt}]{V:S}{\D_2}}}}
+% \end{array}
+% \]
+
+In \beluga where substitutions are first-class, we simply associate the derivation $\D$ with the substitution \lstinline![_, D2]!; the underscore stands for the value $V$ whose name is not explicitly available in the program. Beluga's type
 reconstruction will however make sure that that the underscore is
 exactly the value \lstinline!D2! refers to.
 
@@ -598,8 +613,8 @@ fn d => fn s => case s of
     [ |- t_app D1 F2]
 
 | [ |- e_app_abs V] =>
-  let [ |- t_app (t_lam \x.\u. D x u) D2] = d in
-    [ |- D _ D2]
+  let [ |- t_app (t_lam \x.\u. D) D2] = d in
+    [ |- D[_,  D2]]
 ;
 \end{lstlisting}
 
@@ -746,7 +761,7 @@ contexts.
 
 \begin{small}
 \begin{center}
-\begin{tabular}{p{8.75cm}|p{6.25cm}}
+\begin{tabular}{p{8.65cm}@{}|@{~}p{6.25cm}}
 %\multicolumn{1}{c}{Context} & \multicolumn{1}{c}{Is of schema
 %  \lstinline!tctx!?}\\
 \hspace{2cm}Context & \hspace{1.5cm}Is of schema \lstinline!tctx!?\\
