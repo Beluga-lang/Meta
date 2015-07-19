@@ -1,0 +1,47 @@
+%{
+  CH 6: Encoding Proofs by Induction - Revisited
+     6.1 Translation of de Bruijn Terms to HOAS Terms
+
+  Author: Brigitte Pientka
+
+}%
+
+% ---------------------------------------------------------- %
+LF term   : type =
+| app   : term  -> term  -> term
+| lam   : (term -> term) -> term;
+
+
+LF dBruijn   : type =
+| one    : dBruijn
+| shift  : dBruijn  -> dBruijn
+| lam'   : dBruijn  -> dBruijn
+| app'   : dBruijn  -> dBruijn  -> dBruijn;
+
+% ---------------------------------------------------------- %
+schema ctx = term ;
+
+rec vhoas2db : {gamma:ctx}{#p:[gamma |-term]}  [ |-dBruijn] =
+ / total gamma (vhoas2db gamma  ) /
+mlam gamma => mlam #p =>  case [gamma] of
+| [] => impossible [ |-#p ]
+| [gamma', x:term] => (case [gamma', x:term |-#p ] of
+ | [gamma',x:term |-x] => [ |-one ]
+ | [gamma',x:term |-#q[..] ] =>
+   let [ |-Db] = vhoas2db [gamma'] [gamma' |-#q] in
+     [ |-shift Db])
+;
+
+rec hoas2db : (gamma:ctx) [gamma |-term] ->  [ |-dBruijn ] = / total e ( hoas2db _  e) /
+ fn e =>  case e of
+  | [gamma |-#p ] => vhoas2db [gamma] [gamma |-#p]
+
+ | [gamma |-lam \x.M] =>
+   let [ |-F] =  hoas2db  [gamma,x:term |- M] in
+     [ |-lam' F ]
+
+ | [gamma |-app M1 M2] =>
+   let [ |-F1] = hoas2db  [gamma |- M1]  in
+   let [ |-F2] = hoas2db  [gamma |- M2]  in
+     [ |-app' F1 F2]
+;
