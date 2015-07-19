@@ -11,7 +11,7 @@ example \citep[Ch 5]{TAPL} for a more detailed introduction.
 
 \[
 \begin{array}{ll@{\bnfas}l}
-\mbox{Terms} & M, N & x \bnfalt \lam x{:}T.M \bnfalt M \app N
+\mbox{Terms} & M, N & x \bnfalt \lam x.M \bnfalt M \app N
 \end{array}
 \]
 
@@ -621,17 +621,11 @@ fn d => fn s => case s of
 
 \section{Type Uniqueness}\label{chap:proofs-open-derivations}
 We also sometimes prove properties that hold only for non-empty
-contexts. One such example is proving type uniqueness. So far we have
-been dropping the type annotation present in our abstraction. This is
-apparent when we revisit the grammar for terms, where we define
-abstractions as $\lam x{:}T.M$, and the type of the constructor
-\lstinline!lam: (term -> term) -> term!.
+contexts. One such example is proving type uniqueness. In fact, this property does not hold unless we add some type annotations. So far we have
+been working with lambda-terms $\lambda x.M$. However, consider the identity function $\lambda x.x$ - it has many types, not just one. However, annotating the variable bound by a lambda-abstractions will be sufficient to guarantee that every lambda-term has a unique type.
 
-While this does not matter when we are proving type preservation, we
-will not be able to prove that every term has a unique type, unless we
-also keep track of the type in the representation of abstractions. We
-therefore revise our definition of terms and typing rules slightly,
-highlighting the new parts in green. We also define equality
+We therefore also revise our definition of terms and typing rules slightly,
+highlighting the new parts in green. Finally we define type equality
 explicitly using reflexivity.
 
 \begin{lstlisting}
@@ -939,13 +933,7 @@ rule \lstinline!ref!.
 
 \chapter{Encoding Program Transformations }
 \section{Translation of de Bruijn Terms to HOAS Terms} 
-As soon as we have support for binders,
-we may ask, how do we handle terms which are not always
-closed. Clearly, we have seen multiple examples, where we needed to
-build up a context of variable names; see the example for turning a
-lambda-term into its de Bruijn representation.
-%
-Therefore, Beluga supports first class contexts.
+We return here to the beginning of Chapter \ref{chap:binders} where we discussed two different representations for lambda-terms, namely using de Bruijn representation and using higher-order abstract syntax (HOAS). In Section \ref{sec:debruijn}, we defined de Bruijn terms and also showed how to translate lambda-terms in HOAS to their corresponding de Bruijn representation. Here, we implement de Bruijn terms and write a total function for the translation of lambda-terms in HOAS to their corresponding  de Bruijn representation.  To contrast we repeat our definition of lambda-terms using HOAS on the left and define de Bruijn terms on the right. 
 
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
@@ -956,15 +944,16 @@ LF term   : type =
 \end{minipage}
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
-LF term'   : type
-| one    : term'
-| shift  : term'  -> term'
-| lam'   : term'  -> term'
-| app'   : term'  -> term'  -> term';
+LF dBruijn   : type =
+| one    : dBruijn
+| shift  : dBruijn  -> dBruijn
+| lam'   : dBruijn  -> dBruijn
+| app'   : dBruijn  -> dBruijn  -> dBruijn;
 \end{lstlisting}
 \end{minipage}
 
-We now first define the shape and structure of our context. This is
+The translation from \lstinline!term! to \lstinline!deBruijn! is naturally recursive and as we travers a \lstinline!term!, we will go under binders. Hence, our translation must translate a \lstinline!term! in the context $\gamma$ to \lstinline!deBruijn! (see also Sec. \ref{sec:debruijn}). 
+We hence first define the shape and structure of our context $\gamma$. This is
 simply done by : \lstinline!schema ctx = term ; !
 
 
@@ -975,52 +964,45 @@ lambda-terms to de Bruijn terms into a recursive program:
 
 
 \begin{lstlisting}
-rec vhoas2db : {g:ctx}{#p:[\gamma |-term]}  [ |-term'] =
+rec vhoas2db : {\gamma:ctx}{#p:[\gamma |-term]}  [ |-dBruijn] =
  / total \gamma (vhoas2db \gamma  ) /
 mlam \gamma => mlam #p =>  case [\gamma] of
-| [] => impossible [ |-#p ] in []
-| [\gamma', x:term] => (case [\gamma', x:term |-#p ..] of
+| [] => impossible [ |-#p ]
+| [\gamma', x:term] => (case [\gamma', x:term |-#p ] of
  | [\gamma',x:term |-x] => [ |-one ]
- | [\gamma',x:term |-#p .. ] =>
-   let [ |-Db] = vhoas2db [\gamma'] [\gamma' |-#p ..] in
+ | [\gamma',x:term |-#q[..] ] =>
+   let [ |-Db] = vhoas2db [\gamma'] [\gamma' |-#q] in
      [ |-shift Db])
 ;
 
-rec hoas2db : (\gamma:ctx) [\gamma |-term] ->  [ |-term' ] = / total e ( hoas2db _  e) /
+rec hoas2db : (\gamma:ctx) [\gamma |-term] ->  [ |-dBruijn ] = / total e ( hoas2db _  e) /
  fn e =>  case e of
-  | [\gamma |-#p .. ] => vhoas2db [\gamma] [\gamma |-#p ..]
+  | [\gamma |-#p ] => vhoas2db [\gamma] [\gamma |-#p]
 
- | [\gamma |-lam \x. E .. x] =>
-   let [ |-F] =  hoas2db  [\gamma,x:term |-E .. x ] in
+ | [\gamma |-lam \x.M] =>
+   let [ |-F] =  hoas2db  [\gamma,x:term |- M] in
      [ |-lam' F ]
 
- | [\gamma |-app (E1 .. ) (E2 .. )] =>
-   let [ |-F1] = hoas2db  [\gamma |-E1 ..]  in
-   let [ |-F2] = hoas2db  [\gamma |-E2 ..]  in
+ | [\gamma |-app M1 M2] =>
+   let [ |-F1] = hoas2db  [\gamma |- M1]  in
+   let [ |-F2] = hoas2db  [\gamma |- M2]  in
      [ |-app' F1 F2]
 ;
 \end{lstlisting}
 
 The type of the program reads as follows: Given a context
-\lstinline!g! of schema \lstinline!ctx!, and given an object of type
-\lstinline!term! in the context \lstinline!g!, we return an object
-\lstinline!term'! which is closed.
+\lstinline!\gamma! of schema \lstinline!ctx!, and given an object of type
+\lstinline!term! in the context \lstinline!\gamma!, we return an object
+\lstinline!dBruijn! which is closed.
 
 The type system will ensure we never work with variables outside their
 scope; it will also ensure that we produce a closed de Bruijn term.
 
-We call an object of type \lstinline![\gamma |-term]! a contextual object and
-it describes objects of type \lstinline!term! in the context
-\lstinline!g!.
-
 Let us look at the easy cases first, for example the case
-\lstinline![g |-app (E1 ..) (E2 ..)]!.  We note we write \lstinline!..!
-to indicate that the object \lstinline!E1! can refer to the variables
-in the context \lstinline!g!. This way we are very explicit about
-potential variable dependencies.
+\lstinline![\gamma |-app M1 M2]!.  We note again that by default \lstinline!M1! and \lstinline!M2! can depend on the variables declared in the context $\gamma$.
 
-So, to translate \lstinline![\gamma |-app (E1 ..) (E2 ..)]! we recursively
-translate \lstinline![\gamma |-E1 ..]! and \lstinline![\gamma |-E2 ..]!. Each
+So, to translate \lstinline![\gamma |- app M1 M2]! we recursively
+translate \lstinline![\gamma |- M1]! and \lstinline![\gamma |- M2]!. Each
 recursive call will produce a closed de Bruijn term, namely
 \lstinline![|-F1] ! and \lstinline![|-F2]!, which we can use to
 re-assemble our proper de Bruijn term \lstinline![|-app' F1 F2]!.
@@ -1028,44 +1010,19 @@ re-assemble our proper de Bruijn term \lstinline![|-app' F1 F2]!.
 When we translate a lambda-term, we must extend the context.
 
 
-Finally, we must consider the variable cases: we note that the
-inference rules took advantage of the shape of the context; for
+Finally, we must consider the variable cases. We implement the variable case using a separate function \lstinline!vhoas2db! whose type can be read as: For all $\gamma:$\lstinline!ctx! and for all parameters (variables) \lstinline!#p:[\gamma |- term]! there exists a \lstinline!deBruijn! term. \index{Quantification over parameter variables} We note that the algorithm in Section \ref{sec:debruijn} 
+took advantage of the shape of the context; for
 example, we really took the context for being ordered. The same thing
 happens in Beluga. We can match on the shape of contexts.
 
+We implement the function \lstinline!vhoas2db! by pattern matching on the context $\gamma$. If the context is empty, then there are no variables and hence there is no \lstinline!#p!. If the context is not empty but has the shape \lstinline!\gamma', x:term!, we continue pattern matching on \lstinline!#p!. There are two possible cases for \lstinline!#p!:\index{Pattern matching on context}\index{Pattern matching on parameters}
+\begin{enumerate}
+\item \lstinline!#p! stands for \lstinline!x!, written as \lstinline![\gamma', x:term |- x]!. In this case we simply return \lstinline!one!.
+\item \lstinline!#p! stands for a variable from $\gamma'$, written as \lstinline![\gamma', x:term |- #q[..]]!. Note that we associate \lstinline!#q! with the weakening substitution \lstinline!..! that provides a map from a context $\gamma'$ to the context \lstinline!\gamma', x:term!. Therefore, \lstinline!#q! can only be instantiated with a variable from \lstinline!\gamma'!, but not \lstinline!x!. In this latter case, we recursively call \lstinline!vhoas2db! on \lstinline!\gamma'! and \lstinline![\gamma' |- #q]! and shift the result.
+\end{enumerate}
 
-Moreover, we must have a case for a concrete bound variable, but we
-must also be able to say what happens generically, i.e. when we have a
-variable from the context. We hence support \emph{Parameter
-  Variables}. These variables can only be instantiated by other
-variables but not arbitrary terms.
 
 
-% We can also translate de Bruijn expressions back to their corresponding higher-order abstract syntax representation. To do this, we must generate new variable names as we traverse a lambda-expression. Although a de Bruijn expression is closed, we will associate it here with a context \lstinline!g:ctx!, because it will indicate how many bound variables have been already introduced - or to put it differently, how many binder have we already traversed when we are processing a de Bruijn term. The type of the function \lstinline!db2hoas! hence will have type:
-% \lstinline!(g:ctx) [g|-term'] -> [g|-term]!. The full program below exploits the same ideas as previously described.
-
-% \begin{lstlisting}
-% rec db2hoas : (g:ctx) [g|-term'] -> [g|-term] =
-% fn e => case e of
-% | [h,x:term |-one] => [h,x:term |-x]
-
-% | [h,x:term |-shift E =>
-%   let [h |- F ..] = db2hoas [h |- E]  in
-%   [h,x:term |- F ..]
-
-% | [h |-lam' E] =>
-%   let [g,x:term|- F .. x] = db2hoas  [h, x:term|- E] in
-%   [g |- lam \x.F .. x]
-
-% | [g |-app' E1 E2] =>
-%   let [g|- F1 ..] = db2hoas [g|- E1] in
-%   let [g|- F2 ..] = db2hoas [g|- E2] in
-%   [g|- app (F1 ..) (F2 ..)]
-% ;
-
-% rec tohoas : [|-term'] -> [|-term] =
-% fn e => db2hoas e ;
-% \end{lstlisting}
 
 %%% Local Variables:
 %%% mode: latex
