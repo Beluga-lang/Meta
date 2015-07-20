@@ -1,0 +1,267 @@
+% Small Step ~ Big Step
+
+LF term : type =
+   | true   : term
+   | false  : term
+   | switch : term -> term -> term -> term
+   | zero   : term
+   | succ   : term -> term
+   | pred   : term -> term
+   | iszero : term -> term
+;
+
+
+LF num_value : term -> type =
+   | zero_value : num_value zero
+   | succ_value : num_value NV -> num_value (succ NV)
+;
+LF value : term -> type =
+   | true_value    : value true
+   | false_value   : value false
+   | numeric_value : num_value NV -> value NV
+;
+
+LF step : term -> term -> type =
+   | e_switchtrue  : step (switch true T2 T3) T2
+   | e_switchfalse : step (switch false T2 T3) T3
+   | e_switch      : step T1 T1' -> step (switch T1 T2 T3) (switch T1' T2 T3)
+   | e_succ        : step T1 T1' -> step (succ T1) (succ T1')
+   | e_predzero    : step (pred zero) zero
+   | e_predsucc    : num_value T1 -> step (pred (succ T1)) T1
+   | e_pred        : step T1 T1' -> step (pred T1) (pred T1')
+   | e_iszerozero  : step (iszero zero) true
+   | e_iszerosucc  : num_value T1 -> step (iszero (succ T1)) false
+   | e_iszero      : step T1 T1' -> step (iszero T1) (iszero T1')
+;
+
+LF multistep : term -> term -> type =
+   | e*_step  : step T T' -> multistep T T'
+   | e*_ref   : multistep T T
+   | e*_trans : multistep T T' -> multistep T' T'' -> multistep T T''
+;
+
+LF bigstep : term -> term -> type =
+   | b_value       : value v -> bigstep v v
+   | b_switchtrue  : bigstep T1 true -> bigstep T2 V2 -> value V2 -> bigstep (switch T1 T2 T3) V2
+   | b_switchfalse : bigstep T1 false -> bigstep T3 V3 -> value V3 -> bigstep (switch T1 T2 T3) V3
+   | b_succ        : bigstep T1 NV1 -> num_value NV1 -> bigstep (succ T1) (succ NV1)
+   | b_predzero    : bigstep T1 zero -> bigstep (pred T1) zero
+   | b_predsucc    : bigstep T1 (succ NV1) -> num_value NV1 -> bigstep (pred T1) NV1
+   | b_iszerozero  : bigstep T1 zero -> bigstep (iszero T1) true
+   | b_iszerosucc  : bigstep T1 (succ NV1) -> num_value NV1 -> bigstep (iszero T1) false
+;
+
+% If t1 →* t1', then for all terms t2 and t3, switch t1 t2 t3 →* switch t1' t2 t3.
+rec lemma_a6_switch : [|- multistep T1 T1'] -> {T2: [|- term]} {T3: [|- term]} [|- multistep (switch T1 T2 T3) (switch T1' T2 T3)] =
+/ total m (lemma_a6_switch _ _ m _ _) /
+  fn m => mlam T2 => mlam T3 => case m of 
+  | [|- e*_ref] => [|- e*_ref]
+  | [|- e*_step S] => [|- e*_step (e_switch S)]
+  | [|- e*_trans S1 S2] =>
+    let [|- S1'] = lemma_a6_switch [|- S1] [|- T2] [|- T3] in
+    let [|- S2'] = lemma_a6_switch [|- S2] [|- T2] [|- T3] in
+    [|- e*_trans S1' S2']
+;
+
+rec lemma_a6_succ : [|- multistep T1 T1'] -> [|- multistep (succ T1) (succ T1')] =
+/ total m (lemma_a6_succ _ _ m) /
+  fn m => case m of 
+  | [|- e*_ref] => [|- e*_ref]
+  | [|- e*_step S] => [|- e*_step (e_succ S)]
+  | [|- e*_trans S1 S2] =>
+    let [|- S1'] = lemma_a6_succ [|- S1] in
+    let [|- S2'] = lemma_a6_succ [|- S2] in
+    [|- e*_trans S1' S2']
+;
+
+rec lemma_a6_pred : [|- multistep T1 T1'] -> [|- multistep (pred T1) (pred T1')] =
+/ total m (lemma_a6_pred _ _ m) /
+  fn m => case m of 
+  | [|- e*_ref] => [|- e*_ref]
+  | [|- e*_step S] => [|- e*_step (e_pred S)]
+  | [|- e*_trans S1 S2] =>
+    let [|- S1'] = lemma_a6_pred [|- S1] in
+    let [|- S2'] = lemma_a6_pred [|- S2] in
+    [|- e*_trans S1' S2']
+;
+
+rec lemma_a6_iszero : [|- multistep T1 T1'] -> [|- multistep (iszero T1) (iszero T1')] =
+/ total m (lemma_a6_iszero _ _ m) /
+  fn m => case m of 
+  | [|- e*_ref] => [|- e*_ref]
+  | [|- e*_step S] => [|- e*_step (e_iszero S)]
+  | [|- e*_trans S1 S2] =>
+    let [|- S1'] = lemma_a6_iszero [|- S1] in
+    let [|- S2'] = lemma_a6_iszero [|- S2] in
+    [|- e*_trans S1' S2']
+;
+
+% If t ↓ v then t →* v.
+rec proposition_a7 : [|- bigstep T V] -> [|- multistep T V] =
+/ total b (proposition_a7 _ _ b) /
+  fn b => case b of 
+    
+  | [|- b_value _] => [|- e*_ref]
+			
+  | [|- b_switchtrue B1 B2 _] : [|- bigstep (switch T1 T2 T3) V] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_switch [|- E*1] [|- T2] [|- T3] in
+    let [|- E*2] = proposition_a7 [|- B2] in
+    [|- e*_trans (e*_trans E*1' (e*_step e_switchtrue)) E*2]
+	
+  | [|- b_switchfalse B1 B2 _] : [|- bigstep (switch T1 T2 T3) V] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_switch [|- E*1] [|- T2] [|- T3] in
+    let [|- E*2] = proposition_a7 [|- B2] in
+    [|- e*_trans (e*_trans E*1' (e*_step e_switchfalse)) E*2]
+
+  | [|- b_succ B1 _] => lemma_a6_succ (proposition_a7 [|- B1])
+
+  | [|- b_predzero B1] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_pred [|- E*1] in
+    [|- e*_trans E*1' (e*_step e_predzero)]
+
+  | [|- b_predsucc B1 N1] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_pred [|- E*1] in
+    [|- e*_trans E*1' (e*_step (e_predsucc N1))]
+
+  | [|- b_iszerozero B1] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_iszero [|- E*1] in
+    [|- e*_trans E*1' (e*_step e_iszerozero)]
+
+  | [|- b_iszerosucc B1 N1] =>
+    let [|- E*1] = proposition_a7 [|- B1] in
+    let [|- E*1'] = lemma_a6_iszero [|- E*1] in
+    [|- e*_trans E*1' (e*_step (e_iszerosucc N1))]
+
+;
+
+% If t1 → t1' and t1' ↓ v with v a value, then t1 ↓ v.
+rec proposition_a9_aux_step : [|- step T1 T1'] -> [|- bigstep T1' V] -> [|- value V] -> [|- bigstep T1 V] =
+/ total s (proposition_a9_aux_step _ _ _ s _ _) /
+  fn s => fn b => fn v => case s of 
+
+  | [|- e_switchtrue] =>
+    let [|- B] = b in
+    let [|- V] = v in
+    [|- b_switchtrue (b_value true_value) B V]
+	
+  | [|- e_switchfalse] =>
+    let [|- B] = b in
+    let [|- V] = v in
+    [|- b_switchfalse (b_value false_value) B V]
+	
+  | [|- e_predzero] =>
+    let [|- B] : [|- bigstep zero zero] = b in
+    [|- b_predzero (b_value (numeric_value zero_value))]
+	
+  | [|- e_predsucc N] =>
+    let [|- B] : [|- bigstep V V] = b in
+    [|- b_predsucc (b_value (numeric_value (succ_value N))) N]
+	
+  | [|- e_iszerozero] =>
+    let [|- B] : [|- bigstep true true] = b in
+    [|- b_iszerozero (b_value (numeric_value zero_value))]
+	
+  | [|- e_iszerosucc N] =>
+    let [|- B] : [|- bigstep false false] = b in
+    [|- b_iszerosucc (b_succ (b_value (numeric_value N)) N) N]
+	
+  % And now the cases with reccursive calls
+	
+  | [|- e_switch S] =>
+    % S is a proof that t1 → t1'
+    (case b of
+     | [|- b_value V] =>
+       let [|- numeric_value N] = [|- V] in
+       impossible [|- N]
+
+     | [|- b_switchtrue B1' B2 V] =>
+       % B1' is a proof that t1' ↓ true
+       % B2 is a proof that t2 ↓ v2
+       % V is a proof that v2 is a value
+       % We want to prove that switch t1 t2 t3 ↓ v2
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- true_value] in
+       % B1 is a proof that t1 ↓ true (because t1 → t1' ↓ true)
+       [|- b_switchtrue B1 B2 V]
+
+     | [|- b_switchfalse B1' B3 V] =>
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- false_value] in
+       [|- b_switchfalse B1 B3 V]
+    )
+
+  | [|- e_succ S] =>
+    % S is a proof that t1 → t1'
+    (case b of 
+     | [|- b_value V] =>
+       % This case is the case `succ t1 → succ t1' ↓ succ t1'`
+       % V is the proof that succ t1' is a value
+       let [|- numeric_value (succ_value N)] = [|- V] in
+       % Now N is a proof that t1' is a numeric value.
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- b_value (numeric_value N)] [|- numeric_value N] in
+       [|- b_succ B1 N]
+
+     | [|- b_succ B1' N] =>
+       % B1' is a proof that t1' ↓ nv
+       % N is a proof that nv is a value
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- numeric_value N] in
+       [|- b_succ B1 N]
+    )
+
+  | [|- e_pred S] =>
+    (case b of 
+     | [|- b_value V] =>
+       let [|- numeric_value N] = [|- V] in
+       impossible [|- N]
+
+     | [|- b_predzero B1'] =>
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- numeric_value zero_value] in
+       [|- b_predzero B1]
+
+     | [|- b_predsucc B1' N] =>
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- numeric_value (succ_value N)] in
+       [|- b_predsucc B1 N]
+    )
+
+  | [|- e_iszero S] =>
+    (case b of
+     | [|- b_value V] =>
+       let [|- numeric_value N] = [|- V] in
+       impossible [|- N]
+
+     | [|- b_iszerozero B1'] =>
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- numeric_value zero_value] in
+       [|- b_iszerozero B1]
+
+     | [|- b_iszerosucc B1' N] =>
+       let [|- B1] = proposition_a9_aux_step [|- S] [|- B1'] [|- numeric_value (succ_value N)] in
+       [|- b_iszerosucc B1 N]
+    )
+
+;
+
+% If t1 →* t1' ↓ v with v a value then t1 ↓ v.
+rec proposition_a9_aux : [|- multistep T1 T1'] -> [|- bigstep T1' V] -> [|- value V] -> [|- bigstep T1 V] =
+/ total m (proposition_a9_aux _ _ _ m _ _) /
+  fn m => fn b => fn v => case m of
+    
+  | [|- e*_ref] => b
+		     
+  | [|- e*_step S] => proposition_a9_aux_step [|- S] b v
+			    
+  | [|- e*_trans E*1 E*2] =>
+    let [|- B2] = proposition_a9_aux [|- E*2] b v in
+    proposition_a9_aux [|- E*1] [|- B2] v
+		       
+;
+
+% If t →* v with v a value then t ↓ v.
+rec proposition_a9 : [|- multistep T V] -> [|- value V] -> [|- bigstep T V] =
+/ total e* (proposition_a9 _ _ e* _) /
+  fn e* => fn v =>
+  let [|- V] = v in
+  proposition_a9_aux e* [|- b_value V] v
+;
