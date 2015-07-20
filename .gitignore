@@ -9,4 +9,5 @@
 *.make
 *.fls
 *.temp
+*.tdo
 *~
