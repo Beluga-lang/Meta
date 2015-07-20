@@ -148,7 +148,20 @@ In order to have an induction hypothesis that is strong enough we need
 to define an inductive predicate on types that specifies what terms
 can be candidates to be reducible.
 
-\improvement{Add the ``on paper'' definition here}
+We define the \emph{Reducibility Candidates} predicate as:
+
+\begin{itemize}
+\item \rc \iota B iff $M$ halts
+\item \rc{T\arrow S} M iff $M$ halts and for all $N$, if \rc {T} N then \rc{S}{M\app N}
+\end{itemize}
+
+The definitions states that a term of base type is in the relation if
+it halts, and a term of function type when it halts and it is well
+behaved under application. The general idea of the proof is to show
+that the terms in \rc{T}{M} have the desired property and then we need
+to prove that all terms are reducible. In this case the desired
+property is that the evaluation of the term halts, and it straight
+forward to show that if a term is reducible then its evaluation halts.
 
 Reducibility cannot be directly encoded at the LF layer, since it
 involves a strong, computational function space. Hence we move to the
@@ -183,7 +196,7 @@ of \bel{Reduce} are at types \bel{A} and \bel{B} which are smaller than \bel{arr
 term(additionally this is why we cannot leave the type implicit).
 
 Now, we need to prove some more or less trivial lemmas that are
-usually omitted in paper presentations.
+some times omitted in paper presentations.
 
 First, we prove that halts is closed under expansion in the \bel{halts_step} lemma.
 
@@ -195,11 +208,11 @@ let [|- halts/m MS' V] = h in
 ;
 \end{lstlisting}
 
-Next we prove closure of Reduce under expansion. This follows the
-handwritten proof, proceeding by induction on the type A which is an
-implicit argument. In the base case we appeal to \bel{halts_step}, while
-in the \bel{Rarr} case we must also appeal to the induction hypothesis at
-the range type, going inside the function position of applications.
+Next we prove closure of Reduce under expansion. This follows by
+induction on the type \bel{A}' which is an implicit argument. In the
+base case we appeal to \bel{halts_step}, while in the \bel{Rarr} case
+we must also appeal to the induction hypothesis at the range type,
+going inside the function position of applications.
 
 \begin{lstlisting}
 rec bwd_closed : {S:[|- step M M']} Reduce [|- T] [|- M'] -> Reduce [|- T] [|- M] =
@@ -223,15 +236,47 @@ fn r => case r of
 ;
 \end{lstlisting}
 
-\subsection{Reducibility of Substitutions}
+It is at this point, that we may start thinking on the proof of the
+main theorem. The main theorem states that all terms are reducible, so
+a first approximation to this could be to try to prove this theorem:
 
 \begin{lstlisting}
-schema ctx = tm T;
+rec main : {M:[|- tm A[]]} Reduce [|- A] [|- M] =
+  ?
+;
+\end{lstlisting}
 
+However, if we try to prove this theorem, we very quickly realize that
+we need to have appeals to the induction hypothesis for open term. In
+particular, when trying to build the reducibility candidate for
+$\lambda$-terms.
+
+\subsection{Reducibility of Substitutions}
+
+As motivated by the previous section, we need to be able to talk about
+open terms, fortunately Beluga has first class support for open
+terms. The first thing we need is declaration of a schema, that is a
+classifier of contexts.
+
+For our normalization proof, we needs contexts that contain well-typed
+terms, as open terms have only terms as assumptions. So we declare a schema:
+\begin{lstlisting}
+schema ctx = tm T;
+\end{lstlisting}
+
+Also, to  we need the concept of \emph{grounding substitutions}, again
+natively supported in Beluga as substitution from some context into an
+empty context. And we need also to define what it means for a
+substitution to be \emph{reducible}. In particular, a \emph{a
+  reducible substitution} is a substitution where all the terms that
+compose it are also reducible. We define that, using an inductive
+data-type indexed by grounding substitutions.
+
+\begin{lstlisting}
 inductive RedSub : {g:ctx}{#S:[|- g]} ctype =
 | Nil : RedSub  [ ] [|- ^ ]
-| Dot : RedSub  [g] [|- #S[^] ] → Reduce [|- A] [|- M]
-     → RedSub [g, x:tm A[]] [|- #S,M ]
+| Dot : RedSub  [g] [|- #S[^] ] -> Reduce [|- A] [|- M]
+     -> RedSub [g, x:tm A[]] [|- #S,M ]
 ;
 
 rec lookup : {g:ctx}{#p:[g |- tm A[]]}RedSub [g] [|- #S[^]] ->
@@ -243,8 +288,11 @@ mlam g => mlam #p => fn rs => case [g |- #p[..]] of
 ;
 \end{lstlisting}
 
+We also show how to look-up a reducible term in a reducible
+substitution by using the \bel{lookup} function.
+
 Now, we have all the elements in place, so we can proceed to prove the
-main lemma, that all terms under reducible grounding substitutions are
+main lemma, generalizing all terms under reducible grounding substitutions are
 in the \bel{Reduce} relation.
 \begin{lstlisting}
 rec main : {g:ctx}{M:[g |- tm A[]]} RedSub [g] [|- #S[^]] ->
@@ -262,10 +310,27 @@ rec main : {g:ctx}{M:[g |- tm A[]]} RedSub [g] [|- #S[^]] ->
 ;
 \end{lstlisting}
 
-And finally we prove that all well typed terms eventually reduce to a
-value:
+And finally we have all the elements to prove that all well typed
+terms eventually reduce to a value:
 \begin{lstlisting}
 rec weakNorm : {M:[|- tm A]} [|- halts M] =
 mlam M => reduce_halts (main [] [|- M] Nil)
 ;
 \end{lstlisting}
+
+Let's retrace our steps. We set out to prove that all terms reduce into a
+value. A simple proof by induction would not give us a powerful enough
+induction hypothesis, so we defined the reducibility candidate
+relation that was inductive on the type and allowed for a powerful enough
+induction hypothesis. Then when proving that all terms are reducibl, We needed again a more powerful induction
+hypothesis to be able to prove that all terms were in the reducibility
+relation. In particular, we generalized the theorem to all terms and
+their grounding substitutions, for this we needed a predicate on
+grounding substitution, to be sure that all the terms in them were
+reducible. With all this machinery in place the proof went through by
+appealing to the lemmas we had proven earlier.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "book"
+%%% End:
