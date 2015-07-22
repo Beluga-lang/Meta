@@ -35,11 +35,6 @@ LF bigstep : term -> term -> type =
    | b_succ        : bigstep M V
 		     -> bigstep (succ M) (succ V)
 
-   | b_if_true     : bigstep M1 true -> bigstep M2 V
-		     -> bigstep (if_then_else M1 M2 M3) V
-   | b_if_false    : bigstep M1 false -> bigstep M3 V
-		     -> bigstep (if_then_else M1 M2 M3) V
-
    | b_pred_zero   : bigstep M z
 		     -> bigstep (pred M) z
    | b_pred_succ   : bigstep M (succ V)
@@ -49,6 +44,11 @@ LF bigstep : term -> term -> type =
 		     -> bigstep (iszero M) true
    | b_iszero_succ : bigstep M (succ V)
 		     -> bigstep (iszero M) false
+
+   | b_if_true     : bigstep M1 true  -> bigstep M2 V
+		     -> bigstep (if_then_else M1 M2 M3) V
+   | b_if_false    : bigstep M1 false -> bigstep M3 V
+		     -> bigstep (if_then_else M1 M2 M3) V
 ;
 
 
@@ -61,18 +61,17 @@ LF bigstep : term -> term -> type =
 rec bstep_value : [|- bigstep M V] -> [|- value V] =
 / total b (bstep_value _ _ b) /
   fn b => case b of 
-  | [|- b_value V] => [|- V]
-  | [|- b_if_true B1 B2] => bstep_value [|- B2]
-  | [|- b_if_false B1 B3] => bstep_value [|- B3]
-  | [|- b_succ B] =>
-    let [|- V] = bstep_value [|- B] in
-    [|- v_succ V]
+  | [|- b_value E] => [|- E]
+  | [|- b_succ B]  => let [|- E] = bstep_value [|- B] in [|- v_succ E]
+
   | [|- b_pred_zero B] => bstep_value [|- B]
-  | [|- b_pred_succ B] =>
-    let [|- v_succ V] = bstep_value [|- B] in
-    [|- V]
+  | [|- b_pred_succ B] => let [|- v_succ E] = bstep_value [|- B] in [|- E]
+
   | [|- b_iszero_zero B] => [|- v_true]
   | [|- b_iszero_succ B] => [|- v_false]
+
+  | [|- b_if_true  B1 B2] => bstep_value [|- B2]
+  | [|- b_if_false B1 B3] => bstep_value [|- B3]
 ;
 
 
@@ -85,20 +84,8 @@ rec bstep_value : [|- bigstep M V] -> [|- value V] =
 rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
 / total b (bstep_to_mstep _ _ b) /
   fn b =>
-  case b of 
-  | [|- b_value V] => [|- ms_ref]
-
-  | [|- b_if_true B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>
-    let [|- S1] = bstep_to_mstep [|- B1] in
-    let [|- S2] = bstep_to_mstep [|- B2] in
-    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
-    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
-	
-  | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ M2 M3) _] =>
-    let [|- S1] = bstep_to_mstep [|- B1] in
-    let [|- S3] = bstep_to_mstep [|- B3] in
-    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
-    [|- ms_tr (ms_tr S1' (ms_step e_if_false)) S3]
+  case b of
+  | [|- b_value _] => [|- ms_ref]
 
   | [|- b_succ B] =>
     let [|- S] = bstep_to_mstep [|- B] in
@@ -126,8 +113,19 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
     let [|- S'] = mstep_iszero [|- S] in
     let [|- v_succ V] = bstep_value [|- B] in
     [|- ms_tr S' (ms_step (e_iszero_succ V))]
-;
 
+  | [|- b_if_true  B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>
+    let [|- S1] = bstep_to_mstep [|- B1] in
+    let [|- S2] = bstep_to_mstep [|- B2] in
+    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
+    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
+	
+  | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ M2 M3) _] =>
+    let [|- S1] = bstep_to_mstep [|- B1] in
+    let [|- S3] = bstep_to_mstep [|- B3] in
+    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
+    [|- ms_tr (ms_tr S1' (ms_step e_if_false)) S3]
+;
 
 
 %  The fact that values can't change isn't trivial for Beluga, and we will     %
@@ -142,16 +140,16 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
 %        succ true ↓ succ true             succ true ↓ succ true               %
 
 rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
-/ total v (bstep_values_stagnate _ _ _ v) /
-  fn b => fn v => case v of 
-  | [|- v_zero] => let [|- b_value _] = b in [|- ref]
-  | [|- v_true] => let [|- b_value _] = b in [|- ref]
-  | [|- v_false] => let [|- b_value _] = b in [|- ref]
-  | [|- v_succ V'] =>
+/ total e (bstep_values_stagnate _ _ _ e) /
+  fn b => fn e => case e of 
+  | [|- v_zero]    => let [|- b_value _] = b in [|- ref]
+  | [|- v_true]    => let [|- b_value _] = b in [|- ref]
+  | [|- v_false]   => let [|- b_value _] = b in [|- ref]
+  | [|- v_succ E'] =>
     (case b of 
      | [|- b_value _] => [|- ref]
      | [|- b_succ B'] =>
-       let [|- ref] = bstep_values_stagnate [|- B'] [|- V'] in [|- ref]
+       let [|- ref] = bstep_values_stagnate [|- B'] [|- E'] in [|- ref]
     )
 ;
 
@@ -178,28 +176,28 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     % or let [|- b_value v_zero] = [|- B] in
     [|- b_pred_zero B]
 
-  | [|- e_pred_succ V] =>
-    let [|- ref] = bstep_values_stagnate [|- B] [|- V] in
+  | [|- e_pred_succ E] =>
+    let [|- ref] = bstep_values_stagnate [|- B] [|- E] in
     % /!\ No `or` this time.
     % This is for this case that we wrote bstep_values_stagnate.
-    [|- b_pred_succ (b_value (v_succ V))]
+    [|- b_pred_succ (b_value (v_succ E))]
 
   | [|- e_iszero_zero] =>
     let [|- ref] = bstep_values_stagnate [|- B] [|- v_true] in
     % or let [|- b_value v_true] = [|- B] in
     [|- b_iszero_zero (b_value v_zero)]
 
-  | [|- e_iszero_succ V] =>
+  | [|- e_iszero_succ E] =>
     let [|- ref] = bstep_values_stagnate [|- B] [|- v_false] in
     % or let [|- b_value v_false] = [|- B] in
-    [|- b_iszero_succ (b_value (v_succ V))]
+    [|- b_iszero_succ (b_value (v_succ E))]
 
   | [|- e_if_then_else S] =>
-    (case [ |- B] of 
-     | [|- b_value V] => impossible [|- V]
-     | [|- b_if_true B1' B2'] =>
+    (case [|- B] of 
+     | [|- b_value E] => impossible [|- E]
+     | [|- b_if_true  B1' B2'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
-       [|- b_if_true B1 B2']
+       [|- b_if_true  B1 B2']
      | [|- b_if_false B1' B3'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
        [|- b_if_false B1 B3']
@@ -207,9 +205,9 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
 
   | [|- e_succ S] =>
     (case [|- B] of 
-     | [|- b_value V] =>
-       let [|- v_succ V'] = [|- V] in
-       let [|- B'] = step_bstep_to_bstep [|- S] [|- b_value V'] in
+     | [|- b_value E] =>
+       let [|- v_succ E'] = [|- E] in
+       let [|- B'] = step_bstep_to_bstep [|- S] [|- b_value E'] in
        [|- b_succ B']
      | [|- b_succ B] =>
        let [|- B'] = step_bstep_to_bstep [|- S] [|- B] in
@@ -218,7 +216,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
 
   | [|- e_pred S] =>
     (case [|- B] of 
-     | [|- b_value V] => impossible [|- V]
+     | [|- b_value E] => impossible [|- E]
      | [|- b_pred_zero B1'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
        [|- b_pred_zero B1]
@@ -229,7 +227,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
 
   | [|- e_iszero S] =>
     (case [|- B] of 
-     | [|- b_value V] => impossible [|- V]
+     | [|- b_value E] => impossible [|- E]
      | [|- b_iszero_zero B1'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
        [|- b_iszero_zero B1]

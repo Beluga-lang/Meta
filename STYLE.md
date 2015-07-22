@@ -7,27 +7,27 @@ This is the apendix B of the TAPL.
 1.  Metavariable Names
 ---------------------
 
- Text                    | ML         | Beluga      | Usage
--------------------------|------------|-------------|-----------------------------
-                         |            |             |
- p, q, r, s, t, u        | s, t       | M, N        | terms
- x, y, z                 | x, y       | x, y, z     | term variables
- v, w                    | v, w       | V, W        | values
- nv                      | nv         |             | numeric values
- l, j, k                 | l          |             | record/variant field labels
- `\mu`                   | store      |             | stores
-                         |            |             |
- M, N, P, Q, S, T, U, V  | tyS, tyT   | T, S, U     | types
- A, B, C                 | tyA, tyB   | A, B        | base types
- `\Sigma`                |            |             | store typings
- X, Y, Z                 | tyX, tyY   |             | type variables
- K, L                    | kK, kL     | K, L        |  kinds
-                         |            |             |
- `\sigma`                |            | #S          | substitutions
- `\Gamma`, `\Delta`      | ctx        | gamma, g, h | contexts
- `\mathcal{J}`           |            |             | arbitrary statements
- `\mathcal{D}`           |            |             | typing derivations
- `\mathcal{C}`           |            |             | subtyping derivations
+ TAPL's Text             | Companion's Text        | ML         | Beluga      | Usage
+-------------------------|-------------------------|------------|-------------|-----------------------------
+                         |                         |            |             |
+ p, q, r, s, t, u        | p, q, r, s, t, u        | s, t       | M, N        | terms
+ x, y, z                 | x, y, z                 | x, y       | x, y, z     | term variables
+ v, w                    | v, w                    | v, w       | V, W        | values
+ nv                      | nv                      | nv         |             | numeric values
+ l, j, k                 | l, j, k                 | l          |             | record/variant field labels
+ `\mu`                   | `\mu`                   | store      |             | stores
+                         |                         |            |             |
+ M, N, P, Q, S, T, U, V  | M, N, P, Q, S, T, U, V  | tyS, tyT   | T, S, U     | types
+ A, B, C                 | A, B, C                 | tyA, tyB   | A, B        | base types
+ `\Sigma`                | `\Sigma`                |            |             | store typings
+ X, Y, Z                 | X, Y, Z                 | tyX, tyY   |             | type variables
+ K, L                    | K, L                    | kK, kL     | K, L        |  kinds
+                         |                         |            |             |
+ `\sigma`                | `\sigma`                |            | #S          | substitutions
+ `\Gamma`, `\Delta`      | `\Gamma`, `\Delta`      | ctx        | gamma, g, h | contexts
+ `\mathcal{J}`           | `\mathcal{J}`           |            |             | arbitrary statements
+ `\mathcal{D}`           | `\mathcal{D}`           |            |             | typing derivations
+ `\mathcal{C}`           | `\mathcal{C}`           |            |             | subtyping derivations
 
 
 2.  Rule Naming Convention
