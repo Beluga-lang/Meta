@@ -13,42 +13,42 @@
 %  modifying the term step-by-step, we go directly to the value. This is also  %
 %  called the natural semantics.                                               %
 %                                                                              %
-%                  v value                  t ↓ v                              %
+%                  V value                  M ↓ V                              %
 %                  ——————— B-Value     ——————————————— B-Succ                  %
-%                   v ↓ v              succ t ↓ succ v                         %
+%                   V ↓ V              succ M ↓ succ V                         %
 %                                                                              %
-%     t1 ↓ true   t2 ↓ v                     t1 ↓ false   t3 ↓ v               %
+%     M1 ↓ true   M2 ↓ V                     M1 ↓ false   M3 ↓ V               %
 %  ————————————————————————— B-IfTrue     ————————————————————————— B-IfFalse  %
-%  if t1 then t2 else t3 ↓ v              if t1 then t2 else t3 ↓ v            %
+%  if M1 then M2 else M3 ↓ V              if M1 then M2 else M3 ↓ V            %
 %                                                                              %
-%                  t ↓ z                  t ↓ succ v                           %
+%                  M ↓ z                  M ↓ succ V                           %
 %               —————————— B-PredZero     —————————— B-PredSucc                %
-%               pred t ↓ z                pred t ↓ v                           %
+%               pred M ↓ z                pred M ↓ V                           %
 %                                                                              %
-%             t ↓ z                          t ↓ succ v                        %
+%             M ↓ z                          M ↓ succ V                        %
 %         ——————————————— B-IszeroZero     ———————————————— B-IszeroSucc       %
-%        iszero t ↓ true                  iszero t ↓ false                     %
+%        iszero M ↓ true                  iszero M ↓ false                     %
 
 LF bigstep : term -> term -> type =
    | b_value       : value V
 		     -> bigstep V V
-   | b_succ        : bigstep T V
-		     -> bigstep (succ T) (succ V)
+   | b_succ        : bigstep M V
+		     -> bigstep (succ M) (succ V)
 
-   | b_if_true     : bigstep T1 true -> bigstep T2 V
-		     -> bigstep (if_then_else T1 T2 T3) V
-   | b_if_false    : bigstep T1 false -> bigstep T3 V
-		     -> bigstep (if_then_else T1 T2 T3) V
+   | b_if_true     : bigstep M1 true -> bigstep M2 V
+		     -> bigstep (if_then_else M1 M2 M3) V
+   | b_if_false    : bigstep M1 false -> bigstep M3 V
+		     -> bigstep (if_then_else M1 M2 M3) V
 
-   | b_pred_zero   : bigstep T z
-		     -> bigstep (pred T) z
-   | b_pred_succ   : bigstep T (succ V)
-		     -> bigstep (pred T) V
+   | b_pred_zero   : bigstep M z
+		     -> bigstep (pred M) z
+   | b_pred_succ   : bigstep M (succ V)
+		     -> bigstep (pred M) V
 
-   | b_iszero_zero : bigstep T z
-		     -> bigstep (iszero T) true
-   | b_iszero_succ : bigstep T (succ V)
-		     -> bigstep (iszero T) false
+   | b_iszero_zero : bigstep M z
+		     -> bigstep (iszero M) true
+   | b_iszero_succ : bigstep M (succ V)
+		     -> bigstep (iszero M) false
 ;
 
 
@@ -56,9 +56,9 @@ LF bigstep : term -> term -> type =
 %  We didn't propagated the value hypothesis in the whole bigstep constructor  %
 %  because we don't need it. Infact, we can prove the following:               %
 %                                                                              %
-%  If  t ↓ v  then v is a value.                                               %
+%  If  M ↓ V  then V is a value.                                               %
 
-rec bstep_value : [|- bigstep T V] -> [|- value V] =
+rec bstep_value : [|- bigstep M V] -> [|- value V] =
 / total b (bstep_value _ _ b) /
   fn b => case b of 
   | [|- b_value V] => [|- V]
@@ -80,51 +80,52 @@ rec bstep_value : [|- bigstep T V] -> [|- value V] =
 %  Let us now prove the first part of what we want to prove: the bigstep       %
 %  relation is included in the multi_step relation.                            %
 %                                                                              %
-%  If  t ↓ v  then  t →* v.                                                    %
+%  If  M ↓ V  then  M →* V.                                                    %
 
-rec bstep_to_mstep : [|- bigstep T V] -> [|- multi_step T V] =
+rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
 / total b (bstep_to_mstep _ _ b) /
   fn b =>
   case b of 
   | [|- b_value V] => [|- ms_ref]
 
-  | [|- b_if_true B1 B2] : [|- bigstep (if_then_else _ T2 T3) _] =>
-    let [|- M1] = bstep_to_mstep [|- B1] in
-    let [|- M2] = bstep_to_mstep [|- B2] in
-    let [|- M1'] = mstep_if_then_else [|- M1] [|- T2] [|- T3] in
-    [|- ms_tr (ms_tr M1' (ms_step e_if_true)) M2]
+  | [|- b_if_true B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>
+    let [|- S1] = bstep_to_mstep [|- B1] in
+    let [|- S2] = bstep_to_mstep [|- B2] in
+    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
+    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
 	
-  | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ T2 T3) _] =>
-    let [|- M1] = bstep_to_mstep [|- B1] in
-    let [|- M3] = bstep_to_mstep [|- B3] in
-    let [|- M1'] = mstep_if_then_else [|- M1] [|- T2] [|- T3] in
-    [|- ms_tr (ms_tr M1' (ms_step e_if_false)) M3]
+  | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ M2 M3) _] =>
+    let [|- S1] = bstep_to_mstep [|- B1] in
+    let [|- S3] = bstep_to_mstep [|- B3] in
+    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
+    [|- ms_tr (ms_tr S1' (ms_step e_if_false)) S3]
 
   | [|- b_succ B] =>
-    let [|- M] = bstep_to_mstep [|- B] in
-    mstep_succ [|- M]
+    let [|- S] = bstep_to_mstep [|- B] in
+    mstep_succ [|- S]
+    % or mstep_succ (bstep_to_mstep [|- B])
 
   | [|- b_pred_zero B] =>
-    let [|- M] = bstep_to_mstep [|- B] in
-    let [|- M'] = mstep_pred [|- M] in
-    [|- ms_tr M' (ms_step e_pred_zero)]
+    let [|- S] = bstep_to_mstep [|- B] in
+    let [|- S'] = mstep_pred [|- S] in
+    [|- ms_tr S' (ms_step e_pred_zero)]
 
   | [|- b_pred_succ B] =>
-    let [|- M] = bstep_to_mstep [|- B] in
-    let [|- M'] = mstep_pred [|- M] in
+    let [|- S] = bstep_to_mstep [|- B] in
+    let [|- S'] = mstep_pred [|- S] in
     let [|- v_succ V] = bstep_value [|- B] in
-    [|- ms_tr M' (ms_step (e_pred_succ V))]
+    [|- ms_tr S' (ms_step (e_pred_succ V))]
 
   | [|- b_iszero_zero B] =>
-    let [|- M] = bstep_to_mstep [|- B] in
-    let [|- M'] = mstep_iszero [|- M] in
-    [|- ms_tr M' (ms_step e_iszero_zero)]
+    let [|- S] = bstep_to_mstep [|- B] in
+    let [|- S'] = mstep_iszero [|- S] in
+    [|- ms_tr S' (ms_step e_iszero_zero)]
 
   | [|- b_iszero_succ B] =>
-    let [|- M] = bstep_to_mstep [|- B] in
-    let [|- M'] = mstep_iszero [|- M] in
+    let [|- S] = bstep_to_mstep [|- B] in
+    let [|- S'] = mstep_iszero [|- S] in
     let [|- v_succ V] = bstep_value [|- B] in
-    [|- ms_tr M' (ms_step (e_iszero_succ V))]
+    [|- ms_tr S' (ms_step (e_iszero_succ V))]
 ;
 
 
@@ -162,11 +163,11 @@ rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 
 
 
 
-%  Let us now show that if  t → t' ↓ v,  then  t ↓ v.  Once we will have       %
-%  this propertie, it will not be hard to obtain the same one for →* and to    %
-%  apply it to any value.                                                      %
+%  Let us now show that if  M → N ↓ V,  then  M ↓ V.  Once we will have this   %
+%  property, it will not be hard to obtain the same one for →* and to apply    %
+%  it to any value.                                                            %
 
-rec step_bstep_to_bstep : [|- step T T'] -> [|- bigstep T' V] -> [|- bigstep T V] =
+rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
 / total s (step_bstep_to_bstep _ _ _ s _) /
   fn s => fn b =>
   let [|- B] = b in
@@ -249,26 +250,27 @@ rec step_bstep_to_bstep : [|- step T T'] -> [|- bigstep T' V] -> [|- bigstep T V
 %  We can now easely extend this to the multi_step relation.This will just be  %
 %  a simple induction on the multi_step constructor.                           %
 %                                                                              %
-%  If  t →* t' ↓ v  then  t ↓ v.                                               %
+%  If  M →* N ↓ V  then  M ↓ V.                                                %
 
-rec mstep_bstep_to_bstep : [|- multi_step T T'] -> [|- bigstep T' V] -> [|- bigstep T V] =
+rec mstep_bstep_to_bstep : [|- multi_step M N] -> [|- bigstep N V]
+			   -> [|- bigstep M V] =
 / total s (mstep_bstep_to_bstep _ _ _ s _) /
   fn s => fn b => case s of 
   | [|- ms_tr S1 S2] =>
     let [|- B2] = mstep_bstep_to_bstep [|- S2] b in
     mstep_bstep_to_bstep [|- S1] [|- B2]
-  | [|- ms_ref ] => b
+  | [|- ms_ref] => b
   | [|- ms_step S'] => step_bstep_to_bstep [|- S'] b
 ;
 
 
 
 %  And now we can prove the wanted theorem. This is only an application of     %
-%  the previous one, with  t' == v.                                            %
+%  the previous one, with  N == v.                                             %
 %                                                                              %
-%  If t →* v with v a value, then t ↓ v.                                       %
+%  If  M →* V  with V a value, then  M ↓ V.                                    %
 
-rec mstep_to_bstep : [|- multi_step T V] -> [|- value V] -> [|- bigstep T V] =
+rec mstep_to_bstep : [|- multi_step M V] -> [|- value V] -> [|- bigstep M V] =
 / total s (mstep_to_bstep _ _ s _) /
   fn s => fn v =>
   let [|- V] = v in
