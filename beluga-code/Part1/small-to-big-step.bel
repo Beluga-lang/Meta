@@ -1,0 +1,324 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+%                Basics: Mechanizing Simple Languages and Proofs               %
+%                         Encoding Proofs by Induction                         %
+%                  Relating Small-step and Big-step Semantics                  %
+%                                                                              %
+%                             by Nicolas Jeannerod                             %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% These lines will be deleted. They can be found in the files in
+% Meta/beluga-code/Part1 but I copied tem here to have beli working.
+
+LF term  : type = 
+| true         : term
+| false        : term
+| if_then_else : term -> term -> term -> term
+| z            : term
+| succ         : term -> term
+| pred         : term -> term
+| iszero       : term -> term
+;
+LF value : term -> type =
+| v_zero     : value z
+| v_succ     : value V -> value (succ V)
+| v_true     : value true
+| v_false    : value false
+;
+LF step: term -> term -> type =
+| e_if_true      : step (if_then_else true M2 M3) M2
+| e_if_false     : step (if_then_else false M2 M3) M3
+| e_pred_zero    : step (pred z) z
+| e_pred_succ    : value V1 -> step (pred (succ V1)) V1
+| e_iszero_zero  : step (iszero z) true
+| e_iszero_succ  : value V1 -> step (iszero (succ V1)) false
+| e_if_then_else : step M1 M1' -> step (if_then_else M1 M2 M3) (if_then_else M1' M2 M3)
+| e_succ         : step M1 M1' -> step (succ M1) (succ M1')
+| e_pred         : step M1 M1' -> step (pred M1) (pred M1')
+| e_iszero       : step M1 M1' -> step (iszero M1) (iszero M1')
+;
+LF multi_step: term -> term -> type = 
+| ms_tr: multi_step M N' -> multi_step N' N -> multi_step M N
+| ms_ref: multi_step M M
+| ms_step: step M N -> multi_step M N
+;
+rec mstep_if_then_else :
+  [ |- multi_step M M'] ->
+  {M2:[ |- term]}{M3:[ |- term]}
+  [ |- multi_step (if_then_else M M2 M3) (if_then_else M' M2 M3)] =
+/ total ms (mstep_if_then_else _ _ ms)/
+fn ms => case ms of
+| [ |- ms_ref] => mlam M2 => mlam M3 => [ |- ms_ref]
+| [ |- ms_step S] =>
+  mlam M2 => mlam M3 => [ |- ms_step (e_if_then_else S)]
+
+| [ |- ms_tr S1 S2] => 
+  mlam M2 => mlam M3 => 
+  let [ |- S1'] = mstep_if_then_else [ |- S1] [ |- M2 ] [ |- M3 ] in
+  let [ |- S2'] = mstep_if_then_else [ |- S2] [ |- M2 ] [ |- M3 ] in
+    [ |- ms_tr S1' S2']
+;
+rec mstep_succ :
+ [ |- multi_step M M'] -> [ |- multi_step (succ M) (succ M') ] =
+/ total ms (mstep_succ m m' ms)/
+fn ms => case ms of
+| [ |- ms_ref] => [ |- ms_ref]
+| [ |- ms_step S] =>
+    [ |- ms_step (e_succ S)]
+| [ |- ms_tr MS1 MS2] =>
+  let [ |- MS1'] = mstep_succ [ |- MS1] in
+  let [ |- MS2'] = mstep_succ [ |- MS2] in
+    [ |- ms_tr MS1' MS2']
+;
+rec mstep_pred :
+  [ |- multi_step M M'] -> [ |- multi_step (pred M) (pred M')] =
+/ total ms (mstep_pred m m' ms)/
+fn ms => case ms of
+| [ |- ms_ref] => [ |- ms_ref]
+| [ |- ms_step S] =>
+    [ |- ms_step (e_pred S)]
+| [ |- ms_tr MS1 MS2] =>
+  let [ |- MS1'] = mstep_pred [ |- MS1] in
+  let [ |- MS2'] = mstep_pred [ |- MS2] in
+    [ |- ms_tr MS1' MS2']
+;
+rec mstep_iszero :
+  [ |- multi_step M M'] -> [ |- multi_step (iszero M) (iszero M')] =
+/ total ms (mstep_iszero m m' ms)/
+fn ms => case ms of
+| [ |- ms_ref] => [ |- ms_ref]
+| [ |- ms_step S] =>
+    [ |- ms_step (e_iszero S)]
+| [ |- ms_tr MS1 MS2] =>
+  let [ |- MS1'] = mstep_iszero [ |- MS1] in
+  let [ |- MS2'] = mstep_iszero [ |- MS2] in
+    [ |- ms_tr MS1' MS2']
+;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%                     Definition of the bigstep semantics                      %
+%                                                                              %
+%                                                                              %
+%                  v value                  t ↓ v                              %
+%                  ——————— B-Value     ——————————————— B-Succ                  %
+%                   v ↓ v              succ t ↓ succ v                         %
+%                                                                              %
+%     t1 ↓ true   t2 ↓ v                     t1 ↓ false   t3 ↓ v               %
+%  ————————————————————————— B-IfTrue     ————————————————————————— B-IfFalse  %
+%  if t1 then t2 else t3 ↓ v              if t1 then t2 else t3 ↓ v            %
+%                                                                              %
+%                  t ↓ z                  t ↓ succ v                           %
+%               —————————— B-PredZero     —————————— B-PredSucc                %
+%               pred t ↓ z                pred t ↓ v                           %
+%                                                                              %
+%             t ↓ z                          t ↓ succ v                        %
+%         ——————————————— B-IszeroZero     ———————————————— B-IszeroSucc       %
+%        iszero t ↓ true                  iszero t ↓ false                     %
+
+LF bigstep : term -> term -> type =
+   | b_value       : value V
+		     -> bigstep V V
+   | b_succ        : bigstep T V
+		     -> bigstep (succ T) (succ V)
+
+   | b_if_true     : bigstep T1 true -> bigstep T2 V
+		     -> bigstep (if_then_else T1 T2 T3) V
+   | b_if_false    : bigstep T1 false -> bigstep T3 V
+		     -> bigstep (if_then_else T1 T2 T3) V
+
+   | b_pred_zero   : bigstep T z
+		     -> bigstep (pred T) z
+   | b_pred_succ   : bigstep T (succ V)
+		     -> bigstep (pred T) V
+
+   | b_iszero_zero : bigstep T z
+		     -> bigstep (iszero T) true
+   | b_iszero_succ : bigstep T (succ V)
+		     -> bigstep (iszero T) false
+;
+
+
+
+% If t ↓ v then v is a value.
+rec bstep_value : [|- bigstep T V] -> [|- value V] =
+/ total b (bstep_value _ _ b) /
+  fn b => case b of 
+  | [|- b_value V] => [|- V]
+  | [|- b_if_true B1 B2] => bstep_value [|- B2]
+  | [|- b_if_false B1 B3] => bstep_value [|- B3]
+  | [|- b_succ B] =>
+    let [|- V] = bstep_value [|- B] in
+    [|- v_succ V]
+  | [|- b_pred_zero B] => bstep_value [|- B]
+  | [|- b_pred_succ B] =>
+    let [|- v_succ V] = bstep_value [|- B] in
+    [|- V]
+  | [|- b_iszero_zero B] => [|- v_true]
+  | [|- b_iszero_succ B] => [|- v_false]
+;
+
+
+
+% If t ↓ v then t →* v.
+
+rec bstep_to_mstep : [|- bigstep T V] -> [|- multi_step T V] =
+/ total b (bstep_to_mstep _ _ b) /
+  fn b =>
+  case b of 
+  | [|- b_value V] => [|- ms_ref]
+
+  | [|- b_if_true B1 B2] : [|- bigstep (if_then_else _ T2 T3) _] =>
+    let [|- M1] = bstep_to_mstep [|- B1] in
+    let [|- M2] = bstep_to_mstep [|- B2] in
+    let [|- M1'] = mstep_if_then_else [|- M1] [|- T2] [|- T3] in
+    [|- ms_tr (ms_tr M1' (ms_step e_if_true)) M2]
+	
+  | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ T2 T3) _] =>
+    let [|- M1] = bstep_to_mstep [|- B1] in
+    let [|- M3] = bstep_to_mstep [|- B3] in
+    let [|- M1'] = mstep_if_then_else [|- M1] [|- T2] [|- T3] in
+    [|- ms_tr (ms_tr M1' (ms_step e_if_false)) M3]
+
+  | [|- b_succ B] =>
+    let [|- M] = bstep_to_mstep [|- B] in
+    mstep_succ [|- M]
+
+  | [|- b_pred_zero B] =>
+    let [|- M] = bstep_to_mstep [|- B] in
+    let [|- M'] = mstep_pred [|- M] in
+    [|- ms_tr M' (ms_step e_pred_zero)]
+
+  | [|- b_pred_succ B] =>
+    let [|- M] = bstep_to_mstep [|- B] in
+    let [|- M'] = mstep_pred [|- M] in
+    let [|- v_succ V] = bstep_value [|- B] in
+    [|- ms_tr M' (ms_step (e_pred_succ V))]
+
+  | [|- b_iszero_zero B] =>
+    let [|- M] = bstep_to_mstep [|- B] in
+    let [|- M'] = mstep_iszero [|- M] in
+    [|- ms_tr M' (ms_step e_iszero_zero)]
+
+  | [|- b_iszero_succ B] =>
+    let [|- M] = bstep_to_mstep [|- B] in
+    let [|- M'] = mstep_iszero [|- M] in
+    let [|- v_succ V] = bstep_value [|- B] in
+    [|- ms_tr M' (ms_step (e_iszero_succ V))]
+;
+
+
+
+LF equal : term -> term -> type =
+   | eq : equal V V
+;
+
+
+
+%  The fact that values can't change isn't trivial for Beluga, and we will     %
+%  to show it. This comes from the fact that you can have different ways to    %
+%  prove that `succ V` with V a value evaluates to `succ V`:                   %
+%                                                                              %
+%             —————————— V-True                 —————————— V-True              %
+%             true value                        true value                     %
+%           ——————————————— V-Succ              ——————————— B-Value            %
+%           succ true value                     true ↓ true                    %
+%        ————————————————————— B-Value     ————————————————————— B-Succ        %
+%        succ true ↓ succ true             succ true ↓ succ true               %
+
+rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
+/ total v (bstep_values_stagnate _ _ _ v) /
+  fn b => fn v => case v of 
+  | [|- v_zero] => let [|- b_value _] = b in [|- eq]
+  | [|- v_true] => let [|- b_value _] = b in [|- eq]
+  | [|- v_false] => let [|- b_value _] = b in [|- eq]
+  | [|- v_succ V'] =>
+    (case b of 
+     | [|- b_value _] => [|- eq]
+     | [|- b_succ B'] =>
+       let [|- eq] = bstep_values_stagnate [|- B'] [|- V'] in [|- eq]
+    )
+;
+
+
+
+%  Let us now show that if t → t' ↓ v, then t ↓ v. Once we will have this      %
+%  propertie, it will not be hard to obtain the same one for →* and to apply   %
+%  it to any value.                                                            %
+
+rec step_bstep_to_bstep : [|- step T T'] -> [|- bigstep T' V] -> [|- bigstep T V] =
+/ total s (step_bstep_to_bstep _ _ _ s _) /
+  fn s => fn b =>
+  let [|- B] = b in
+  case s of 
+
+  | [|- e_if_true] =>
+    [|- b_if_true (b_value v_true) B]
+
+  | [|- e_if_false] =>
+    [|- b_if_false (b_value v_false) B]
+
+  | [|- e_pred_zero] =>
+    let [|- eq] = bstep_values_stagnate [|- B] [|- v_zero] in
+    % or let [|- b_value v_zero] = [|- B] in
+    [|- b_pred_zero B]
+
+  | [|- e_pred_succ V] =>
+    let [|- eq] = bstep_values_stagnate [|- B] [|- V] in
+    % /!\ No `or` this time.
+    % This is for this case that we wrote bstep_values_stagnate.
+    [|- b_pred_succ (b_value (v_succ V))]
+
+  | [|- e_iszero_zero] =>
+    let [|- eq] = bstep_values_stagnate [|- B] [|- v_true] in
+    % or let [|- b_value v_true] = [|- B] in
+    [|- b_iszero_zero (b_value v_zero)]
+
+  | [|- e_iszero_succ V] =>
+    let [|- eq] = bstep_values_stagnate [|- B] [|- v_false] in
+    % or let [|- b_value v_false] = [|- B] in
+    [|- b_iszero_succ (b_value (v_succ V))]
+
+  | [|- e_if_then_else S] =>
+    (case [ |- B] of 
+     | [|- b_value V] => impossible [|- V]
+     | [|- b_if_true B1' B2'] =>
+       let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
+       [|- b_if_true B1 B2']
+     | [|- b_if_false B1' B3'] =>
+       let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
+       [|- b_if_false B1 B3']
+    )
+
+  | [|- e_succ S] =>
+    (case [|- B] of 
+     | [|- b_value X] => ?
+     | [|- b_succ X1] => ?
+    )
+
+  | [|- e_pred S] =>
+    (case [|- B] of 
+     | [|- b_value V] => impossible [|- V]
+     | [|- b_pred_zero B1'] => ?
+     | [|- b_pred_succ B1'] => ?
+    )
+
+  | [|- e_iszero S] =>
+    (case [|- B] of 
+     | [|- b_value V] => impossible [|- V]
+     | [|- b_iszero_zero B1'] => ?
+     | [|- b_iszero_succ B1'] => ?
+)
+;
