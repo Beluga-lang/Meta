@@ -11,6 +11,11 @@ Theorem: if step T T1 and step T T2 then equal T1 T2.
 
 }%
 
+% Defining equality
+LF equal : term -> term -> type =
+   | ref : equal M M
+;
+
 % Defining empty type for falsehood
 not_possible : type.
 
