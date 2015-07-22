@@ -285,10 +285,10 @@ evaluation rules. Let us recall our rules for evaluating function application.
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
 \\[1em]
-\infer[\EAppFnStep]{M \app N \Steps M'\;N}{M \Steps M'} \qquad
-\infer[\EAppArgStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
+\infer[\EAppFnStep]{t \app s \Steps t'\;s}{t \Steps t'} \qquad
+\infer[\EAppArgStep]{v \app s \Steps v\;s'}{s \Steps s' & v \Value}
 \\[1em]
-\infer[\EAppBeta]{(\lam x.M) \app V \Steps [V/x]M}{V \Value}
+\infer[\EAppBeta]{(\lam x.t) \app v \Steps [v/x]t}{v \Value}
 \end{array}
 \]
 
