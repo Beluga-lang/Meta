@@ -17,19 +17,19 @@ programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}. The material
   \centering
 \begin{tabular}{p{8cm}|p{2.4cm}|p{3.25cm}}
  Topic & TAPL & META \\
-\hline  
+\hline
 \textbf{Basics} & & \\\hline\hline
 Preliminaries & CH~1, CH~2 & CH \ref{chap:basic}\\
 Basic Arith. Terms, Types and Proofs & CH~3, CH~8 &  \\
-\hline  
+\hline
 Encoding Basic Terms and Types & & CH \ref{sec:terms-basic}, CH \ref{sec:types-basic} \\
 Encoding Basic Proofs as Functions & & CH \ref{chap:proofs-basic} \\
 \hline  \hline
 \textbf{Intermediate} & & \\\hline \hline
 Untyped Lambda-calculus & CH 5  & \\
 Encoding Variables and Binders & & CH \ref{sec:debruijn}, CH \ref{sec:HOAS-var} \\
-\hline  
-Typed Lambda-Calculus & CH 8  & \\
+\hline
+Typed Lambda-Calculus & CH 8, CH 9  & \\
 Encoding Hypothetical Derivations, i.e. Derivations that depend on
 Assumptions & & CH \ref{sec:HOAS-Assumptions}\\
 Encoding Proofs about Closed Derivations & & CH \ref{chap:proofs-closed-derivations} \\
@@ -38,29 +38,32 @@ Encoding Proofs about Hypoth. Derivations & & CH \ref{chap:proofs-open-derivatio
 \textbf{Advanced} & & \\\hline \hline
 Normalization & CH 12 & CH \ref{chap:normalization}\\
 % Encoding Normalization Proofs & & CH \ref{chap:normalization} \\
-\end{tabular} 
+\end{tabular}
   \caption{Roadmap}
   \label{fig:roadmap}
 \end{figure}
-There are also interesting further extensions to explore; for those only Beluga code exists at this point without a detailled explanation. 
+There are also interesting further extensions to explore; for most of those only Beluga code exists at this point without a detailled explanation.
 
-\begin{center}
+\begin{figure}
+% \begin{center}
 \begin{tabular}{p{9cm}|p{2.25cm}|p{2.75cm}}
  Topic & TAPL & META \\
-\hline    
-Nameless Representation (De Bruijn) & CH 6 & CH 2.1 \\  
+\hline
+Nameless Representation (De Bruijn) & CH 6 & CH 4.1, CH 6.1 \\
 References & CH 13 & Planned \\
 Exceptions & CH 14 & Beluga Code \\
 Subtyping & CH 15 & Planned \\
 Recursive Type & CH 20 & Planned\\
 Bounded Quantification & CH 26 & Beluga Code \\
 \end{tabular}
-\end{center}
-
+% \end{center}
+  \caption{Extensions}
+  \label{fig:extensions}
+\end{figure}
 
 
 A key question when mechanizing formal systems and proofs is the choice of proof environment.  We have chosen here Beluga, a dependently typed programming and proof environment as it directly supports key and common concepts that frequently arise when describing formal systems and derivations within them; in particular it provides infrastructure for modelling variable binders and their scope, it supports first-class contexts to abstract, manage, and manipulate a set of assumptions, it support modelling derivations that depend on assumptions, and has built-in first-class (simultaneous) substitutions.  As such it provides one of the most advanced infrastructures for such an endeavor. As we will show,  the theory of programming languages does
-not require a deep and complicated mathematical apparatus, but can be carried out in a concrete, intuitive, and computational way, when the right abstractions are provided. 
+not require a deep and complicated mathematical apparatus, but can be carried out in a concrete, intuitive, and computational way, when the right abstractions are provided.
 
 % This allows hands-on experimentation w
 
@@ -70,7 +73,7 @@ If you intend to use this material for your own course, we would love to hear fr
 
 \paragraph{Acknowledgements}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "book"
-%%% End: 
+%%% End:
