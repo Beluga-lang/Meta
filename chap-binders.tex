@@ -7,7 +7,7 @@ or more generally constructs that allow us to abstract over
 variables. We begin by considering a small fragment of the
 lambda-calculus where we define terms using variables, function
 abstraction, and function application. We refer the reader to for
-example \citep[Ch 5]{TAPL} for a more detailed introduction.
+example \citep[Ch 5, Ch 9]{TAPL} for a more detailed introduction.
 
 \[
 \begin{array}{ll@{\bnfas}l}
@@ -16,7 +16,7 @@ example \citep[Ch 5]{TAPL} for a more detailed introduction.
 \]
 
 The main question we are interested here in is the following: How do we
-represent this grammar in an proof assistant or programming environment? - Clearly, we need to
+represent this grammar in an proof assistant or programming environment? -- Clearly, we need to
 face the issue of how to represent variables.
 
 The most straightforward answer to this question is to use a standard "named" representation of
@@ -35,31 +35,31 @@ that:
 In practice this approach is cumbersome, inefficient, and often error-prone. It
 has therefore led to the search for different representations of such
 terms. Many such approaches exist (see \cite{Aydemir:TechReport09} for
-a good overview), but we will focus on two approaches here:
+a good overview), here we will focus on two of them:
 
 \begin{itemize}
-\item De Bruijn indices: As the name already indicate, this approach
+\item De Bruijn indices: As the name already indicates, this approach
   goes back to Nicolaas Govert de Bruijn who used it in the
   implementation of Automath. Automath was a formal language in the
-  60s, for expressing complete mathematical theories in such a way
+  60s, developed for expressing complete mathematical theories in such a way
   that an included automated proof checker can verify their
   correctness. De Bruijn indices are also fundamental to more advanced
   techniques such as \emph{explicit substitutions}
-  \cite{Abadi:POPL90}.
+  \citep{Abadi:POPL90}.
 
 \item Higher-order abstract syntax
-  \cite{Pfenning88pldi}\index{Higher-order abstract syntax}: an appeal to
-  higher-order representations where the binder are modelled using 
-  function. These functions are typically very weak and only model the
-  scope of variables in an abstract syntax tree, but do not allow recursion or pattern
+  \citep{Pfenning88pldi}\index{Higher-order abstract syntax}: an appeal to
+  higher-order representations where the binders are modelled using
+  functions. These functions are typically very weak: they only model the
+  scope of variables in an abstract syntax tree, not allowing for recursion or pattern
   matching. In such representations, the issues of
-  $\alpha$-equivalence, substitution, etc. are identified with the 
+  $\alpha$-equivalence, substitution, etc. are identified with the
   same operations in a meta-logic.
 \end{itemize}
 
 It is worth pointing out that although we may prefer one of these two
 representations for modelling binders in a proof and programming environment, the named
-representation of $\lambda$-terms has one important advantage: it can be 
+representation of $\lambda$-terms has one important advantage: it can be
 immediately understood by others because the variables can be
 given descriptive names. Thus, even if a system uses De Bruijn indexes
 internally, it will present a user interface with names.
@@ -86,10 +86,10 @@ internally, it will present a user interface with names.
 \section{De Bruijn Indices}\label{sec:debruijn}
 
 De Bruijn's idea was that we can represent terms more
-straightforwardly and avoid issues due to $\alpha$-renaming by
+straightforwardly and avoid issues related to $\alpha$-renaming by
 choosing a canonical representation of variables. Variable occurrences
 point directly to their binders rather than referring to them by
-name. This is accomplished by replacing named variables by a natural
+name. This is accomplished by replacing named variable by a natural
 number where the number $k$ stands for ``the variable bound by the
 $k$'th enclosing $\lambda$.
 
@@ -109,7 +109,7 @@ however tedious to manage. In particular, the same variable may have
 different indices depending on where it occurs! This can make term
 manipulations extremely challenging.
 
-How can we define more formally a grammar for de Bruijn terms:
+We can define a grammar for de Bruijn terms more formally as
 
 \[
 \begin{array}{ll@{\bnfas}l}
@@ -128,9 +128,9 @@ see the following definition
 \]
 
 This allows us to shift arbitrary de Bruijn terms. Intuitively, the
-meaning of shifting $\shift (\lamdb 1 \app 2)$ is that we shift all free
-variables in this term and the result would be $\lamdb 1 \app 3$. We leave
-the exact definition of shifting arbitrary terms for later.
+meaning of shifting $\shift (\lamdb 1 \app 2)$ is that we increase by 1 all free
+variable indices in this term and the result would be $\lamdb 1 \app 3$. We leave
+the exact definition of shifting arbitrary terms for later.\todo{It's now commented out -am}
 
 
 % \section{Translating lambda-terms to de Bruijn}
@@ -139,14 +139,12 @@ Let us first consider the translation between lambda-terms and their
 corresponding de Bruijn representation.
 
 \begin{center}
-\begin{tabular}{l@{\qquad}p{9cm}}
+\begin{tabular}{l@{ : }p{9cm}}
 \fbox{$\Gamma \vdash M \Translates T$} & Term $M$ with the free variables
     in $\Gamma$ is translated to the de Bruijn representation $T$
 \end{tabular}
 \end{center}
-
-We can then define this translation using the following inference rules:
-
+% We can then define this translation using the following inference rules:
 \[
 \begin{array}{l@{\quad}l}
 \infer[\TrLam]{\Gamma \vdash \lam x. M \Translates \lamdb S}{\Gamma,x \vdash M \Translates S} &
@@ -163,12 +161,15 @@ We can then define this translation using the following inference rules:
 If we translate a lambda-term in the context $\Gamma$ to its de Bruijn
 representation, then the de Bruijn representation is in fact closed,
 i.e. it does not contain any variables declared from $\Gamma$.
+\unsure{This is unclear: translating x |- x gives 1, which is not
+closed, is it? -am}
 
 If we translate a de Bruijn term to a lambda-term, then we do need to
 assume that we have a context where we already accumulated variables,
 i.e. we may have already generated some variable names for indices we
 encountered.
-
+\unsure{Unclear; I think the point is that we might need to generate
+fresh names for variables? -am}
 % \subsection*{Substitution} Substitution for de Bruijn terms is tedious
 % and crucially relies on properly shifting variables.
 
@@ -214,7 +215,7 @@ several alternatives have been and are being developed.
 In Beluga (as in Twelf and Delphin), we support higher-order abstract
 syntax \index{Higher-order abstract
 syntax}: our foundation, called the logical framework LF
-\cite{Harper93jacm} allows us to represent binders via binders in our
+\citep{Harper93jacm} allows us to represent binders via binders in our
 data-language.
 
 For example, we can declare a type \lstinline!term! in Beluga,
@@ -399,7 +400,7 @@ in the context $\Gamma$.''
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$\Gamma \vdash \tmhastype M
     T$}\quad\mbox{Term $M$ has type $T$ in the context $\Gamma$
-    (explicit context)} } 
+    (explicit context)} }
 \\[1em]
 \infer[u]{\Gamma \vdash \tmhastype x T}{u:\tmhastype x T \in \Gamma} \qquad
 \infer[\TFn^{x,u}]{\Gamma \vdash \tmhastype {(\lam x.M)} {(T \arrow S)}}
@@ -476,27 +477,27 @@ Here we see that indeed we replace all occurrences of $x$ in $M$ with a new
 variable $y$. It is exactly this kind of renaming that is happening, when we
 write \lstinline!hastype (M x) S!.
 Let us revisit the typing derivation for $\lam x.\lam y.x~y : (\Nat \arrow
-\Nat) \arrow \Nat \arrow \Nat$. 
+\Nat) \arrow \Nat \arrow \Nat$.
 \[
 \infer[\TFn^{x,u}]{\lam x.\lam y.x~y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat}
  {\infer[\TFn^{y,v}]{\lam y.x~y :  \Nat  \arrow \Nat}
            {\infer[\TApp]{x~y :\Nat}
-                      {\infer[u]{x: (\Nat \arrow \Nat) }{} & 
-                        \infer[v]{ y: \Nat }{} & 
+                      {\infer[u]{x: (\Nat \arrow \Nat) }{} &
+                        \infer[v]{ y: \Nat }{} &
                       }
                     }
                   }
 \]
 
 How would we encode it? - First we translate the
-typing judgment to representation; 
+typing judgment to representation;
 % \lstinline![|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))]!.
 then we construct an object of this type that will correspond to the typing
 derivation. % for  $\lam x.\lam y.x~y : (\Nat \arrow \Nat) \arrow \Nat \arrow \Nat$.
 %
 
 \begin{lstlisting}
-let d:[|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))] =   
+let d:[|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))] =
   [|-t_lam \x.\u. t_lam \y.\v. t_app u v]
 \end{lstlisting}
 
@@ -529,7 +530,7 @@ $\D_2$ in $\D$.
 
 The proof below reflects the structure of the proof.
 Case-analyzing \lstinline!s! that stands for
-\lstinline![|- step M N]! yields three different cases. 
+\lstinline![|- step M N]! yields three different cases.
 
 The case where
 we have  \lstinline![|- e_app_abs V]!
@@ -539,7 +540,7 @@ use inversion to analyze our assumption
 \lstinline![|-hastype (app (lam M) V) T]!. We have written the two
 inversion steps as one nested pattern in Beluga. More importantly, the
 subderivation $\proofderivc{\D}{x:S}{M:T}$ in the proof is represented as
-\lstinline!\x.\u. D! where  
+\lstinline!\x.\u. D! where
 \lstinline!D! has type \lstinline!hastype (M  x) T! in the context \lstinline!x:term, u:hastype x S!.
 
 Recall that earlier we remarked that the
@@ -547,10 +548,10 @@ typing rule for functions does make two assumptions: that we have a
 fresh variable \lstinline!x! and an assumption \lstinline!hastype x S!
 which we call \lstinline!u! here. In the proof we then replaced all
 occurrences of $x$ by the value $V$ and all assumptions $V:S$ are
-replaced by the proof $\D_2$. 
+replaced by the proof $\D_2$.
 
 \begin{small}
-  
+
 \[
 \begin{array}{l@{\quad}c@{\quad}l@{\quad}c}
 & \qquad\infer[\TFn^{x,u}]
@@ -558,7 +559,7 @@ replaced by the proof $\D_2$.
        {\above{\D^x}{u:\tmhastype x T \vdash \tmhastype M S}} & & \\[1em]
 \mbox{replacing $x$ by $V$ in $\D$ yields} &
        {\above{[V/x]\D}{u:\tmhastype V T \vdash \tmhastype {([V/x]M)} S}} & \\[1em]
-\mbox{replacing $u$ by $\D_2$ in $\D$ yields} & 
+\mbox{replacing $u$ by $\D_2$ in $\D$ yields} &
 \above{[\D_2/u, V/x]\D}{\tmhastype {([V/x]M)} S}
 \end{array}
 \]
@@ -770,7 +771,7 @@ contexts.
 \lstinline!b1:block(x:term,u:hastype x (arr nat nat)),!\newline\lstinline!b2:block(y:term,u:hastype x nat)!
 & no (wrong binding structure)
 \end{tabular}
-\end{center}  
+\end{center}
 \end{small}
 
 
@@ -789,7 +790,7 @@ fn d => fn f => case d of
 
 |[\gamma |-t_lam \x.\u. D] =>
   let[\gamma |-t_lam \x.\u. F] = f in
-  let[ |-ref] = unique [\gamma,b:block(x:term,u:hastype x _)|-D[.. b.1 b.2] ] 
+  let[ |-ref] = unique [\gamma,b:block(x:term,u:hastype x _)|-D[.. b.1 b.2] ]
                       [\gamma,b$\,$|-F[.. b.1 b.2] ] in
    [ |-ref]
 
@@ -812,13 +813,13 @@ Beluga will be able to reconstruct it.
 We call the type \lstinline![\gamma |-hastype M T[] ]! a contextual type and
 the object inhabiting it a contextual object.
 The term \lstinline!M! can depend on the variables declared in the
-context \lstinline!\gamma!. Implicitely, all meta-variables occurring inside \lstinline![ ]! are associated with a post-poned substitution which can be omitted, if the substitution is the identity substitution (which can be written as \lstinline!..!). Hence, writing simply \lstinline!M! in the context $\gamma$, is equivalent to writing \lstinline!M[..]!. Why are meta-variables such as \lstinline!M! associated with post-poned substitutions? - Intuitively, 
+context \lstinline!\gamma!. Implicitely, all meta-variables occurring inside \lstinline![ ]! are associated with a post-poned substitution which can be omitted, if the substitution is the identity substitution (which can be written as \lstinline!..!). Hence, writing simply \lstinline!M! in the context $\gamma$, is equivalent to writing \lstinline!M[..]!. Why are meta-variables such as \lstinline!M! associated with post-poned substitutions? - Intuitively,
 \lstinline!M! itself is a contextual object of type
 \lstinline![\gamma |-term]! and \lstinline!..! is the identity substitution
 which $\alpha$-renames the bound variables.
 On the other hand, \lstinline!T! and \lstinline!S! stand for closed
 objects of type \lstinline!tp! and they cannot refer to declarations
-from the context \lstinline!\gamma!. Their declared type is \lstinline![|- tp]!. To use an object of type \lstinline![|-tp]! in a context $\gamma$, we need to weaken it. This is what we express in the statement by writing \lstinline!T[]! and \lstinline!S[]!. Here \lstinline![]! denotes a weakening substitution from the empty context to $\gamma$. 
+from the context \lstinline!\gamma!. Their declared type is \lstinline![|- tp]!. To use an object of type \lstinline![|-tp]! in a context $\gamma$, we need to weaken it. This is what we express in the statement by writing \lstinline!T[]! and \lstinline!S[]!. Here \lstinline![]! denotes a weakening substitution from the empty context to $\gamma$.
 Note that these subtleties were not
 captured in our original informal statement of the type uniqueness
 theorem.
@@ -932,8 +933,8 @@ rule \lstinline!ref!.
 
 
 \chapter{Encoding Program Transformations }
-\section{Translation of de Bruijn Terms to HOAS Terms} 
-We return here to the beginning of Chapter \ref{chap:binders} where we discussed two different representations for lambda-terms, namely using de Bruijn representation and using higher-order abstract syntax (HOAS). In Section \ref{sec:debruijn}, we defined de Bruijn terms and also showed how to translate lambda-terms in HOAS to their corresponding de Bruijn representation. Here, we implement de Bruijn terms and write a total function for the translation of lambda-terms in HOAS to their corresponding  de Bruijn representation.  To contrast we repeat our definition of lambda-terms using HOAS on the left and define de Bruijn terms on the right. 
+\section{Translation of de Bruijn Terms to HOAS Terms}
+We return here to the beginning of Chapter \ref{chap:binders} where we discussed two different representations for lambda-terms, namely using de Bruijn representation and using higher-order abstract syntax (HOAS). In Section \ref{sec:debruijn}, we defined de Bruijn terms and also showed how to translate lambda-terms in HOAS to their corresponding de Bruijn representation. Here, we implement de Bruijn terms and write a total function for the translation of lambda-terms in HOAS to their corresponding  de Bruijn representation.  To contrast we repeat our definition of lambda-terms using HOAS on the left and define de Bruijn terms on the right.
 
 \begin{minipage}[t]{7cm}
 \begin{lstlisting}
@@ -952,7 +953,7 @@ LF dBruijn   : type =
 \end{lstlisting}
 \end{minipage}
 
-The translation from \lstinline!term! to \lstinline!deBruijn! is naturally recursive and as we travers a \lstinline!term!, we will go under binders. Hence, our translation must translate a \lstinline!term! in the context $\gamma$ to \lstinline!deBruijn! (see also Sec. \ref{sec:debruijn}). 
+The translation from \lstinline!term! to \lstinline!deBruijn! is naturally recursive and as we travers a \lstinline!term!, we will go under binders. Hence, our translation must translate a \lstinline!term! in the context $\gamma$ to \lstinline!deBruijn! (see also Sec. \ref{sec:debruijn}).
 We hence first define the shape and structure of our context $\gamma$. This is
 simply done by : \lstinline!schema ctx = term ; !
 
@@ -1010,7 +1011,7 @@ re-assemble our proper de Bruijn term \lstinline![|-app' F1 F2]!.
 When we translate a lambda-term, we must extend the context.
 
 
-Finally, we must consider the variable cases. We implement the variable case using a separate function \lstinline!vhoas2db! whose type can be read as: For all $\gamma:$\lstinline!ctx! and for all parameters (variables) \lstinline!#p:[\gamma |- term]! there exists a \lstinline!deBruijn! term. \index{Quantification over parameter variables} We note that the algorithm in Section \ref{sec:debruijn} 
+Finally, we must consider the variable cases. We implement the variable case using a separate function \lstinline!vhoas2db! whose type can be read as: For all $\gamma:$\lstinline!ctx! and for all parameters (variables) \lstinline!#p:[\gamma |- term]! there exists a \lstinline!deBruijn! term. \index{Quantification over parameter variables} We note that the algorithm in Section \ref{sec:debruijn}
 took advantage of the shape of the context; for
 example, we really took the context for being ordered. The same thing
 happens in Beluga. We can match on the shape of contexts.
