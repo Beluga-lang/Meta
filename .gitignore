@@ -11,4 +11,10 @@
 *.temp
 *.tdo
 *.idx
+*.ilg
+*.ind
+*.cookie
+
 *~
+*#
+.#*
