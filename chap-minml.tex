@@ -132,15 +132,17 @@ judgment $M \Steps N$ using congruence rules and reduction rules.
 Our goal is to represent the relation $M \Steps N$ and describe the derivation
 trees which correspond to evaluating a given sub-term. To accomplish this we
 also must be able to construct derivation trees that prove that a given term is
-a value. Recall that a data-type provides us with a definition of constructing
-elements. Clearly, terms are inductively defined and are easily translated into
-a data-type definition. However, we also defined inductively what it means for a
+a value.  Clearly, inductively defined terms can be easily translated into objects of
+type \lstinline!term! using the constants \lstinline!true!,
+\lstinline!false!, \lstinline!if_then_else!, \lstinline!z!,
+\lstinline!suc!, \lstinline!pred!, and \lstinline!iszero!.
+However, we also defined inductively what it means for a
 term to be a value:  we use the  axioms $\VZero$, $\VTrue$,
-$\VFalse$ together with the inference rule $\VSucc$. Similarly, we defined
-inductively what it means for a term $M$ to step to a term $N$.
-\todo{Do we really keep data-type in the explanation? -nj}
+$\VFalse$ together with the inference rule $\VSucc$. Similarly, we can
+translate derivation trees that prove $V \Value$ and derivation trees
+that show $M \Steps N$.
 
-In \beluga, data-types are powerful enough to encode such definitions about
+In \beluga, types are powerful enough to encode such definitions about
 predicates and relations. To represent the judgment $V \Value$ we define a
 predicate (type family) \lstinline!value! and state that it takes terms as
 argument by declaring its type as \lstinline!term -> type!. Then each rule
@@ -197,8 +199,8 @@ side  of this symbol  we can list assumptions and the right hand side
 describes  what we claim can be derived from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
-let w : [x: term, v: value x |- value (succ (succ x))] =
-        [x: term, v: value x |- v_succ (v_succ v)];
+let w:[x: term, v: value x |- value (succ (succ x))] =
+      [x: term, v: value x |- v_succ (v_succ v)];
 \end{lstlisting}
 
 The right hand side can be read as: Assuming \lstinline!x: term! and
@@ -302,7 +304,7 @@ $M : T$. We recall here simply the typing rules from \cite{TAPL}.
 The typing relation between terms and types is encoded in \beluga using a
 predicate (type family) \lstinline!hastype! which is declared with
 \lstinline!term -> tp -> type!. Each typing rule corresponds to a constructor in
-our data-type definition.
+our definition.
 
 \begin{lstlisting}
 LF hastype : term -> tp -> type =
@@ -400,12 +402,10 @@ rec tps: [|- hastype M T] -> [|- step M N] -> [|- hastype N T] = ? ;
 
 Note that \lstinline!->! is overloaded. We have used it so far in defining the
 type families \lstinline!hastype!, \lstinline!step!, \lstinline!value!, and the
-type \lstinline!term!. The arrow in these data-type definitions corresponded to
+type \lstinline!term!. The arrow in these definitions corresponded to
 the line we draw, when we draw an inference rule to distinguish between the
 premises and the conclusions. We merely were using the arrow to define syntactic
 structures.
-
-\todo{Continue cleaning and rewriting $t \to M$ from here.}
 
 In \beluga, we strictly separate between the objects we are
 constructing (such as derivation trees, terms, etc.) from proofs about
@@ -826,8 +826,8 @@ can take another step. In this section we prove that we can always
 evaluate a well-typed term to a final value.
 
 \begin{theorem}
-If $\proofderiv{\D}{t : T}$ then $t \Halts$, i.e.~there exists a value $v$ s.t. $t
-\MSteps v$.
+If $\proofderiv{\D}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
+\MSteps V$.
 \end{theorem}
 
 We recap our definition of multi-step relations that was the
@@ -835,9 +835,9 @@ reflexive, transitive closure over the single step relation.
 
 \[
 \begin{array}{c@{\qquad}c@{\qquad}c}
-\infer[\MRef]{t \MSteps t}{} &
-\infer[\MTr]{t \MSteps t'}{t \MSteps s & s \MSteps t'} &
-\infer[\MStep]{t \MSteps t'}{t \Steps t'}
+\infer[\MRef]{M \MSteps M}{} &
+\infer[\MTr]{M \MSteps M'}{M \MSteps N & N \MSteps M'} &
+\infer[\MStep]{M \MSteps M'}{M \Steps M'}
 \end{array}
 \]
 
@@ -846,30 +846,30 @@ In the proof for showing that well-typed terms terminate, we will see the need f
 
 \begin{lemma}[Multi Step Lemmas]~\label{lem:multi-step}
   \begin{enumerate}
-  \item If $t \MSteps t'$ then $(\tmpred t) \MSteps (\tmpred t')$.
-  \item If $t \MSteps t'$ then $(\tmsucc t) \MSteps (\tmsucc t')$.
-  \item If $t \MSteps t'$ then $(\tmiszero t) \MSteps (\tmiszero t')$.
-  \item If $t \MSteps t'$ then $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.
+  \item If $M \MSteps M'$ then $(\tmpred M) \MSteps (\tmpred M')$.
+  \item If $M \MSteps M'$ then $(\tmsucc M) \MSteps (\tmsucc M')$.
+  \item If $M \MSteps M'$ then $(\tmiszero M) \MSteps (\tmiszero M')$.
+  \item If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-By structural induction  on $\proofderiv{\S}{t \MSteps t'}$.  We'll only the last
+By structural induction  on $\proofderiv{\S}{M \MSteps M'}$.  We'll only the last
 proposition. By definition of $\MSteps$, we consider three cases:
 
-\begin{basecase}{$\S = \ianc{t \Steps t'}{t \MSteps t'}{\MStep}$}
-$\tmif{t_1}{t_2}{t_3} \Steps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\EIf$ \\
-$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\MStep$
+\begin{basecase}{$\S = \ianc{M \Steps M'}{M \MSteps M'}{\MStep}$}
+$\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\EIf$ \\
+$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\MStep$
 \end{basecase}
 
-\begin{basecase}{$\S = \ianc{}{t_1 \MSteps t_1}{\MRef}$}
-$\tmif{t_1}{t_2}{t_3} \longrightarrow^* \tmif{t_1'}{t_2}{t_3}$ \hfill
+\begin{basecase}{$\S = \ianc{}{M_1 \MSteps M_1}{\MRef}$}
+$\tmif{M_1}{M_2}{M_3} \longrightarrow^* \tmif{M_1'}{M_2}{M_3}$ \hfill
 by rule $\MRef$
 \end{basecase}
 
-\begin{stepcase}{$\S = \ibnc{\above{\S_1}{t_1 \MSteps s}}{\above{\S_2}{s \MSteps t_1'}}{t_1 \MSteps t_1'}{\MTr}$}
-$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{s}{t_2}{t_3}$ \hfill by I.H. on $\S_1$\\
-$\tmif{s}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by I.H. on $\S_2$\\
-$\tmif{t_1}{t_2}{t_3} \MSteps \tmif{t_1'}{t_2}{t_3}$ \hfill by rule $\MTr$  \\
+\begin{stepcase}{$\S = \ibnc{\above{\S_1}{M_1 \MSteps N}}{\above{\S_2}{s \MSteps M_1'}}{M_1 \MSteps M_1'}{\MTr}$}
+$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{N}{M_2}{M_3}$ \hfill by I.H. on $\S_1$\\
+$\tmif{s}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by I.H. on $\S_2$\\
+$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\MTr$  \\
 \end{stepcase}
 \end{proof}
 
@@ -878,16 +878,16 @@ straightforward, but there are some subtleties. In the last statement,
 we say
 
 \begin{center}
-If $t \MSteps t'$ then $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.
+If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
 \end{center}
 
-It is important to realize that $t$, $t'$, $t_1$, and $t_2$ are all
+It is important to realize that $M$, $M'$, $M_1$, and $M_2$ are all
 univerally quantified.  When we appeal to the induction hypthtesis on
-$\S_1$ we in fact instantiate and choose the appropriate $t_2$ and
-$t_3$. It might be more precise to rewrite the statement to make this clearer.
+$\S_1$ we in fact instantiate and choose the appropriate $M_2$ and
+$M_3$. It might be more precise to rewrite the statement to make this clearer.
 
 \begin{center}
-If $t \MSteps t'$ then for all $t_1$ and $t_2$, $(\tmif t {t_1} {t_2}) \MSteps (\tmif {t'} {t_1} {t_2})$.
+If $t \MSteps M'$ then for all $M_1$ and $M_2$, $(\tmif t {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
 \end{center}
 
 Mechanizing proofs highlights such subtleties and forces us to
@@ -1000,7 +1000,7 @@ We now discuss how to mechanize this proof as a program. As a first step, we
 must encode the statement of the theorem as a type.
 
 \begin{lstlisting}
-datatype halts: term -> type =
+LF halts: term -> type =
 | result: multi_step M V -> value V
        -> halts M;
 
@@ -1141,11 +1141,8 @@ LF bigstep : term -> term -> type =
 
 \subsection{Value soundness}
 
-We will now prove two interesting things about values in the bigstep semantics.
-
-\paragraph{Firstly} we can prove that, even if we didn't propagate the value
-hypothesis in the whole bigstep constructor tree, we still always evaluate to a
-value:
+We will now prove two interesting properties about values in the bigstep semantics.
+First, we prove that an expression always evaluates to a value:
 
 \begin{lemma}[Value Soundness for the Big-step semantics]
   \label{lem:bstep-value-soundness}
@@ -1170,9 +1167,9 @@ rec bstep_value : [|- bigstep M V] -> [|- value V] =
 ;
 \end{lstlisting}
 
-\paragraph{Secondly} we can also prove that once we reach a value, we can't
-reach an other one. Note that this is {\bf not} equivalent to say that only the
-\BValue rule can apply. Indeed, there's two different ways of proving that
+Second, we  prove that evaluation yields a unique value. Note that
+this is {\bf not} equivalent to saying that only the \BValue rule can
+apply. For example there are two different ways of proving that 
 $\tmsucc \tmtrue \BSteps \tmsucc \tmtrue$:
 
 \[
@@ -1189,7 +1186,8 @@ $\tmsucc \tmtrue \BSteps \tmsucc \tmtrue$:
 
 What we prove here for the bigstep semantics is the same property as the
 ``values don't step'' for the smallstep semantics, except that in our case,
-values can continue evaluating over and over.
+values can continue evaluating over and over. Values always
+evaluate to themselves.
 
 \begin{lemma}
   \label{lem:bstep-values-stagnate}
@@ -1197,8 +1195,8 @@ values can continue evaluating over and over.
 \end{lemma}
 
 \begin{lstlisting}
-rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
-/ total e (bstep_values_stagnate _ _ _ e) /
+rec bstep_value_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
+/ total e (bstep_unique_stagnate _ _ _ e) /
   fn b => fn e => case e of 
   | [|- v_zero]    => let [|- b_value _] = b in [|- ref]
   | [|- v_true]    => let [|- b_value _] = b in [|- ref]
@@ -1207,7 +1205,7 @@ rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 
     (case b of 
      | [|- b_value _] => [|- ref]
      | [|- b_succ B'] =>
-       let [|- ref] = bstep_values_stagnate [|- B'] [|- E'] in [|- ref]
+       let [|- ref] = bstep_unique_stagnate [|- B'] [|- E'] in [|- ref]
     )
 ;
 \end{lstlisting}
@@ -1232,50 +1230,42 @@ write the actual proof:
 \begin{proposition}[Big-step to small-step]
   \label{prop:bstep-to-mstep}
   If $M \BSteps V$ then $M \MSteps V.$
-  \em
-  \begin{lstlisting}
-rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
-/ total b (bstep_to_mstep _ _ b) /
-  fn b =>
-  \end{lstlisting}
 \end{proposition}
 
 \begin{proof}
-  By induction on the proof $\mathcal{B} := M \BSteps V$:
-  \begin{itemize}
-  \item Case $\infera{\BValue}{V \BSteps V}{V \Value}$\\
-    By reflexivity of $\MSteps$, $V \MSteps V$.
+  By induction on the proof $\proofderiv{\mathcal{B}}{M \BSteps V}$:
+
+\paragraph{Case} $\B = \ianc{V \Value}{V \BSteps V}{\BValue}$\\
+$V \MSteps V$ \hfill by reflexivity of $\MSteps$, i.e. $\MRef$
     
-  \item Case $\infera{\BPredZero}{\tmpred M \BSteps \tmzero}{M \BSteps \tmzero}$\\
-    Since the proof in the premise is smaller than our proof $\mathcal{B}$, we
-    can use the induction hypothesis and deduce $M \MSteps \tmzero$.\\
-    Thanks to lemma~\ref{lem:multi-step}, we know that
-    $\tmpred M \MSteps \tmpred z$.\\
-    And since we know that $\tmpred \tmzero \Steps \tmzero$, we have 
-    $\tmpred M \MSteps \tmpred \tmzero \Steps \tmzero$ and we just have to use
-    the inclusion of $\Steps$ in $\MSteps$ and the transitivity of $\MSteps$ to
-    conclude.
+\paragraph{Case} $\B = \ianc{\above{\B'}{M \BSteps \tmzero}}{\tmpred M
+  \BSteps \tmzero}{\BPredZero}$\\
+$M \MSteps \tmzero$ \hfill by i.h. on $\B'$\\
+$\tmpred M \MSteps \tmpred z$ \hfill by lemma~\ref{lem:multi-step}\\
+$\tmpred \tmzero \Steps \tmzero$ \hfill by $\EPredZero$\\
+$\tmpred \tmzero \MSteps \tmzero$ \hfill by $\MStep$\\
+$\tmpred M \MSteps \tmzero$ \hfill by $\MTr$ 
 
-  \item Case $\inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{M_1 \BSteps \tmtrue}{M_2 \BSteps V}$\\
-    Since the proofs in the premises are small than our proof $\mathcal{B}$, we
-    can use the induction hypothesis and deduce $M_1 \MSteps \tmtrue$ and
-    $M_2 \MSteps V$.\\
-    Thanks to lemma~\ref{lem:multi-step}), we know then that\\
-    $\tmif{M_1}{M_2}{M_3} \MSteps \tmif{\tmtrue}{M_2}{M_3}$.\\
-    We then have:
-    \begin{align*}
-      \tmif{M_1}{M_2}{M_3} &\MSteps \tmif{\tmtrue}{M_2}{M_3} \\
-                           &\Steps  M_2                      \\
-                           &\MSteps V
-    \end{align*}
-    And we just have to use the inclusion of $\Steps$ in $\MSteps$ and the
-    transitivity of $\MSteps$ to conclude.
-  \end{itemize}
+\paragraph{Case} $\B = \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{\above{\B_1}{M_1 \BSteps \tmtrue}}{\above{\B_2}{M_2 \BSteps V}}$\\
+$M_1 \MSteps \tmtrue$ \hfill by i.h. using $\B_1$ \\
+$M_2 \MSteps V$ \hfill by i.h. using $\B_2$ \\
+$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{\tmtrue}{M_2}{M_3}$ \hfill by lemma~\ref{lem:multi-step}\\
+$\tmif{\tmtrue}{M_2}{M_3} \Steps M_2$ \hfill by $\EIfTrue$ \\
+$\tmif{\tmtrue}{M_2}{M_3} \MSteps M_2$ \hfill by $\MStep$ \\
+$\tmif{M_1}{M_2}{M_3} \MSteps V$ \hfill by $\MTr$
 
-  ~
+\end{proof}
 
-  \begin{lstlisting}
-  case b of
+
+Encoding this proof is in fact straightforward. We translate the
+theorem statement into a type and the inductive proof into a recursive
+program.
+
+
+\begin{lstlisting}
+rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
+/ total b (bstep_to_mstep _ _ b) /
+  fn b => case b of
 
   | [|- b_value _] => [|- ms_ref]
 
@@ -1290,16 +1280,33 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
     let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
     [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
   \end{lstlisting}
-\end{proof}
 
-A really interesting line in this proof is the following one:
+There is however one very interesting aspect that arises in the
+translation of the on-paper proof into the program. Revisit the line 
+
 \begin{center}
 \lstinline!| [|- b_if_true  B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>!
 \end{center}
-The second part of the pattern is not syntactically necessary. In our case, it
-is used to give a name to the terms $M_2$ and $M_3$, because we will need them
-to use the lemma \lstinline!mstep_if_then_else!.
-\todo{Explain this a little better? I don't know what to say. -nj}
+
+We give a type annotation to the pattern. This is not necessary for
+type reconstruction, but rather we want to be able to name the term
+\lstinline!M2! and \lstinline!M3! as we want to and must pass them explicitly
+when we use the lemma \lstinline!mstep_if_then_else!. Type annotations
+can also be used in let-expressions and alternatively, we could have
+written the following:
+\todo{To be checked in Beluga}
+
+\begin{lstlisting}
+ | [|- b_if_true  B1 B2] =>
+    let [|- B1] : [|- bigstep M2 V] = [|- B1] in 
+    let [|- B]  : [|- bigstep (if_then_else _ M2 M3) _]  = b in 
+    let [|- S1] = bstep_to_mstep [|- B1] in
+    let [|- S2] = bstep_to_mstep [|- B2] in
+    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
+    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]  
+\end{lstlisting}
+
+
 
 \subsection{Part~2: If $M \MSteps V$ with $V$ a value then $M \BSteps V$ }
 

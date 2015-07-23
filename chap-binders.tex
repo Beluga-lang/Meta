@@ -284,12 +284,12 @@ evaluation rules. Let us recall our rules for evaluating function application.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$t \Steps t'$}: \mbox{Term $t$ steps to term $t'$}}
+\multicolumn{1}{l}{\fbox{$M \Steps M'$}: \mbox{Term $M$ steps to term $M'$}}
 \\[1em]
-\infer[\EAppFnStep]{t \app s \Steps t'\;s}{t \Steps t'} \qquad
-\infer[\EAppArgStep]{v \app s \Steps v\;s'}{s \Steps s' & v \Value}
+\infer[\EAppFnStep]{M \app N \Steps M'\;N}{M \Steps M'} \qquad
+\infer[\EAppArgStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
 \\[1em]
-\infer[\EAppBeta]{(\lam x.t) \app v \Steps [v/x]t}{v \Value}
+\infer[\EAppBeta]{(\lam x.M) \app V \Steps [V/x]M}{V \Value}
 \end{array}
 \]
 
@@ -404,7 +404,7 @@ in the context $\Gamma$.''
 \\[1em]
 \infer[u]{\Gamma \vdash \tmhastype x T}{u:\tmhastype x T \in \Gamma} \qquad
 \infer[\TFn^{x,u}]{\Gamma \vdash \tmhastype {(\lam x.M)} {(T \arrow S)}}
-                 {\Gamma, u:\tmhastype x T \vdash \tmhastype M S}
+                 {\Gamma,x, u:\tmhastype x T \vdash \tmhastype M S}
 \\[1em]
 \infer[\TApp]{\Gamma \vdash \tmhastype {(M \app N)} S}
              {\Gamma \vdash \tmhastype M (T \arrow S)
@@ -504,25 +504,26 @@ let d:[|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))
 
 
 \chapter{Encoding Proofs by Induction - Revisited}\label{chap:proofs-intermediate}
-\section{Type preservation}\label{chap:proofs-closed-derivations}
+\section{Type Preservation}\label{chap:proofs-closed-derivations}
 
 Let us revisit the type preservation proof for the functions and
 function application, in particular we concentrate on the case for
 abstractions.
 
 \begin{theorem}
-If $\proofderivc{\D}{}{M : T}$ and $\proofderiv{\S}{M \Steps N}$ then $\vdash N : T$.
+If $\proofderivc{\D}{~}{\tmhastype M T}$ and $\proofderiv{\S}{M \Steps N}$ then $\vdash N : T$.
 \end{theorem}
 \begin{proof}
 By structural induction on the derivation $\proofderiv{\S}{M \Steps N}$.
 
 \begin{case}{$\S = \ianc{\above{\V}{V \Value}}{(\lam x.M) \app V \Steps [V/x]M}{\EAppBeta}$}
-$\proofderivc{~~~~}{}{(\lam x.M) \app V : T}$
+$\proofderivc{~~~~}{~}{\tmhastype {((\lam x.M) \app V)} T}$
 \hfill by assumption  \\
-$\proofderivc{\D_1}{}{(\lam x.M) : S \arrow T}$ \quad and \quad $\proofderivc{\D_2}{}{V : S}$
+$\proofderivc{\D_1}{~}{\tmhastype{(\lam x.M)}{(S \arrow T)}}$ \\
+$\proofderivc{\D_2}{~}{\tmhastype V S}$
 \hfill by inversion using rule $\TApp$\\
-$\proofderivc{\D~}{x:S}{M : T}$ \hfill by inversion on $\D_1$ using rule $\TFn$\\
-$\proofderivc{~~~~}{}{[V/x]M : T}$ \hfill by substitution lemma using $V$ and
+$\proofderivc{\D~}{x, u:\tmhastype x S}{\tmhastype M T}$ \hfill by inversion on $\D_1$ using rule $\TFn$\\
+$\proofderivc{~~~~}{~}{\tmhastype {[V/x]M} T}$ \hfill by substitution lemma using $V$ and
 $\D_2$ in $\D$.
 \end{case}
 
@@ -539,9 +540,9 @@ wrote out explicitly where \lstinline!V! corresponds to $\V$. We then
 use inversion to analyze our assumption
 \lstinline![|-hastype (app (lam M) V) T]!. We have written the two
 inversion steps as one nested pattern in Beluga. More importantly, the
-subderivation $\proofderivc{\D}{x:S}{M:T}$ in the proof is represented as
+subderivation $\proofderivc{\D}{u:\tmhastype x S}{\tmhastype M T}$ in the proof is represented as
 \lstinline!\x.\u. D! where
-\lstinline!D! has type \lstinline!hastype (M  x) T! in the context \lstinline!x:term, u:hastype x S!.
+\lstinline!D! has type \lstinline!hastype (M x) T! in the context \lstinline!x:term, u:hastype x S!.
 
 Recall that earlier we remarked that the
 typing rule for functions does make two assumptions: that we have a
@@ -556,11 +557,11 @@ replaced by the proof $\D_2$.
 \begin{array}{l@{\quad}c@{\quad}l@{\quad}c}
 & \qquad\infer[\TFn^{x,u}]
        {\vdash \tmhastype {(\lam x. M)}{(S \arrow T)}}
-       {\above{\D^x}{u:\tmhastype x T \vdash \tmhastype M S}} & & \\[1em]
+       {\above{\D^{x,u}}{x, u:\tmhastype x S \vdash \tmhastype M T}} & & \\[1em]
 \mbox{replacing $x$ by $V$ in $\D$ yields} &
-       {\above{[V/x]\D}{u:\tmhastype V T \vdash \tmhastype {([V/x]M)} S}} & \\[1em]
+       {\above{[V/x]\D^u}{u:\tmhastype V S \vdash \tmhastype {([V/x]M)} T}} & \\[1em]
 \mbox{replacing $u$ by $\D_2$ in $\D$ yields} &
-\above{[\D_2/u, V/x]\D}{\tmhastype {([V/x]M)} S}
+\above{[\D_2/u, V/x]\D}{\tmhastype {([V/x]M)} T}
 \end{array}
 \]
 
@@ -655,7 +656,7 @@ rules, since this proves to be more convenient. To make the structure
 of the proof even more apparent, we already use our LF encoding to
 describe our typing judgments. This will also make the translation of
 this proof into a Beluga program much easier.
-
+\label{sec:thmunique}
 \begin{theorem}[Type uniqueness]$\;$\\
 If $\proofderivc{\D}{\Gamma}{\tmhastype M T}$ and $\proofderivc{\C}{\Gamma}{\tmhastype M S}$
 then $\tmeq T S$.
@@ -682,10 +683,10 @@ $\proofderiv{\E}{\tmeq {(\tmarr T S)} {(\tmarr T S)}}$  \; and \; \emphFact{$S =
 Therefore there is a proof for $\tmeq S S'$ by reflexivity (\emphFact{since we know $S=S'$}).
 \end{case}
 
-\begin{case}{$\D = \infera{\TLam}
+\begin{case}{$\D = \infera{\TAbs}
    {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tmarr T S)}}
    {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S}{\D_1}}$}
-$ \C = \infera{\TLam}
+$ \C = \infera{\TAbs}
    {\Gamma \vdash \tmhastype {(\tmlam x T M)} {(\tmarr T S')}}
    {\deduce[\vspace{2pt}]{\Gamma, x, u : \tmhastype x T \vdash \tmhastype M S'}{\D_1}}
 $\\[2em]
@@ -715,9 +716,9 @@ proof:
 \begin{itemize}
 \item We rely on the fact that every assumption is unique and there
   are not two assumptions about the same variable; this is in fact
-  implicitly enforced in the rule $\TLam$ where we ensure
+  implicitly enforced in the rule $\TAbs$ where we ensure
   that the variable is new.
-\item We extend our context in the rule $\TLam$.
+\item We extend our context in the rule $\TAbs$.
 \item We reason about equality using reflexivity. We note that by
   using our rule \lstinline!refl!, we are able to learn that two types
   are actually the same (i.e. $T = T'$).
@@ -825,7 +826,7 @@ captured in our original informal statement of the type uniqueness
 theorem.
 
 We subsequently omit writing weakening substitutions as they clutter the explanation and we should be in principle able to infer them.
-We consider each case individually. Each case in the proof on page
+We consider each case individually. Each case in the proof on page 
 \pageref{sec:thmunique} will correspond to one case in the
 case-expression.
 %
