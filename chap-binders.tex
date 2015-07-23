@@ -130,7 +130,9 @@ see the following definition
 This allows us to shift arbitrary de Bruijn terms. Intuitively, the
 meaning of shifting $\shift (\lamdb 1 \app 2)$ is that we increase by 1 all free
 variable indices in this term and the result would be $\lamdb 1 \app 3$. We leave
-the exact definition of shifting arbitrary terms for later.\todo{It's now commented out -am}
+out the exact definition of shifting arbitrary terms (see \cite{TAPL}
+for details).
+% \todo{It's now commented out -am}
 
 
 % \section{Translating lambda-terms to de Bruijn}
@@ -162,14 +164,12 @@ If we translate a lambda-term in the context $\Gamma$ to its de Bruijn
 representation, then the de Bruijn representation is in fact closed,
 i.e. it does not contain any variables declared from $\Gamma$.
 \unsure{This is unclear: translating x |- x gives 1, which is not
-closed, is it? -am}
+closed, is it? -am It is, since 1 is a number. -bp}
 
-If we translate a de Bruijn term to a lambda-term, then we do need to
-assume that we have a context where we already accumulated variables,
-i.e. we may have already generated some variable names for indices we
-encountered.
-\unsure{Unclear; I think the point is that we might need to generate
-fresh names for variables? -am}
+To translate a de Bruijn term to a lambda-term, we accummulate
+variables in a context and we look up the position of a variable in
+it.
+
 % \subsection*{Substitution} Substitution for de Bruijn terms is tedious
 % and crucially relies on properly shifting variables.
 

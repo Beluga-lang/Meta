@@ -1311,73 +1311,87 @@ written the following:
 \subsection{Part~2: If $M \MSteps V$ with $V$ a value then $M \BSteps V$ }
 
 This direction is not as immediate as the first one. This comes essentially from
-the fact that the bigstep relation must be between a term and a value, while the
-multistep relation can be between two terms.
+the fact that the bigstep semantics relates a term and a value, while the
+small step semantics relates two terms. In this proof, we 
+exploit the fact that eventually we also reach a value using the
+small-step semantics and moreover that in both, the small step and big
+step semantics, values evaluates to itself.
 
-This is the reason why we will need to say that $V$ is a value (we didn't need
-it in the Part~1), and this is the reason why we will have to use lemmas that
-will take a multistep relation between two terms, and a bigstep relation
-starting from the second term and finishing the evaluation to the value.
-\todo{This is really not clear, but I don't know how to say it. -nj}
+% This is the reason why we will need to say that $V$ is a value (we didn't need
+% it in the Part~1), and this is the reason why we will have to use lemmas that
+% will take a multistep relation between two terms, and a bigstep relation
+% starting from the second term and finishing the evaluation to the value.
+% \todo{This is really not clear, but I don't know how to say it. -nj}
 
 \begin{lemma}\label{lem:step-bstep-to-bstep}
-  If $M \Steps N \BSteps V$ then $M \BSteps V$.
-  \em
-  \begin{lstlisting}
-rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
-/ total s (step_bstep_to_bstep _ _ _ s _) /
-  fn s => fn b =>
-  \end{lstlisting}
+  If $M \Steps N$ and $N \BSteps V$ then $M \BSteps V$.
 \end{lemma}
 
-This is the hardest part. Indeed, once we will have this lemma, we will only
+The statement of the lemma can be directly translated into \beluga.
+
+\begin{lstlisting}
+rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
+/ total s (step_bstep_to_bstep _ _ _ s _) /
+  fn s => fn b => ?;
+\end{lstlisting} 
+
+The proof of this lemma is the hardest part. Indeed, once we have this lemma, we will only
 have to iterate over the $\Steps$ to get the same property for $\MSteps$:
 
 \begin{lemma}\label{lem:mstep-bstep-to-bstep}
   If $M \MSteps N \BSteps V$ then $M \Downarrow V$.
-  \em
+\end{lemma}
+
+This lemma is translated into \beluga directly as
+
   \begin{lstlisting}
 rec mstep_bstep_to_bstep : [|- multi_step M N] -> [|- bigstep N V]
 			   -> [|- bigstep M V] =
 / total s (mstep_bstep_to_bstep _ _ _ s _) /
-  fn s => fn b =>
+  fn s => fn b => ?;
   \end{lstlisting}
-\end{lemma}
 
-And then we will just have to apply this lemma with $N = V$ to obtain what we
+Finally we will just have to apply this lemma with $N = V$ to obtain what we
 want:
 
 \begin{proposition}\label{prop:mstep-to-bstep}
   If $M \MSteps V$ with $V$ a value then $M \BSteps V$.
-  \em
-  \begin{lstlisting}
-rec mstep_to_bstep : [|- multi_step M V] -> [|- value V] -> [|- bigstep M V] =
-/ total s (mstep_to_bstep _ _ s _) /
-  fn s => fn v =>
-  \end{lstlisting}
 \end{proposition}
 
-Let's now proof the hard part:
+Or in \beluga: 
+
+\begin{lstlisting}
+rec mstep_to_bstep : [|- multi_step M V] -> [|- value V] -> [|- bigstep M V] =
+/ total s (mstep_to_bstep _ _ s _) /
+  fn s => fn v => ? ;
+\end{lstlisting}
+
+
+Let us now return to the proof of Lemma \ref{lem:step-bstep-to-bstep}:
 
 \begin{proof}[Proof of lemma~\ref{lem:step-bstep-to-bstep}]
-  By induction on the proof $\mathcal{S}$ of $M \Steps N$:
-  \begin{itemize}
-  \item Case $\tmif{\tmtrue}{M_2}{M_3} \Steps M_2$\\
-    We know that $\tmtrue \BSteps \tmtrue$ and that $M_2 \BSteps V$. Which means
-    we can directly conclude:
+
+By induction on the proof $\proofderiv{\mathcal{S}}{M \Steps N}$.
+
+\paragraph{Case} $\S = \ianc{}{\tmif{\tmtrue}{M_2}{M_3} \Steps  M_2}{\EIfTrue}$
+\\[1em]
+$M_2 \BSteps V$ \hfill by assumption \\ 
+$\tmtrue \BSteps \tmtrue$ \hfill by $\BValue$\\
+
     \[ \inferaa{\BIfTrue}{\tmif{\tmtrue}{M_2}{M_3} \BSteps V}{\infera{\BValue}{\tmtrue \BSteps \tmtrue}{\infera{\VTrue}{\tmtrue \Value}{}}}{M_2 \BSteps V} \]
 
-  \item Case $\infera{\EPredSucc}{\tmpred \tmsucc V \Steps V}{V \Value}$\\
-    Since $V$ is a value, and since we know that values stagnate, we know that
-    we just have to show a bigstep reduction to $V$, and there it is:
-    \[ \infera{\BPredSucc}{\tmpred \tmsucc V \BSteps V}{\infera{\BValue}{\tmsucc V \BSteps \tmsucc V}{\infera{\VSucc}{\tmsucc V \Value}{V \Value}}} \]
+\paragraph{Case} $\S = \infera{\EPredSucc}{\tmpred \tmsucc V \Steps V}{V \Value}$\\
+$V \BSteps V'$ \hfill by assumption \\
+$V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
 
-  \item Case $\infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$\\
+    \[ \infera{\BPredSucc}{\tmpred (\tmsucc V) \BSteps V}{\infera{\BValue}{\tmsucc V \BSteps \tmsucc V}{\infera{\VSucc}{\tmsucc V \Value}{V \Value}}} \]
+
+\paragraph{Case} $\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$\\
     Let's notice that after such a step, there can be three bigstep rules:
     \begin{itemize}
       \item A \BValue rule, but this is not possible since a $\tmif{M_1'}{M_2}{M_3}$ cannot be a
         value.
-      \item A \BIfTrue rule. In that case, it will give us a proof for
+      \item A \BIfTrue rule. In that case, we have a proof for
         $M_1' \BSteps \tmtrue$ and an other one for $M_2 \BSteps V$. We can then
         apply our induction hypothesis on $M_1 \Steps M_1' \BSteps \tmtrue$,
         obtain a proof for $M_1 \BSteps \tmtrue$ and conclude:
@@ -1385,7 +1399,7 @@ Let's now proof the hard part:
       \item A \BIfFalse rule, which is exactly the same thing.
     \end{itemize}
 
-  \item Case $\infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$\\
+\paragraph{Case} $\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$\\
     Once again, after this step, we can have two different bigstep rules:
     \begin{itemize}
     \item A \BValue rule. Which means that $\tmsucc N$ is a value, which means
@@ -1399,9 +1413,13 @@ Let's now proof the hard part:
       can conclude:
       \[ \infera{\BSucc}{\tmsucc M \BSteps \tmsucc V'}{M \BSteps V'} \]
     \end{itemize}
-  \end{itemize}
-  ~
+
+\end{proof}
+
   \begin{lstlisting}
+rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
+/ total s (step_bstep_to_bstep _ _ _ s _) /
+  fn s => fn b => 
   let [|- B] = b in
   case s of 
 
@@ -1434,9 +1452,6 @@ Let's now proof the hard part:
        [|- b_succ B']
     )
   \end{lstlisting}
-\end{proof}
-
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "book"
