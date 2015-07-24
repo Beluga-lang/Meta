@@ -1131,7 +1131,7 @@ LF bigstep : term -> term -> type =
 
 \subsection{Value soundness}
 
-We will now prove two interesting properties about values in the bigstep semantics.
+We will now prove two interesting properties about values in the big-step semantics.
 First, we prove that an expression always evaluates to a value:
 
 \begin{lemma}[Value Soundness for the Big-step semantics]
@@ -1174,8 +1174,8 @@ $\tmsucc \tmtrue \BSteps \tmsucc \tmtrue$:
 \end{array}
 \]
 
-What we prove here for the bigstep semantics is the same property as the
-``values don't step'' for the smallstep semantics, except that in our case,
+What we prove here for the big-step semantics is the same property as the
+``values don't step'' for the small-step semantics, except that in our case,
 values can continue evaluating over and over. Values always
 evaluate to themselves.
 
@@ -1303,7 +1303,7 @@ written the following:
 \subsection{Part 2: If $M \MSteps V$ with $V$ a value then $M \BSteps V$ }
 
 This direction is not as immediate as the first one. This comes essentially from
-the fact that the bigstep semantics relates a term and a value, while the
+the fact that the big-step semantics relates a term and a value, while the
 small step semantics relates two terms. In this proof, we
 exploit the fact that eventually we also reach a value using the
 small-step semantics and moreover that in both, the small step and big
@@ -1311,7 +1311,7 @@ step semantics, values evaluates to itself.
 
 % This is the reason why we will need to say that $V$ is a value (we didn't need
 % it in the Part~1), and this is the reason why we will have to use lemmas that
-% will take a multistep relation between two terms, and a bigstep relation
+% will take a multi-step relation between two terms, and a big-step relation
 % starting from the second term and finishing the evaluation to the value.
 % \todo{This is really not clear, but I don't know how to say it. -nj}
 
@@ -1380,7 +1380,7 @@ $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
 \end{case}
 
 \begin{case}{$\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$}
-    Let's notice that after such a step, there can be three bigstep rules:
+    Let's notice that after such a step, there can be three big-step rules:
     \begin{itemize}
       \item A \BValue rule, but this is not possible since a $\tmif{M_1'}{M_2}{M_3}$ cannot be a
         value.
@@ -1394,7 +1394,7 @@ $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
 \end{case}
 
 \begin{case}{$\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$}
-    Once again, after this step, we can have two different bigstep rules:
+    Once again, after this step, we can have two different big-step rules:
     \begin{itemize}
     \item A \BValue rule. Which means that $\tmsucc N$ is a value, which means
       that $N$ is a value. We can then use the induction hypothesis on
