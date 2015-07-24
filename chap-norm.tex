@@ -1,14 +1,48 @@
 \chapter{Normalization}\label{chap:normalization}
 
-In chapter~\ref{chap:binders}, we discussed the Simply Typed Lambda
+In Chapter~\ref{chap:binders}, we discussed the Simply Typed Lambda
 Calculus (STLC), its grammar, operational semantics and typing
-judgement. Additionally, we studied some meta-theoretic properties of
-this formalism, namely: Type Preservation, the fact that type is
-preserved under evaluation of the operational semantics and Type
-Uniqueness, the fact that each well-typed term has only one type. In
+judgement.  In addition, we studied some meta-theoretic properties of
+this formalism such as type preservation, the fact that type is
+preserved under evaluation of the operational semantics, and type
+uniqueness, the fact that each well-typed term has only one type. In
 this chapter we will explore another meta-theoretical property,
 normalization --i.e., the evaluation of well-typed terms always
-terminates.
+terminates. We proved earlier in Section \ref{sec:termination}
+termination of evaluation for a simple language containing arithmetic
+and booleans. This proof was straightforward by structural induction
+on the typing derivation. Unfortunately, proving this property for the
+simply typed lambda-calculus is more challenging. A direct proof via
+structural induction fails. Instead, we fall back to a technique
+called proofs by logical relations going back to Tait  \cite{Tait67}
+and was later refined by Girard
+\citep{GirardLafontTaylor:proofsAndTypes}. The central idea of logical
+relations is to specify relations on well-typed terms via structural
+induction on the syntax of types instead of directly on the syntax of
+terms themselves. Thus, for instance, logically related functions take
+logically related arguments to related results, while  logically
+related pairs consist of components that are related pairwise. 
+
+Mechanizing logical relations proofs is challenging: first, specifying logical relations themselves typically requires a logic which allows arbitrary nesting of quantification and implications; second, to establish soundness of a logical relation, one must prove the Fundamental Property which says that any well-typed term under a closing simultaneous substitution is in the relation. This latter part requires some notion of simultaneous substitution together with the appropriate equational theory of composing substitutions. As Altenkirch \cite{Altenkirch:TLCA93} remarked,
+
+\begin{quote}
+``I discovered that the core part of the proof (here proving lemmas about CR) is fairly straightforward and only requires a good understanding of the paper version. However, in completing the proof I observed that in certain places I had to invest much more work than expected, e.g. proving lemmas about substitution and weakening.'' 
+\end{quote}
+
+While logical normalization proofs often are not large, they are
+conceptually intricate and mechanizing them has become a challenging
+benchmark for proof environments. In \beluga, this proof and similar
+logical relations proofs can be implemented concisely. In developing
+this kind of proof in \beluga, we introduce several new ideas:
+
+\begin{itemize}
+\item We will start by revisiting well-typed lambda-terms together with a
+simple call-by-name semantics and show an intrinsically 
+\end{itemize}
+
+
+
+
 
 \section{Representing Well-typed Terms}
 
