@@ -1,6 +1,6 @@
 
 
-\chapter{Encoding a Simple Language with Arithmetic and Booleans}
+\chapter{Simple Language with Arithmetic and Booleans}
 \label{chap:basic}
 \begin{quote}
 ``A language that doesn't affect the way you think about programming, is
@@ -324,7 +324,7 @@ LF hastype : term -> tp -> type =
 ;
 \end{lstlisting}
 
-\chapter{Encoding Proofs by Induction}\label{chap:proofs-basic}
+\chapter{Proofs by Induction}\label{chap:proofs-basic}
 
 We now discuss some standard properties about languages which are also discussed
 in \cite{TAPL} and show how we can represent such proofs as total functions that
@@ -341,7 +341,7 @@ manipulate and analyze derivation trees. In particular, we illustrate:
 We develop each example step-wise using the interactive programming features in
 \beluga.
 
-\section{Type preservation}
+\section{Type Preservation}
 
 The first property we re-visit is type preservation. In particular, we write
 $M : T$ and $M \Steps N$ to clearly state that we only consider closed terms.
@@ -360,7 +360,7 @@ and $\proofderiv{\S}{M \Steps N}$ respectively.
     $\proofderiv{\D'}{\tmzero : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
     $\proofderiv{~~~~}{\tmzero : \Nat}$ \hfill by rule $\TZero$.
   \end{case}
-  
+
   \begin{case}{$\S = \infera{\EPred}{\tmpred M \Steps \tmpred N}{\above{\S '}{M \Steps N}}$}
     $\proofderiv{\D~}{\tmpred M : T}$ \hfill by assumption \\
     $\proofderiv{\D'}{M : \Nat}$ \quad and \quad $T = \Nat$ \hfill by inversion using rule $\TPred$ \\
@@ -611,7 +611,7 @@ fn d => fn s => case s of
 The full proof can be found online in the example directory corresponding to
 this chapter (see \verb|Part1/type-preservation.bel|).
 
-\section{Uniqueness of Small-step Evaluation}\label{sec:unique-eval}
+\section{Uniqueness of Small-Step Evaluation}\label{sec:unique-eval}
 
 Next, we consider the proof that evaluation using the small-step rules yields a
 unique value. This is an interesting proof because we must argue that values do
@@ -807,7 +807,7 @@ stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.\index{Implicit Argume
 
 
 
-\section{Termination of Well-typed Terms}\label{sec:termination}
+\section{Termination of Well-Typed Terms}\label{sec:termination}
 
 Our goal is to prove that the evaluation of well-typed terms halts. In
 fact we already proved progress, i.e. evaluation cannot get stuck on
@@ -1066,9 +1066,9 @@ fn d => case d of
 
 % \chapter{Exercise 3.5.17}
 
-\section{Relating Small-step and Big-step Semantics}
+\section{Relating Small-Step and Big-Step Semantics}
 \label{sec:small-to-big}
-\subsection{Definition of the big-step semantics}
+\subsection{Definition of the Big-Step semantics}
 
 % Almost taken from TAPL:
 Two styles of operational semantics are in common use. The one used so far and
@@ -1142,7 +1142,7 @@ First, we prove that an expression always evaluates to a value:
 \begin{lstlisting}
 rec bstep_value : [|- bigstep M V] -> [|- value V] =
 / total b (bstep_value _ _ b) /
-  fn b => case b of 
+  fn b => case b of
   | [|- b_value E] => [|- E]
   | [|- b_succ B]  => let [|- E] = bstep_value [|- B] in [|- v_succ E]
 
@@ -1159,7 +1159,7 @@ rec bstep_value : [|- bigstep M V] -> [|- value V] =
 
 Second, we  prove that evaluation yields a unique value. Note that
 this is {\bf not} equivalent to saying that only the \BValue rule can
-apply. For example there are two different ways of proving that 
+apply. For example there are two different ways of proving that
 $\tmsucc \tmtrue \BSteps \tmsucc \tmtrue$:
 
 \[
@@ -1187,12 +1187,12 @@ evaluate to themselves.
 \begin{lstlisting}
 rec bstep_value_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
 / total e (bstep_unique_stagnate _ _ _ e) /
-  fn b => fn e => case e of 
+  fn b => fn e => case e of
   | [|- v_zero]    => let [|- b_value _] = b in [|- ref]
   | [|- v_true]    => let [|- b_value _] = b in [|- ref]
   | [|- v_false]   => let [|- b_value _] = b in [|- ref]
   | [|- v_succ E'] =>
-    (case b of 
+    (case b of
      | [|- b_value _] => [|- ref]
      | [|- b_succ B'] =>
        let [|- ref] = bstep_unique_stagnate [|- B'] [|- E'] in [|- ref]
@@ -1204,7 +1204,7 @@ We now prove that the small-step and big-step semantics for this language
 coincide, {\em i.e.} $M \MSteps V$ if and only if $M \BSteps V$, for any value
  $V$. We will prove the two directions of the ``if and only if'' separately.
 
-\subsection{Part1: If $M \BSteps V$ then $M \MSteps V$}
+\subsection{Part 1: If $M \BSteps V$ then $M \MSteps V$}
 
 Note that in this direction, we do not need to state that $V$ is a value, since
 the Value Soundness Lemma (Lemma~\ref{lem:bstep-value-soundness}) gives us this
@@ -1225,25 +1225,27 @@ write the actual proof:
 \begin{proof}
   By induction on the proof $\proofderiv{\mathcal{B}}{M \BSteps V}$:
 
-\paragraph{Case} $\B = \ianc{V \Value}{V \BSteps V}{\BValue}$\\
+\begin{case}{$\B = \ianc{V \Value}{V \BSteps V}{\BValue}$}
 $V \MSteps V$ \hfill by reflexivity of $\MSteps$, i.e. $\MRef$
-    
-\paragraph{Case} $\B = \ianc{\above{\B'}{M \BSteps \tmzero}}{\tmpred M
-  \BSteps \tmzero}{\BPredZero}$\\
+\end{case}
+
+\begin{case}{$\B = \ianc{\above{\B'}{M \BSteps \tmzero}}{\tmpred M
+  \BSteps \tmzero}{\BPredZero}$}
 $M \MSteps \tmzero$ \hfill by i.h. on $\B'$\\
 $\tmpred M \MSteps \tmpred z$ \hfill by lemma~\ref{lem:multi-step}\\
 $\tmpred \tmzero \Steps \tmzero$ \hfill by $\EPredZero$\\
 $\tmpred \tmzero \MSteps \tmzero$ \hfill by $\MStep$\\
-$\tmpred M \MSteps \tmzero$ \hfill by $\MTr$ 
+$\tmpred M \MSteps \tmzero$ \hfill by $\MTr$
+\end{case}
 
-\paragraph{Case} $\B = \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{\above{\B_1}{M_1 \BSteps \tmtrue}}{\above{\B_2}{M_2 \BSteps V}}$\\
+\begin{case}{$\B = \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{\above{\B_1}{M_1 \BSteps \tmtrue}}{\above{\B_2}{M_2 \BSteps V}}$}
 $M_1 \MSteps \tmtrue$ \hfill by i.h. using $\B_1$ \\
 $M_2 \MSteps V$ \hfill by i.h. using $\B_2$ \\
 $\tmif{M_1}{M_2}{M_3} \MSteps \tmif{\tmtrue}{M_2}{M_3}$ \hfill by lemma~\ref{lem:multi-step}\\
 $\tmif{\tmtrue}{M_2}{M_3} \Steps M_2$ \hfill by $\EIfTrue$ \\
 $\tmif{\tmtrue}{M_2}{M_3} \MSteps M_2$ \hfill by $\MStep$ \\
 $\tmif{M_1}{M_2}{M_3} \MSteps V$ \hfill by $\MTr$
-
+\end{case}
 \end{proof}
 
 
@@ -1272,7 +1274,7 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
   \end{lstlisting}
 
 There is however one very interesting aspect that arises in the
-translation of the on-paper proof into the program. Revisit the line 
+translation of the on-paper proof into the program. Revisit the line
 
 \begin{center}
 \lstinline!| [|- b_if_true  B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>!
@@ -1288,21 +1290,21 @@ written the following:
 
 \begin{lstlisting}
  | [|- b_if_true  B1 B2] =>
-    let [|- B1] : [|- bigstep M2 V] = [|- B1] in 
-    let [|- B]  : [|- bigstep (if_then_else _ M2 M3) _]  = b in 
+    let [|- B1] : [|- bigstep M2 V] = [|- B1] in
+    let [|- B]  : [|- bigstep (if_then_else _ M2 M3) _]  = b in
     let [|- S1] = bstep_to_mstep [|- B1] in
     let [|- S2] = bstep_to_mstep [|- B2] in
     let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
-    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]  
+    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
 \end{lstlisting}
 
 
 
-\subsection{Part~2: If $M \MSteps V$ with $V$ a value then $M \BSteps V$ }
+\subsection{Part 2: If $M \MSteps V$ with $V$ a value then $M \BSteps V$ }
 
 This direction is not as immediate as the first one. This comes essentially from
 the fact that the bigstep semantics relates a term and a value, while the
-small step semantics relates two terms. In this proof, we 
+small step semantics relates two terms. In this proof, we
 exploit the fact that eventually we also reach a value using the
 small-step semantics and moreover that in both, the small step and big
 step semantics, values evaluates to itself.
@@ -1323,7 +1325,7 @@ The statement of the lemma can be directly translated into \beluga.
 rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
 / total s (step_bstep_to_bstep _ _ _ s _) /
   fn s => fn b => ?;
-\end{lstlisting} 
+\end{lstlisting}
 
 The proof of this lemma is the hardest part. Indeed, once we have this lemma, we will only
 have to iterate over the $\Steps$ to get the same property for $\MSteps$:
@@ -1348,7 +1350,7 @@ want:
   If $M \MSteps V$ with $V$ a value then $M \BSteps V$.
 \end{proposition}
 
-Or in \beluga: 
+Or in \beluga:
 
 \begin{lstlisting}
 rec mstep_to_bstep : [|- multi_step M V] -> [|- value V] -> [|- bigstep M V] =
@@ -1363,20 +1365,21 @@ Let us now return to the proof of Lemma \ref{lem:step-bstep-to-bstep}:
 
 By induction on the proof $\proofderiv{\mathcal{S}}{M \Steps N}$.
 
-\paragraph{Case} $\S = \ianc{}{\tmif{\tmtrue}{M_2}{M_3} \Steps  M_2}{\EIfTrue}$
-\\[1em]
-$M_2 \BSteps V$ \hfill by assumption \\ 
+\begin{case}{$\S = \ianc{}{\tmif{\tmtrue}{M_2}{M_3} \Steps  M_2}{\EIfTrue}$}
+$M_2 \BSteps V$ \hfill by assumption \\
 $\tmtrue \BSteps \tmtrue$ \hfill by $\BValue$\\
 
     \[ \inferaa{\BIfTrue}{\tmif{\tmtrue}{M_2}{M_3} \BSteps V}{\infera{\BValue}{\tmtrue \BSteps \tmtrue}{\infera{\VTrue}{\tmtrue \Value}{}}}{M_2 \BSteps V} \]
+\end{case}
 
-\paragraph{Case} $\S = \infera{\EPredSucc}{\tmpred \tmsucc V \Steps V}{V \Value}$\\
+\begin{case}{$\S = \infera{\EPredSucc}{\tmpred \tmsucc V \Steps V}{V \Value}$}
 $V \BSteps V'$ \hfill by assumption \\
 $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
 
     \[ \infera{\BPredSucc}{\tmpred (\tmsucc V) \BSteps V}{\infera{\BValue}{\tmsucc V \BSteps \tmsucc V}{\infera{\VSucc}{\tmsucc V \Value}{V \Value}}} \]
+\end{case}
 
-\paragraph{Case} $\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$\\
+\begin{case}{$\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$}
     Let's notice that after such a step, there can be three bigstep rules:
     \begin{itemize}
       \item A \BValue rule, but this is not possible since a $\tmif{M_1'}{M_2}{M_3}$ cannot be a
@@ -1388,8 +1391,9 @@ $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
         \[ \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{M_1 \BSteps \tmtrue}{M_2 \BSteps V} \]
       \item A \BIfFalse rule, which is exactly the same thing.
     \end{itemize}
+\end{case}
 
-\paragraph{Case} $\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$\\
+\begin{case}{$\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$}
     Once again, after this step, we can have two different bigstep rules:
     \begin{itemize}
     \item A \BValue rule. Which means that $\tmsucc N$ is a value, which means
@@ -1403,15 +1407,15 @@ $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
       can conclude:
       \[ \infera{\BSucc}{\tmsucc M \BSteps \tmsucc V'}{M \BSteps V'} \]
     \end{itemize}
-
+\end{case}
 \end{proof}
 
   \begin{lstlisting}
 rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
 / total s (step_bstep_to_bstep _ _ _ s _) /
-  fn s => fn b => 
+  fn s => fn b =>
   let [|- B] = b in
-  case s of 
+  case s of
 
   | [|- e_if_true] =>
     [|- b_if_true (b_value v_true) B]
@@ -1421,7 +1425,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     [|- b_pred_succ (b_value (v_succ E))]
 
   | [|- e_if_then_else S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] => impossible [|- E]
      | [|- b_if_true  B1' B2'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
@@ -1432,7 +1436,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     )
 
   | [|- e_succ S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] =>
        let [|- v_succ E'] = [|- E] in
        let [|- B'] = step_bstep_to_bstep [|- S] [|- b_value E'] in

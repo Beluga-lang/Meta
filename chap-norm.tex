@@ -21,12 +21,12 @@ relations is to specify relations on well-typed terms via structural
 induction on the syntax of types instead of directly on the syntax of
 terms themselves. Thus, for instance, logically related functions take
 logically related arguments to related results, while  logically
-related pairs consist of components that are related pairwise. 
+related pairs consist of components that are related pairwise.
 
 Mechanizing logical relations proofs is challenging: first, specifying logical relations themselves typically requires a logic which allows arbitrary nesting of quantification and implications; second, to establish soundness of a logical relation, one must prove the Fundamental Property which says that any well-typed term under a closing simultaneous substitution is in the relation. This latter part requires some notion of simultaneous substitution together with the appropriate equational theory of composing substitutions. As Altenkirch \cite{Altenkirch:TLCA93} remarked,
 
 \begin{quote}
-``I discovered that the core part of the proof (here proving lemmas about CR) is fairly straightforward and only requires a good understanding of the paper version. However, in completing the proof I observed that in certain places I had to invest much more work than expected, e.g. proving lemmas about substitution and weakening.'' 
+``I discovered that the core part of the proof (here proving lemmas about CR) is fairly straightforward and only requires a good understanding of the paper version. However, in completing the proof I observed that in certain places I had to invest much more work than expected, e.g. proving lemmas about substitution and weakening.''
 \end{quote}
 
 While logical normalization proofs often are not large, they are
@@ -37,14 +37,14 @@ this kind of proof in \beluga, we introduce several new ideas:
 
 \begin{itemize}
 \item We will start by revisiting well-typed lambda-terms together with a
-simple call-by-name semantics and show an intrinsically 
+simple call-by-name semantics and show an intrinsically
 \end{itemize}
 
 
 
 
 
-\section{Representing Well-typed Terms}
+\section{Representing Well-Typed Terms}
 
 Let's revisit the definition of STLC, starting with the grammar of terms, values and types:
 
@@ -282,7 +282,7 @@ we need to have appeals to the induction hypothesis for open term. In
 particular, when trying to build the reducibility candidate for
 $\lambda$-terms.
 
-\subsection{Reducibility of Substitutions}
+\subsection{Reducibility of substitutions}
 
 As motivated by the previous section, we need to be able to talk about
 open terms, fortunately Beluga has first class support for open
