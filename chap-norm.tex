@@ -67,29 +67,29 @@ type and a constant term.
 
 Then we define the small-step operational semantics. In this
 particular presentation we use rules are different to
-chapter~\ref{chap:binders}. This presentation corresponds to what is
+Chapter~\ref{chap:binders}. This presentation corresponds to what is
 typically referred to as a Call-By-Name operational semantics.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$M \Steps M'$}: \mbox{Term $M$ steps to term $M'$}}
+\multicolumn{1}{l}{\fbox{$M \Steps M'$}~~ \mbox{Term $M$ steps to term $M'$}}
 \\[1em]
 \infer[\EAppBeta]{(\lam x.M) \app N \Steps [N/x]M}{} \qquad
-\infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \\[1em]
+\infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \quad
 % \infer[\EAppFnStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
 \end{array}
 \]
 
 Finally, we define the typing judgement. Note that we added the rule
-\TBase for the new type and term.
+\TBase for constants of base type.
 
 \[
-\begin{array}{c@{\qquad}c}
-\multicolumn{2}{l}{\mbox{Typing rules \fbox{$M:T$}}} \\[1em]
+\begin{array}{c}
+\multicolumn{1}{l}{\mbox{\fbox{$M:T$}~~ \mbox{Term $M$ has type $T$}}} \\[1em]
 \infer[\TFn^{x,u}]{\lam x.M : T \arrow S}
-                 {\infer*{M:S}{\infer[u]{x:T}{}}} &
-\infer[\TApp]{M\;N : S}{M : T \arrow S & N:T} \\[1em]
-\multicolumn{2}{c}{\infer[\TBase]{c : B}{}}
+                 {\infer*{M:S}{\infer[u]{x:T}{}}} \qquad
+\infer[\TApp]{M\;N : S}{M : T \arrow S & N:T} \qquad
+\infer[\TBase]{c : B}{}
 \end{array}
 \]
 
@@ -114,15 +114,16 @@ LF tm : tp -> type =
 \end{lstlisting}
 %\end{extract}
 
-The type \bel{tm} defines our family of simply-typed lambda terms
-indexed by their type as an LF signature. In typical higher-order
+The type family \bel{tm} defines simply-typed lambda terms by 
+indexing \bel{tm} by the type \bel{tp}, the type of a term. In typical higher-order
 abstract syntax (HOAS) fashion, lambda abstraction takes a function
 representing the abstraction of a term over a variable. There is no
 case for variables, as they are treated implicitly in HOAS.
 
 We now encode the step relation of the operational semantics. In
-particular, we create the \bel{step} type indexed by two terms that
-represent each step of the computation.
+particular, we create the \bel{step} type indexed by two well-typed terms that
+represent each step of the computation. Hence our stepping relation is
+intrinsically type-preserving. 
 
 \begin{lstlisting}
 LF step : tm A -> tm A -> type =
@@ -131,7 +132,7 @@ LF step : tm A -> tm A -> type =
 ;
 \end{lstlisting}
 
-Notice how the \bel{beta} rule re-uses the LF notion of substitution by
+Notice again how the \bel{beta} rule re-uses the LF notion of substitution by
 computing the application of \bel{M} to \bel{N}.
 
 Finally, because we want to prove that every chain of evaluation steps
@@ -139,7 +140,7 @@ terminates, we need to define:
 \begin{itemize}
 \item a multiple step reduction \bel{mstep}.
 \item values \bel{val}
-\item and \bel{halts} to encode that a term halts if it steps into a value.
+\item and a predicate \bel{halts} to encode that a term halts if it steps into a value.
 \end{itemize}
 
 \begin{lstlisting}
@@ -171,19 +172,37 @@ LF halts : tm A -> type =
 %name halts H.
 \end{lstlisting}
 
-Finally, \bel{halts} is also a predicate on terms, and only terms that
-eventually step into a value are in it. Thus, the proof of
-normalization needs to establish that all terms are in \bel{halts}. At
-this point, one might be tempted to prove this by induction on the
-structure of terms. However, the na\"if approach fails here because
-the induction hypothesis we get is not strong
-enough. \improvement{Perhaps one could add an exercise as in TAPL for this}
+Finally, a term \bel{M} halts (i.e. \bel{halts M}), if it eventually
+step to a value. 
+Thhe normalization proof will establish that for all terms \bel{M}, 
+\bel{M halts}. At
+this point, one might be tempted to prove this property by induction on the
+structure of terms as we did in Section \ref{sec:termination} for a
+language containing booleans and numbers. However, the na\"if direct approach
+fails when we consider functions and function application. As we
+reduce well-typed terms, we cannot guarantee that their size is
+decreasing. We hence take a different approach.
+\improvement{Perhaps one could add an exercise as in TAPL for this}
 
-\section{Proving Normalization}
+\section{Inductive and Stratified Definitions}
+Instead of proving directly that the evaluation of well-typed terms
+terminates on the size of terms, we characterize abstractly terms that
+are reducible at a given type (written as $\rc A M$). We then prove
+that evaluation of well-typed terms halts in two steps:
 
-In order to have an induction hypothesis that is strong enough we need
-to define an inductive predicate on types that specifies what terms
-can be candidates to be reducible.
+\begin{enumerate}
+\item All well-typed terms are reducible. 
+\item If a term is reducible, it will halt.
+\end{enumerate}
+
+We will be careful to define reducibility such that the second part of
+this argument becomes trivial; proving the first part is more
+challenging. 
+
+The key insight in defining what it means for a term to be reducible
+is to define it not on the size of the term which may in fact grow,
+but on the type of the term. This will give us a strong enough
+induction hypothesis for proving part 1. 
 
 We define the \emph{Reducibility Candidates} predicate as:
 
@@ -193,18 +212,35 @@ We define the \emph{Reducibility Candidates} predicate as:
 \end{itemize}
 
 The definitions states that a term of base type is in the relation if
-it halts, and a term of function type when it halts and it is well
+it halts, and a term of function type is reducible when it halts and it is well
 behaved under application. The general idea of the proof is to show
-that the terms in \rc{T}{M} have the desired property and then we need
-to prove that all terms are reducible. In this case the desired
+that the terms in \rc{T}{M} have the desired property. In our case the desired
 property is that the evaluation of the term halts, and it straight
 forward to show that if a term is reducible then its evaluation halts.
 
-Reducibility cannot be directly encoded at the LF layer, since it
-involves a strong, computational function space. Hence we move to the
-computation layer of Beluga, and employ an indexed recursive
-type. Contextual LF objects and contexts which are embedded into
-computation-level types and programs are written inside \bel{[ ]}.
+Reducibility cannot be directly encoded at the LF layer, since the
+universal quantifier and implication in the definition of $\rc{T
+  \arrow S} M$ are not merely describing a hypothetical and parametric
+derivation. The definition is a statement in first-order logic! It
+states an inductive property about terms which we should be able to prove
+(possibly by induction). We often say it involves a strong implication
+or strong computational function space vs the weak implication
+(function space) LF provides. Hence we revisit to the
+computation layer of \beluga. So far, the power of \beluga's language
+corresponds to first-order logic. Here we now exploit the power of
+defining inductive properties about our domain. This corresponds to
+adding fix-points to our logic. From a programmers point of view, it
+corresponds to adding the power of indexed recursive data types which
+can be used to define properties and relations about contexts and
+contextual objects. Here we define a relation \bel{Reduce} between
+types \bel{A} and terms \bel{M} that corresponds to our reducibility
+candidates $\rc A M$. We declare the kind of \bel{Reduce} as using the
+keyword \bel{ctype} which distinguishes this definition from LF types
+families. Computation-level type families such as \bel{Reduce} are
+indexed by contexts and contextual objects which are embedded into
+computation-level types and programs are written inside \bel{[ ]} (see
+\cite{Cave:POPL12}). 
+
 
 \begin{lstlisting}
 stratified Reduce : {A:[|- tp]}{M:[|- tm A]} ctype =
@@ -215,27 +251,90 @@ stratified Reduce : {A:[|- tp]}{M:[|- tm A]} ctype =
 ;
 \end{lstlisting}
 
-A term of type \bel{b} is reducible if it halts, and a \bel{term M} of type
+
+A term of base type \bel{b} is reducible if it halts, and a \bel{term M} of type
 \bel{arr A B} is reducible if it halts, and moreover for every reducible
 \bel{N} of type \bel{A}, the application \bel{app M N} is reducible. We write
 \lstinline!{N:[|-tm A]}! for explicit $\Pi$-quantification over \bel{N}, a closed term
 of type \bel{A}. To the left of the turnstile in \bel{[|- tm A]} is where one
 writes the context the term is defined in -- in this case, it is empty.
 
-In this definition, the arrows represent the usual computational
-function space, not the weak function space of LF. We note that this
-definition is not (strictly) positive, since \bel{Reduce} appears to the
-left of an arrow in the \bel{Rarr} case. Allowing unrestricted such
-definitions destroys the soundness of our system. Here we note that
-this definition is stratified by the type: the recursive occurrences
-of \bel{Reduce} are at types \bel{A} and \bel{B} which are smaller than \bel{arr A B}.
-\bel{Reduce} is defined by induction on the type of the reducible
-term(additionally this is why we cannot leave the type implicit).
 
-Now, we need to prove some more or less trivial lemmas that are
-some times omitted in paper presentations.
+Adding inductive definitions to a language is non-trivial and may
+jeopardize is consistency. In \beluga there are two forms: stratified
+definitions, as the definition of \bel{Reduce}, and inductive definitions.
+What is this difference between LF types on the one hand and inductive and
+stratified types on the other? - To understand these differences it is
+worthwhile looking at some simpler examples.
 
-First, we prove that halts is closed under expansion in the \bel{halts_step} lemma.
+We might be tempted to give an inductive
+definition of \texttt{Tm} as follows
+
+\begin{lstlisting}
+inductive Tm : ctype =
+| Lam : (Tm -> Tm) -> Tm;
+\end{lstlisting}
+
+On the surface, the function space \verb+Tm -> Tm+
+is a strong function space; we cannot match and inspect the structure
+of this function as we are able with the LF function space that we
+used to define abstractions. We can only observe the behavior of
+computation. However, there is a deeper problem which is best
+illustrated with a slightly simpler example:
+
+\begin{lstlisting}
+inductive D : ctype = 
+| Inj : (D -> D) -> D;
+
+rec out : D -> (D -> D) = 
+fn x => case x of Inj f =>  f;
+
+let omega  : D = Inj (fn x -> (out x) x);
+let omega' : D = (out omega) omega ; 
+\end{lstlisting}
+
+The definition of \verb+D+ seems sensible at first; but we can
+cleverly create a non-terminating computation \verb+omega'+ that
+will keep on reproducing itself. The problem is the negative occurrence
+in the definition \verb+D+. 
+
+To avoid such issues we commonly state that inductive definitions must
+satisfy the positivity restriction, i.e. the type we are defining
+cannot be used the the left hand side of an arrow. 
+
+What is then a stratified type? - Clearly our definition of
+\bel{Reduce} is not inductive as we have an occurrence in a negative
+position in 
+
+\begin{lstlisting}
+ ({N:[|- tm A]} Reduce [|- A ] [|- N] -> Reduce [|- B ] [|- app M N])  
+\end{lstlisting}
+
+
+However, we observe that every computation we would be able to
+construct of this type has the property that the input to that
+computation is smaller when we concentrate on the first index
+describing the type, i.e. \lstinline![|- A]! is smaller than
+\lstinline![|- arr A B]!. While we still can never
+pattern match on this function to inspect its shape and we can never
+recurse on this definition directly, we can recurse on the index
+\lstinline!A! instead. 
+
+
+% In this definition, the arrows represent the usual computational
+% function space, not the weak function space of LF. We note that this
+% definition is not (strictly) positive, since \bel{Reduce} appears to the
+% left of an arrow in the \bel{Rarr} case. Allowing unrestricted such
+% definitions destroys the soundness of our system. Here we note that
+% this definition is stratified by the type: the recursive occurrences
+% of \bel{Reduce} are at types \bel{A} and \bel{B} which are smaller than \bel{arr A B}.
+% \bel{Reduce} is defined by induction on the type of the reducible
+% term(additionally this is why we cannot leave the type implicit).
+
+
+\section{Normalization Proof}
+With the main definitions in place we now prove some more or less trivial lemmas that are
+sometimes omitted in paper presentations.First, we prove that halts is closed under expansion in the \bel{halts_step} lemma.
 
 \begin{lstlisting}
 rec halts_step : {S:[|- step M M']} [|- halts M'] -> [|- halts M] =
@@ -278,7 +377,7 @@ main theorem. The main theorem states that all terms are reducible, so
 a first approximation to this could be to try to prove this theorem:
 
 \begin{lstlisting}
-rec main : {M:[|- tm A[]]} Reduce [|- A] [|- M] =
+rec main : {M:[|- tm A]} Reduce [|- A] [|- M] =
   ?
 ;
 \end{lstlisting}
@@ -286,7 +385,7 @@ rec main : {M:[|- tm A[]]} Reduce [|- A] [|- M] =
 However, if we try to prove this theorem, we very quickly realize that
 we need to have appeals to the induction hypothesis for open term. In
 particular, when trying to build the reducibility candidate for
-$\lambda$-terms.
+$\lambda$-terms. We hence need to generalize this statement.
 
 \subsection{Reducibility of substitutions}
 
