@@ -1,4 +1,4 @@
-\chapter{Encoding Variables, Binders, and Assumptions}
+\chapter{Variables, Binders, and Assumptions}
 \label{chap:binders}
 So far we have considered the representation of a simple language with
 arithmetic expressions and booleans together with proofs about it. In this
@@ -207,11 +207,11 @@ it.
 
 
 
-\section{Higher-order Abstract Syntax}\label{sec:HOAS}
+\section{Higher-Order Abstract Syntax}\label{sec:HOAS}
 In general, managing binders and bound variables is a major pain. So,
 several alternatives have been and are being developed.
 
-\subsection{Representing Variables}\label{sec:HOAS-var}
+\subsection{Representing variables}\label{sec:HOAS-var}
 In Beluga (as in Twelf and Delphin), we support higher-order abstract
 syntax \index{Higher-order abstract
 syntax}: our foundation, called the logical framework LF
@@ -357,8 +357,11 @@ This exercise needs a solution.
 Extend the proof for uniqueness of evaluation we developed in the
 previous Chapter in Section \ref{sec:unique-eval}.
 \end{Exercise}
+\begin{Answer}
+This exercise needs a solution.
+\end{Answer}
 
-\subsection{Representing Assumptions }\label{sec:HOAS-Assumptions}
+\subsection{Representing assumptions }\label{sec:HOAS-Assumptions}
 We now consider how to represent typing derivations. Recall that we can
 represent typing derivations with explicit contexts and without
 (i.e. Gentzen-style).
@@ -503,7 +506,7 @@ let d:[|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))
 
 
 
-\chapter{Encoding Proofs by Induction - Revisited}\label{chap:proofs-intermediate}
+\chapter{Proofs by Induction - Revisited}\label{chap:proofs-intermediate}
 \section{Type Preservation}\label{chap:proofs-closed-derivations}
 
 Let us revisit the type preservation proof for the functions and
@@ -826,7 +829,7 @@ captured in our original informal statement of the type uniqueness
 theorem.
 
 We subsequently omit writing weakening substitutions as they clutter the explanation and we should be in principle able to infer them.
-We consider each case individually. Each case in the proof on page 
+We consider each case individually. Each case in the proof on page
 \pageref{sec:thmunique} will correspond to one case in the
 case-expression.
 %
@@ -933,7 +936,7 @@ rule \lstinline!ref!.
 
 
 
-\chapter{Encoding Program Transformations }
+\chapter{Program Transformations }
 \section{Translation of de Bruijn Terms to HOAS Terms}
 We return here to the beginning of Chapter \ref{chap:binders} where we discussed two different representations for lambda-terms, namely using de Bruijn representation and using higher-order abstract syntax (HOAS). In Section \ref{sec:debruijn}, we defined de Bruijn terms and also showed how to translate lambda-terms in HOAS to their corresponding de Bruijn representation. Here, we implement de Bruijn terms and write a total function for the translation of lambda-terms in HOAS to their corresponding  de Bruijn representation.  To contrast we repeat our definition of lambda-terms using HOAS on the left and define de Bruijn terms on the right.
 
