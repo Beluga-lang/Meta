@@ -47,9 +47,6 @@ simple call-by-name semantics and show an intrinsically.
 \end{itemize}
 
 
-
-
-
 \section{Representing Well-Typed Terms}
 
 Let's revisit the definition of STLC, starting with the grammar of terms, values and types:
@@ -58,7 +55,7 @@ Let's revisit the definition of STLC, starting with the grammar of terms, values
 \begin{array}{ll@{\bnfas}l}
 \mbox{Terms} & M, N & x \bnfalt \lam x.M \bnfalt M \app N \bnfalt c\\
 \mbox{Types} & T, S & B \bnfalt T \arrow S\\
-\mbox{Values} & V & \lam x{:}T.M \bnfalt c
+\mbox{Values} & V & \lam x.M \bnfalt c
 \end{array}
 \]
 
@@ -77,8 +74,14 @@ typically referred to as a Call-By-Name operational semantics.
 \infer[\EAppBeta]{(\lam x.M) \app N \Steps [N/x]M}{} \qquad
 \infer[\EAppArgStep]{M \app N \Steps M'\;N}{M \Steps M'} \quad
 % \infer[\EAppFnStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
+\\[1em]
+\multicolumn{1}{l}{\fbox{$M \MSteps M'$}~~ \mbox{Term $M$ steps in
+    multiple steps to term $M'$}}\\[1em]
+\infer[\MRef]{M \MSteps M}{} \qquad
+\infer[\MOne]{M \MSteps M'}{M \Steps N & N \MSteps M'} 
 \end{array}
 \]
+
 
 Finally, we define the typing judgement. Note that we added the rule
 \TBase for constants of base type.
@@ -127,38 +130,26 @@ intrinsically type-preserving.
 
 \begin{lstlisting}
 LF step : tm A -> tm A -> type =
-| beta : step (app (lam M) N) (M N)
+| beta    : step (app (lam M) N) (M N)
 | stepapp : step M M' -> step (app M N) (app M' N)
+;
+
+LF mstep : tm A -> tm A -> type = 
+| refl   : mstep M M
+| onestep: step M N -> mstep N M' -> mstep M M'
 ;
 \end{lstlisting}
 
 Notice again how the \bel{beta} rule re-uses the LF notion of substitution by
 computing the application of \bel{M} to \bel{N}.
 
-Finally, because we want to prove that every chain of evaluation steps
-terminates, we need to define:
-\begin{itemize}
-\item a multiple step reduction \bel{mstep}.
-\item values \bel{val}
-\item and a predicate \bel{halts} to encode that a term halts if it steps into a value.
-\end{itemize}
-
-\begin{lstlisting}
-LF mstep : tm A -> tm A -> type =
-| refl : mstep M M
-| onestep : step M M' -> mstep M' M'' -> mstep M M''
-;
-\end{lstlisting}
-
-In \bel{mstep} we say that every term steps to itself, and that you can
-always add another small-step to a chain of steps.
+Finally, we define values using the type family \bel{val} and a predicate \bel{halts} to encode that a term halts if it steps into a value.
 
 \begin{lstlisting}
 LF val : tm A -> type =
-| val/c : val c
-| val/lam : val (lam M)
+| val_c : val c
+| val_lam : val (lam M)
 ;
-%name val V.
 \end{lstlisting}
 
 To characterize values, instead of directly implementing the grammar
@@ -167,9 +158,8 @@ values.
 
 \begin{lstlisting}
 LF halts : tm A -> type =
-| halts/m : mstep M M' -> val M' -> halts M
+| halts_m : mstep M M' -> val M' -> halts M
 ;
-%name halts H.
 \end{lstlisting}
 
 Finally, a term \bel{M} halts (i.e. \bel{halts M}), if it eventually
@@ -207,7 +197,7 @@ induction hypothesis for proving part 1.
 We define the \emph{Reducibility Candidates} predicate as:
 
 \begin{itemize}
-\item \rc \iota B iff $M$ halts
+\item \rc B M iff $M$ halts
 \item \rc{T\arrow S} M iff $M$ halts and for all $N$, if \rc {T} N then \rc{S}{M\app N}
 \end{itemize}
 
@@ -333,36 +323,73 @@ recurse on this definition directly, we can recurse on the index
 
 
 \section{Normalization Proof}
+\subsection{Auxiliary Lemma}
 With the main definitions in place we now prove some more or less trivial lemmas that are
-sometimes omitted in paper presentations.First, we prove that halts is closed under expansion in the \bel{halts_step} lemma.
+sometimes omitted in paper presentations.First, we state and prove a
+simple lemma which stats that halts is closed under single step expansion.
+
+\begin{lemma}[]
+If $\proofderiv{\S}{M \Steps M'}$ and $M'$ halts then $M$ halts.
+\end{lemma}
+
+The proof is straightforward. As $M'$ halts, we have a value $V$ and a
+derivation $\proofderiv{\S'}{M' \MSteps V}$. By using the rule $\MOne$ together with
+$\S$ and $\S'$ we have a witness for $M \MSteps V$ which shows that $M$ halts.
+This can be encoded directly in \beluga.
 
 \begin{lstlisting}
 rec halts_step : {S:[|- step M M']} [|- halts M'] -> [|- halts M] =
 mlam S => fn h =>
-let [|- halts/m MS' V] = h in
- [|- halts/m (onestep S MS') V]
+let [|- halts_m MS' V] = h in
+ [|- halts_m (onestep S MS') V]
 ;
 \end{lstlisting}
 
-Next we prove closure of Reduce under expansion. This follows by
-induction on the type \bel{A}' which is an implicit argument. In the
-base case we appeal to \bel{halts_step}, while in the \bel{Rarr} case
+Next we prove closure of reducibility candidates under expansion. 
+
+  \begin{lemma}[Backward closed]
+   If $M \Steps M'$ and $\rc T {M'}$ then $\rc T M$.    
+  \end{lemma}
+
+The proof is by induction on the type $T$. In the base case we appeal to \bel{halts_step}, while in the \bel{Rarr} case
 we must also appeal to the induction hypothesis at the range type,
 going inside the function position of applications.
 
 \begin{lstlisting}
-rec bwd_closed : {S:[|- step M M']} Reduce [|- T] [|- M'] -> Reduce [|- T] [|- M] =
-mlam MS => fn r => case r of
-| Rb ha => Rb (halts_step [|- MS] ha)
-| Rarr ha f => Rarr (halts_step [|- MS] ha)
-  (mlam N => fn rn =>
-   bwd_closed [|- stepapp MS] (f [|- N] rn))
+rec bwd_closed' : {T:[|- tp]}{M:[|- tm T]}{M':[|- tm T]}{S:[ |- step M M']} Reduce [|- T] [ |- M'] -> Reduce [|- T] [ |- M] =
+/ total a (bwd_closed' a) /
+ mlam T, M, M' => mlam SS => fn r => case [|- T] of 
+| [|- b] => let I ha = r in I (halts_step [ |- SS] ha)
+| [|- arr T S] => 
+  let Arr ha f = r in
+    Arr (halts_step [ |- MS] ha)
+	(mlam N => fn rn =>
+	 bwd_closed' [|- S] [|- _ ] [|- _ ] [ |- stepapp MS] (f [ |- N] rn))
 ;
+
+rec bwd_closed : {S:[ |- step M M']} Reduce [|- T] [ |- M'] -> Reduce [|- T] [ |- M] = 
+/ total (bwd_closed) /
+mlam S => fn r => 
+let [|- S] : [|- step M M'] = [|- S] in 
+let [|- M] : [|- tm T]    = [|- M] in
+  bwd_closed' [|- T] [|- M ] [|- M' ]  [|- S] r;
 \end{lstlisting}
+
+\todo{Add informal proof and provide more explanation to this function
+-bp}
 
 The trivial fact that reducible terms halt has a corresponding
 trivial proof, analyzing the construction of the the proof of
-\bel{Reduce[|- T] [|- M]}
+\bel{Reduce[|- T] [|- M]}.
+
+Finally we prove that that if a term $M$ is reducible at type $T$ then
+it halts.
+
+\begin{lemma}
+If $\rc T M$ then $M$ halts.  
+\end{lemma}
+The proof is trivial and follows directly from the definition of $\rc
+T M$. This can be translated direct into \beluga as follows.
 
 \begin{lstlisting}
 rec reduce_halts : Reduce [|- T] [|- M] -> [|- halts M] =
@@ -387,62 +414,114 @@ we need to have appeals to the induction hypothesis for open term. In
 particular, when trying to build the reducibility candidate for
 $\lambda$-terms. We hence need to generalize this statement.
 
-\subsection{Reducibility of substitutions}
+\subsection{Fundamental Lemma and Main Theorem}
+% \subsection{Reducibility of substitutions}
+It is worthwhile to revisit the proof of the fundamental lemma on
+paper. The right generalization is often stated as follows:
+
+
+\begin{lemma}[Main lemma]
+If $\D:\Gamma \vdash M : T$ and $\rc {\Gamma}{\sigma}$ then
+$\rc T {[\sigma]M}$ where $\rc {\Gamma}{\sigma}$ is defined as:
+
+\begin{itemize}
+\item $\rc \cdot \cdot$ (i.e. empty substitutions are reducible at the
+  empty context)
+\item $\rc {\Gamma, x:T} {\sigma, N/x}$ iff $\rc \Gamma \sigma$ and  $\rc T N$
+\end{itemize}
+ % \[
+ % \begin{array}{c}
+ % \infer{\rc \cdot \cdot }{} \qquad \qquad
+ % \infer{\rc {\Gamma, x:T} {\sigma, N/x}}
+ % {\rc \Gamma \sigma & \rc T N }
+ % \end{array}
+ % \]
+\end{lemma}
+
+\begin{proof} By structural induction on the typing derivation $\D$.
+\\[0.5em]
+\noindent
+\textbf{Case}  ${\mathcal{D}}=\begin{array}{l}\infer[lam]{\Gamma \vdash \mathsf{lam}~ x.M : T \arrow
+    S}{
+    \begin{array}{c}
+      {\mathcal{D}}_1\\
+      \Gamma,x{:}T \vdash M : S
+    \end{array}
+}\end{array}$
+\\[0.5em]
+$[\sigma](\mathsf{lam}~x.M) = \mathsf{lam}~ x.([\sigma,x/x]M)$ \hfill 
+by \emphFact{properties of substitution} \\
+$\mathsf{lam}~ x.[\sigma,x/x]M$ halts \hfill since it is a value\\
+Suppose $\rc T N$.
+\begin{enumerate}
+\item $\rc S {[\sigma,N/x]M}$ \hfill by I.H. on ${\mathcal{D}}_1$ since $\sigma \in  \mathcal{R}_{\Gamma}$
+\item $\rc S {[N/x][\sigma,x/x]M}$ \hfill by \emphFact{properties of
+  substitution}
+\item $\rc S {\mathsf{app}~(\mathsf{lam}~ x.~[\sigma,x/x]M)\; N}$ \hfill by Backwards closure
+\end{enumerate}
+Hence $\rc {T \arrow S}{[\sigma]\mathsf{lam}~ x.M}$ \hfill by definition
+
+\end{proof}
+
+
 
 As motivated by the previous section, we need to be able to talk about
 open terms, fortunately Beluga has first class support for open
 terms. The first thing we need is declaration of a schema, that is a
 classifier of contexts.
 
-For our normalization proof, we needs contexts that contain well-typed
+For our normalization proof, we need contexts that contain well-typed
 terms, as open terms have only terms as assumptions. So we declare a schema:
 \begin{lstlisting}
 schema ctx = tm T;
 \end{lstlisting}
 
-Also, to  we need the concept of \emph{grounding substitutions}, again
+Also,  we need the concept of \emph{grounding substitutions}, again
 natively supported in Beluga as substitution from some context into an
 empty context. And we need also to define what it means for a
 substitution to be \emph{reducible}. In particular, a \emph{a
   reducible substitution} is a substitution where all the terms that
 compose it are also reducible. We define that, using an inductive
-data-type indexed by grounding substitutions.
+data-type indexed by grounding substitutions. In the code below we
+pretty print the composition of the substitution $\sigma$ with the
+empty substitution by simply writing $\sigma$.
 
 \begin{lstlisting}
-inductive RedSub : {g:ctx}{#S:[|- g]} ctype =
-| Nil : RedSub  [ ] [|- ^ ]
-| Dot : RedSub  [g] [|- #S[^] ] -> Reduce [|- A] [|- M]
-     -> RedSub [g, x:tm A[]] [|- #S,M ]
+inductive Red_sub : {\gamma:ctx}{\sigma:[|- \gamma]} ctype =
+| Nil : Red_sub  [ ] [|- ^ ]
+| Dot : Red_sub  [\gamma] [|- \sigma ] -> Reduce [|- A] [|- M]
+     -> Red_sub [\gamma, x:tm A[]] [|- \sigma,M ]
 ;
 
-rec lookup : {g:ctx}{#p:[g |- tm A[]]}RedSub [g] [|- #S[^]] ->
-             Reduce [|- A] [|- #p[#S[^]]] =
-mlam g => mlam #p => fn rs => case [g |- #p[..]] of
- | [g',x:tm A |-  x] =>    let (Dot rs' rN) = rs in rN
- | [g',x:tm A |-  #q[..]] => let Dot rs' rN = rs in
-                      lookup [g'] [g' |-  #q[..]] rs'
+rec lookup : {\gamma:ctx}{#p:[\gamma |- tm A[]]}Red_sub [\gamma] [|- \sigma] ->
+             Reduce [|- A] [|- #p[\sigma]] =
+mlam \gamma => mlam #p => fn rs => case [\gamma |- #p] of
+ | [\gamma',x:tm A |-  x] =>    let (Dot rs' rN) = rs in rN
+ | [\gamma',x:tm A |-  #q[..]] => let Dot rs' rN = rs in
+                      lookup [\gamma'] [\gamma' |-  #q] rs'
 ;
 \end{lstlisting}
 
 We also show how to look-up a reducible term in a reducible
 substitution by using the \bel{lookup} function.
+\todo{Provide more explanation for this function; it is the first time
+we abstract over parameters.}
 
 Now, we have all the elements in place, so we can proceed to prove the
 main lemma, generalizing all terms under reducible grounding substitutions are
 in the \bel{Reduce} relation.
 \begin{lstlisting}
-rec main : {g:ctx}{M:[g |- tm A[]]} RedSub [g] [|- #S[^]] ->
-           Reduce [|- A] [|- M[#S[^]]] =
- mlam g => mlam M => fn rs => case [g |- M[..]] of
-| [g |- #p[..]] => lookup [g] [g |- #p[..]] rs
-| [g |- lam (\x. M1)] =>
- Rarr [|- halts/m refl val/lam]
+rec main : {\gamma:ctx}{M:[\gamma |- tm A[]]} Red_sub [\gamma] [|- \sigma] -> Reduce [|- A] [|- M[\sigma]] =
+ mlam \gamma => mlam M => fn rs => case [\gamma |- M] of
+| [\gamma |- #p] => lookup [\gamma] [\gamma |- #p] rs
+| [\gamma |- lam \x. M1] =>
+ Rarr [|- halts_m refl val_lam]
    (mlam N => fn rN =>
-    bwd_closed [|- beta] (main [g,x:tm _] [g,x |- M1] (Dot rs rN)))
- | [g |- app (M1[..]) (M2[..])] =>
-  let Rarr ha f = main [g] [g |- M1[..]] rs in
-  f [|- _ ] (main [g] [g |- M2[..]] rs)
-| [g' |-  c] => Rb [|- halts/m refl val/c]
+    bwd_closed [|- beta] (main [\gamma,x:tm _] [\gamma,x |- M1] (Dot rs rN)))
+ | [\gamma |- app M1 M2] =>
+  let Rarr ha f = main [\gamma] [\gamma |- M1] rs in
+  f [|- _ ] (main [\gamma] [\gamma |- M2] rs)
+| [\gamma' |-  c] => Rb [|- halts_m refl val_c]
 ;
 \end{lstlisting}
 

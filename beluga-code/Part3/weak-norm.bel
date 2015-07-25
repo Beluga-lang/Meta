@@ -45,15 +45,15 @@ LF mstep : tm A -> tm A -> type =
 % Values
 
 LF val : tm A -> type = 
-| val/c : val c
-| val/lam : val (lam M)
+| val_c : val c
+| val_lam : val (lam M)
 ;
 %name val V.
 
 % Definition of Halting: 
 % A term halts when we reach a value in multiple steps
 LF halts : tm A -> type = 
-| halts/m : mstep M M' -> val M' -> halts M
+| halts_m : mstep M M' -> val M' -> halts M
 ;
 %name halts H.
 
@@ -105,8 +105,8 @@ sometimes omitted in paper presentations.
 rec halts_step : {S:[ |- step M M']} [ |- halts M'] -> [ |- halts M] =
 / total (halts_step) /
  mlam S ⇒ fn h => 
-let [ |- halts/m MS' V] = h in
- [ |- halts/m (onestep S MS') V]
+let [ |- halts_m MS' V] = h in
+ [ |- halts_m (onestep S MS') V]
 ;
 
 %{
@@ -122,13 +122,13 @@ the range type, going inside the function position of applications.
 
 rec bwd_closed' : {A:[|- tp]}{M:[|- tm A]}{M':[|- tm A]}{S:[ |- step M M']} Reduce [|- A] [ |- M'] -> Reduce [|- A] [ |- M] =
 / total a (bwd_closed' a) /
- mlam A, M, M' => mlam MS => fn r => case [|- A] of 
-| [|- b] => let I ha = r in I (halts_step [ |- MS] ha)
+ mlam A, M, M' => mlam S => fn r => case [|- A] of 
+| [|- b] => let I ha = r in I (halts_step [ |- S] ha)
 | [|- arr A B] => 
   let Arr ha f = r in
-    Arr (halts_step [ |- MS] ha)
+    Arr (halts_step [ |- S] ha)
 	(mlam N => fn rn =>
-	 bwd_closed' [|- B] [|- _ ] [|- _ ] [ |- stepapp MS] (f [ |- N] rn))
+	 bwd_closed' [|- B] [|- _ ] [|- _ ] [ |- stepapp S] (f [ |- N] rn))
 ;
 
 rec bwd_closed : {S:[ |- step M M']} Reduce [|- A] [ |- M'] -> Reduce [|- A] [ |- M] = 
@@ -159,14 +159,14 @@ fn r => case r of
 
 schema ctx = tm T;
 
-inductive RedSub : {gamma:ctx}{#S:[ |- gamma]} ctype =
-| Nil : RedSub  [ ] [ |- ^ ]
-| Dot : RedSub  [gamma] [ |- #S[^] ] → Reduce [|- A] [ |- M]
-     → RedSub [gamma, x:tm A[]] [ |- #S[^], M ] 
+inductive Red_sub : {gamma:ctx}{#S:[ |- gamma]} ctype =
+| Nil : Red_sub  [ ] [ |- ^ ]
+| Dot : Red_sub  [gamma] [ |- #S[^]] → Reduce [|- A] [ |- M]
+     → Red_sub [gamma, x:tm A[]] [ |- #S[^], M ] 
 ;
 
 
-rec lookup : {gamma:ctx}{#p:[gamma |- tm A[]]}RedSub [gamma] [ |- #S[^]] -> Reduce [|- A] [|- #p[#S]] =
+rec lookup : {gamma:ctx}{#p:[gamma |- tm A[]]}Red_sub [gamma] [ |- #S[^]] -> Reduce [|- A] [|- #p[#S]] =
 / total gamma (lookup gamma) / 
 mlam gamma => mlam #p => fn rs => case [gamma] of 
 | [] => impossible [ |- #p]
@@ -178,19 +178,19 @@ mlam gamma => mlam #p => fn rs => case [gamma] of
 
 % Fundamental Lemma
 rec main : {gamma:ctx}{M:[gamma |- tm A[]]} 
-          RedSub [gamma] [ |- #S[^]] -> Reduce [|- A] [|- M[#S]] =
+          Red_sub [gamma] [ |- #S] -> Reduce [|- A] [|- M[#S]] =
 / total m (main gamma a s m) /
 mlam gamma, M => fn rs => case [gamma |- M] of
 | [gamma |- #p] =>  lookup [gamma] [gamma |- #p] rs
 | [gamma |- lam \x. M] => 
- Arr [ |- halts/m refl val/lam]
+ Arr [ |- halts_m refl val_lam]
    (mlam N => fn rN =>
     bwd_closed [ |- beta] (main [gamma,x:tm _] [gamma,x |- M] (Dot rs rN)))
 
 | [gamma |- app M1 M2] => 
   let Arr ha f = main [gamma] [gamma |- M1] rs in
   f [ |- _ ] (main [gamma] [gamma |- M2] rs)
-| [gamma |-  c] =>  I [ |- halts/m refl val/c]
+| [gamma |-  c] =>  I [ |- halts_m refl val_c]
 ;
 
 % Main Theorem: Well-typed terms halt
