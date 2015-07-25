@@ -454,7 +454,7 @@ by \emphFact{properties of substitution} \\
 $\mathsf{lam}~ x.[\sigma,x/x]M$ halts \hfill since it is a value\\
 Suppose $\rc T N$.
 \begin{enumerate}
-\item $\rc S {[\sigma,N/x]M}$ \hfill by I.H. on ${\mathcal{D}}_1$ since $\sigma \in  \mathcal{R}_{\Gamma}$
+\item $\rc S {[\sigma,N/x]M}$ \hfill by I.H. on ${\mathcal{D}}_1$ since $\rc {\Gamma}{\sigma}$
 \item $\rc S {[N/x][\sigma,x/x]M}$ \hfill by \emphFact{properties of
   substitution}
 \item $\rc S {\mathsf{app}~(\mathsf{lam}~ x.~[\sigma,x/x]M)\; N}$ \hfill by Backwards closure
@@ -463,67 +463,160 @@ Hence $\rc {T \arrow S}{[\sigma]\mathsf{lam}~ x.M}$ \hfill by definition
 
 \end{proof}
 
+In the proof we spelled out explicitly where we rely on substitution properites
+such as composition of substitution and associativity. This highlights
+the important and often hidden role substitutions play. In \beluga,
+where we have first-class simultaneous substitutions together with their
+equational theory, the uses of such substitution properties will be
+silently taken care of. This in turn leads to a very elegant and
+compact encoding of the fundamental lemma as it only reflects the main
+structure of the proof.
 
+As the statement talks about open terms, i.e. terms in a context
+$\Gamma$, we first define a context schema that classifies contexts
+containg typing assumptions about variables. 
 
-As motivated by the previous section, we need to be able to talk about
-open terms, fortunately Beluga has first class support for open
-terms. The first thing we need is declaration of a schema, that is a
-classifier of contexts.
-
-For our normalization proof, we need contexts that contain well-typed
-terms, as open terms have only terms as assumptions. So we declare a schema:
 \begin{lstlisting}
 schema ctx = tm T;
 \end{lstlisting}
 
-Also,  we need the concept of \emph{grounding substitutions}, again
-natively supported in Beluga as substitution from some context into an
-empty context. And we need also to define what it means for a
+In the statement of the fundamental lemma, we also relied on the
+concept of \emph{grounding substitutions}. This is again  
+natively supported in \beluga using first-class substitutions that
+provide a mapping from $\Gamma$ to an empty context. Finally,  we need to define what it means for a
 substitution to be \emph{reducible}. In particular, a \emph{a
   reducible substitution} is a substitution where all the terms that
 compose it are also reducible. We define that, using an inductive
 data-type indexed by grounding substitutions. In the code below we
 pretty print the composition of the substitution $\sigma$ with the
-empty substitution by simply writing $\sigma$.
+empty substitution (written as \bel{^}) by simply writing $\sigma$. 
 
 \begin{lstlisting}
 inductive Red_sub : {\gamma:ctx}{\sigma:[|- \gamma]} ctype =
 | Nil : Red_sub  [ ] [|- ^ ]
-| Dot : Red_sub  [\gamma] [|- \sigma ] -> Reduce [|- A] [|- M]
-     -> Red_sub [\gamma, x:tm A[]] [|- \sigma,M ]
+| Dot : Red_sub  [\gamma] [|- \sigma ] -> Reduce [|- T] [|- M]
+     -> Red_sub [\gamma, x:tm T[]] [|- \sigma,M ]
 ;
 
-rec lookup : {\gamma:ctx}{#p:[\gamma |- tm A[]]}Red_sub [\gamma] [|- \sigma] ->
-             Reduce [|- A] [|- #p[\sigma]] =
-mlam \gamma => mlam #p => fn rs => case [\gamma |- #p] of
- | [\gamma',x:tm A |-  x] =>    let (Dot rs' rN) = rs in rN
- | [\gamma',x:tm A |-  #q[..]] => let Dot rs' rN = rs in
-                      lookup [\gamma'] [\gamma' |-  #q] rs'
+rec lookup : {\gamma:ctx}{#p:[\gamma |- tm T[]]}Red_sub [\gamma] [|- \sigma] ->
+             Reduce [|- T] [|- #p[\sigma]] =
+mlam \gamma=> mlam #p => fn rs => case [\gamma] of 
+| [] => impossible [ |- #p]
+| [\gamma', x:tm T] => (case [\gamma', x:tm T |- #p] of
+ | [\gamma',x:tm T |-  x] =>    let (Dot rs' rN) = rs in rN
+ | [\gamma',x:tm T |-  #q[..]] => let Dot rs' rN = rs in
+                      lookup [\gamma'] [\gamma' |- #q] rs')
 ;
 \end{lstlisting}
 
-We also show how to look-up a reducible term in a reducible
-substitution by using the \bel{lookup} function.
-\todo{Provide more explanation for this function; it is the first time
-we abstract over parameters.}
+Recall all meta-variables are associated with substitutions, but we
+are able to omit writing that substitution, if it is the identity substitution. The same
+holds for substitution variables. They are associated with a
+delayed substitution which intuitively represent a delayed composition of
+a substitution variable with that substitution. If the substitution
+variable is associated with the identity substitution or a trivial
+empty substitution (i.e. from the empty context to another empty
+context), we omit writing it. In other words we write simply $\sigma$
+for $\sigma[..]$ (i.e. the composition of $\sigma$ with the identity
+substitution) and $\sigma[^]$ (i.e. the composition of $\sigma$ with
+the trivial empty substitution)\footnote{In ASCII we write \bel{#S}
+  for $\sigma$.}.
 
-Now, we have all the elements in place, so we can proceed to prove the
-main lemma, generalizing all terms under reducible grounding substitutions are
-in the \bel{Reduce} relation.
+We also show how to look-up a reducible term in a reducible
+substitution by using the \bel{lookup} function. We can
+read the type of \bel{lookup} as follows: For a context $\gamma$, for
+all variables \bel{#p} of closed type \bel{T} from the context
+$\gamma = $\bel{x$_1$:term T$_1$, $\ldots$, x$_n$:term T$_n$} , 
+if $\rc {\sigma} {\gamma}$, i.e. $\sigma$ is a substitution
+of the form \bel{N}$_1/$\bel{x}$_1,
+\ldots,$\bel{N}$_n/$\bel{x}$_n$ that provides a term \bel{N}$_i$ 
+for each variable \bel{x}$_i$ in $\gamma$ s.t. \bel{Reducible T$_i$  N$_i$ },
+we know \bel{Reducible T #p[\sigma]}.This property may seem obvious,
+but it must be shown by recursively checking it for each variable in
+$\gamma$. We therefore pattern macht on the context $\gamma$. If the
+context $\gamma$ is empty, then there is no variable and hence the
+case is impossible (written as \lstinline!impossible [|- #p]!. 
+
+If $\gamma =\gamma', x:tm T$, then we pattern match on the parameter
+variable \lstinline!#p!. There are two cases: either 
+\lstinline!#p = x!. in this case we simply analyze \lstinline!rs! which stands for the
+proof \lstinline!Red_sub [\gamma', x:term T[]] [\sigma', N']! and return
+the witness \lstinline!rN! for 
+\lstinline!Reducible [|- N'] [|- T]!. 
+
+Otherwise \lstinline!#p! stands for a variable other than
+\lstinline!x! and must come from \lstinline!\gamma'!. This case is
+written as \lstinline![\gamma', x:term T |- #q[..]]! where the
+parameter variable \lstinline!#q! stands for a variable from
+\lstinline!\gamma'! and we simply recurse on 
+\lstinline![\gamma' |- #q]!. 
+
+We make sure to associate the parameter variable
+with the weakening substitution \lstinline![..]! in the pattern. Note that
+\lstinline$[..]$ is not an identity substitution here. The identity
+substitution in the context \lstinline!\gamma', x:term T[]! is
+\lstinline![..,x]!. 
+
+Finally, we can revisit the fundamental lemma and show its
+implementation in \beluga. 
+
 \begin{lstlisting}
-rec main : {\gamma:ctx}{M:[\gamma |- tm A[]]} Red_sub [\gamma] [|- \sigma] -> Reduce [|- A] [|- M[\sigma]] =
+rec main: {\gamma:ctx}{M:[\gamma |- tm T[]]} Red_sub [\gamma] [|- \sigma] -> Reduce [|- T] [|- M[\sigma]] =
  mlam \gamma => mlam M => fn rs => case [\gamma |- M] of
 | [\gamma |- #p] => lookup [\gamma] [\gamma |- #p] rs
-| [\gamma |- lam \x. M1] =>
+| [\gamma |- lam \x. M] =>
  Rarr [|- halts_m refl val_lam]
    (mlam N => fn rN =>
-    bwd_closed [|- beta] (main [\gamma,x:tm _] [\gamma,x |- M1] (Dot rs rN)))
+    bwd_closed [|- beta] (main [\gamma,x:tm _] [\gamma,x |- M] (Dot rs rN)))
  | [\gamma |- app M1 M2] =>
   let Rarr ha f = main [\gamma] [\gamma |- M1] rs in
   f [|- _ ] (main [\gamma] [\gamma |- M2] rs)
 | [\gamma' |-  c] => Rb [|- halts_m refl val_c]
 ;
 \end{lstlisting}
+
+In the variable case, we simply use the \lstinline!lookup!-function to
+guarantee that \lstinline!#p[\sigma]! is reducible. The case for
+abstractions follows our on paper proof. To prove the 
+\lstinline!Reducible [|- arr T S] [|- lam \x.M]!, we must prove two
+things: first, we must show  \lstinline!halts (lam \x.M)!. We use 
+\lstinline!val_lam!  to justify that abstractions are values and by
+reflexivity abstrations step to themselves. Therefore their evaluation
+halts. Note that we do not explicitly refer to properties of
+substitutions in our implementation, although we highlighted such
+reasoning in our previous proof. Such reasoning is hidden as part
+of the equational theory our type checker uses.
+%
+Second, we show that
+for all \lstinline!N!, if
+\lstinline!Reduce [|-T] [|-N]! then 
+\lstinline!Reduce [|-S] [|-app (lam \x.M) N]!.  
+
+
+
+We first assume \lstinline!N! together with
+\lstinline!rN:Reduce [|- T] [|- N]! by writing 
+\lstinline!mlam N => fn rN =>  ... !. Then we use the IH and the lemma
+\lstinline!bwd_closed! to finish the proof as described earlier. We
+emphasize again that not explicit substitution reasoning is required
+in the implementation, although it clearly is used in the proof.
+
+Lastly, consider the case for applications, i.e. 
+\lstinline![\gamma |- app M1 M2]!. By the IH we have that 
+\lstinline!Reducible [|- arr S T] [|- M1[\sigma]]!. By definition of
+\lstinline!Reduce!, we have that \lstinline!halts M1[\sigma]! and more
+importantly, we have a function \lstinline!f! whose type says:
+for all \lstinline!N!, if 
+\lstinline!Reduce [|- S] [|- N]! then 
+\lstinline!Reduce [|- T] [|- app M1[\sigma] N]!. 
+%
+We now simply use \lstinline!f! and pass to it 
+\lstinline![|- M2[\sigma]! and a witness for 
+\lstinline!Reduce [|- T] [|- M2[\sigma]]! which
+is obtained by making a recursive call on 
+\lstinline![\gamma |- M2]!.
+
+
 
 And finally we have all the elements to prove that all well typed
 terms eventually reduce to a value:
@@ -533,7 +626,7 @@ mlam M => reduce_halts (main [] [|- M] Nil)
 ;
 \end{lstlisting}
 
-Let's retrace our steps. We set out to prove that all terms reduce into a
+Let's retrace our steps. We set out to prove that all terms reduce to a
 value. A simple proof by induction would not give us a powerful enough
 induction hypothesis, so we defined the reducibility candidate
 relation that was inductive on the type and allowed for a powerful enough
