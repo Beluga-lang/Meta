@@ -21,7 +21,7 @@ not_possible : type.
 
 rec values_dont_step : [ |- step M M'] -> [ |- value M ] -> [ |- not_possible]=
 / total v (values_dont_step m m' s v)/
-fn s => fn v => case v of
+fn s => fn v =>  case v of
 | [ |- v_false]  => impossible s
 | [ |- v_true]   => impossible s
 | [ |- v_zero]   => impossible s
