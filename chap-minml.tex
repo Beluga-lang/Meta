@@ -8,7 +8,7 @@ not worth knowing.''
 \hfill - Alan Perlis
 \end{quote}
 
-We beging our gentle introduction to mechanizing languages and proofs by
+We begin our gentle introduction to mechanizing languages and proofs by
 considering a simple language with arithmetic and boolean
 expressions. In general, definitions of programming languages
 typically cover three fundamental aspects:
@@ -872,7 +872,7 @@ If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
 \end{center}
 
 It is important to realize that $M$, $M'$, $M_1$, and $M_2$ are all
-univerally quantified.  When we appeal to the induction hypthtesis on
+universally quantified.  When we appeal to the induction hypothesis on
 $\S_1$ we in fact instantiate and choose the appropriate $M_2$ and
 $M_3$. It might be more precise to rewrite the statement to make this clearer.
 
@@ -883,7 +883,7 @@ If $t \MSteps M'$ then for all $M_1$ and $M_2$, $(\tmif t {M_1} {M_2}) \MSteps (
 Mechanizing proofs highlights such subtleties and forces us to
 understand them and be more precise than in the on paper proof. We can
 now translate the statement and the proof into
-\beluga straitforwardly. We make explicite the quantification in the
+\beluga straitforwardly. We make explicit the quantification in the
 statement writing \lstinline!{M2:[|- term}{M3:[|- term}!. In the
 program, we use \lstinline!mlam!-abstraction as the corresponding
 proof term for introducing a universal quantifier.\index{Universal
