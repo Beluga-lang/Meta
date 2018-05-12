@@ -60,7 +60,7 @@ LF bigstep : term -> term -> type =
 
 rec bstep_value : [|- bigstep M V] -> [|- value V] =
 / total b (bstep_value _ _ b) /
-  fn b => case b of 
+  fn b => case b of
   | [|- b_value E] => [|- E]
   | [|- b_succ B]  => let [|- E] = bstep_value [|- B] in [|- v_succ E]
 
@@ -119,7 +119,7 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
     let [|- S2] = bstep_to_mstep [|- B2] in
     let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
     [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
-	
+
   | [|- b_if_false B1 B3] : [|- bigstep (if_then_else _ M2 M3) _] =>
     let [|- S1] = bstep_to_mstep [|- B1] in
     let [|- S3] = bstep_to_mstep [|- B3] in
@@ -141,12 +141,12 @@ rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
 
 rec bstep_values_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
 / total e (bstep_values_stagnate _ _ _ e) /
-  fn b => fn e => case e of 
-  | [|- v_zero]    => let [|- b_value _] = b in [|- ref]
+  fn b => fn e => case e of
+  | [|- v_z]       => let [|- b_value _] = b in [|- ref]
   | [|- v_true]    => let [|- b_value _] = b in [|- ref]
   | [|- v_false]   => let [|- b_value _] = b in [|- ref]
   | [|- v_succ E'] =>
-    (case b of 
+    (case b of
      | [|- b_value _] => [|- ref]
      | [|- b_succ B'] =>
        let [|- ref] = bstep_values_stagnate [|- B'] [|- E'] in [|- ref]
@@ -163,7 +163,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
 / total s (step_bstep_to_bstep _ _ _ s _) /
   fn s => fn b =>
   let [|- B] = b in
-  case s of 
+  case s of
 
   | [|- e_if_true] =>
     [|- b_if_true (b_value v_true) B]
@@ -172,8 +172,8 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     [|- b_if_false (b_value v_false) B]
 
   | [|- e_pred_zero] =>
-    let [|- ref] = bstep_values_stagnate [|- B] [|- v_zero] in
-    % or let [|- b_value v_zero] = [|- B] in
+    let [|- ref] = bstep_values_stagnate [|- B] [|- v_z] in
+    % or let [|- b_value v_z] = [|- B] in
     [|- b_pred_zero B]
 
   | [|- e_pred_succ E] =>
@@ -185,7 +185,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
   | [|- e_iszero_zero] =>
     let [|- ref] = bstep_values_stagnate [|- B] [|- v_true] in
     % or let [|- b_value v_true] = [|- B] in
-    [|- b_iszero_zero (b_value v_zero)]
+    [|- b_iszero_zero (b_value v_z)]
 
   | [|- e_iszero_succ E] =>
     let [|- ref] = bstep_values_stagnate [|- B] [|- v_false] in
@@ -193,7 +193,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     [|- b_iszero_succ (b_value (v_succ E))]
 
   | [|- e_if_then_else S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] => impossible [|- E]
      | [|- b_if_true  B1' B2'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
@@ -204,7 +204,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     )
 
   | [|- e_succ S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] =>
        let [|- v_succ E'] = [|- E] in
        let [|- B'] = step_bstep_to_bstep [|- S] [|- b_value E'] in
@@ -215,7 +215,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     )
 
   | [|- e_pred S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] => impossible [|- E]
      | [|- b_pred_zero B1'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
@@ -226,7 +226,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
     )
 
   | [|- e_iszero S] =>
-    (case [|- B] of 
+    (case [|- B] of
      | [|- b_value E] => impossible [|- E]
      | [|- b_iszero_zero B1'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
@@ -247,7 +247,7 @@ rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] 
 rec mstep_bstep_to_bstep : [|- multi_step M N] -> [|- bigstep N V]
 			   -> [|- bigstep M V] =
 / total s (mstep_bstep_to_bstep _ _ _ s _) /
-  fn s => fn b => case s of 
+  fn s => fn b => case s of
   | [|- ms_tr S1 S2] =>
     let [|- B2] = mstep_bstep_to_bstep [|- S2] b in
     mstep_bstep_to_bstep [|- S1] [|- B2]

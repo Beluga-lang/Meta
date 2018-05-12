@@ -12,9 +12,9 @@ We begin our gentle introduction to mechanizing languages and proofs by
 considering a simple language with arithmetic and boolean
 expressions. In general, definitions of programming languages
 typically cover three fundamental aspects:
-the grammar  of the language,  i.e. what are syntactically  well-formed terms in
-the language,  its operational semantics,  i.e. how do we execute and evaluate a
-given term,  and its  type structure, i.e. what are  well-typed expressions.  We
+the grammar  of the language  (i.e. what are syntactically well-formed terms in
+the language),  its operational semantics (i.e. how do we execute and evaluate a
+given term),  and its  type structure (i.e. what are  well-typed expressions).  We
 revisit  these concepts  for  a small language  containing booleans  and numbers
 following \citep[Ch 3,Ch 8]{TAPL} in  preparation for representing this language
 together with its operational semantics and type system in \beluga.
@@ -23,21 +23,20 @@ together with its operational semantics and type system in \beluga.
 Let  us  consider  a simple language  containing booleans,  if-expressions,  and
 numbers together  with simple operations  that allow us  to test whether a given
 number is zero (see \cite[Ch 3, Fig 3-1,Fig 3-2]{TAPL}). We define numbers using
-$\tmzero$ and $\tmsucc$-operation.  To analyze  and manipulate numbers,  we also
-provide a $\tmpred$-operator.
-
+$\tmzero$ and the $\tmsucc$operation.  To analyze  and manipulate numbers,  we also
+provide a $\tmpred$operator.
 \[
 \begin{array}{ll@{\bnfas}l}
-\mbox{Terms} & M & \tmfalse \bnfalt \tmtrue \bnfalt \tmif{M_1}{M_2}{M_3} \bnfalt
+\mbox{Terms} & M & \tmtrue \bnfalt \tmfalse \bnfalt \tmif{M_1}{M_2}{M_3} \bnfalt
 \tmzero \bnfalt \tmsucc M \bnfalt \tmpred M \bnfalt \tmiszero M
 \end{array}
 \]
 
 The first question  we investigate is  how to define  and represent terms in the
-proof  environment  \beluga. To represent  terms  in \beluga,  we declare  a type
+\beluga proof  environment. To represent  terms  in \beluga,  we declare  a type
 \lstinline!term!  for  terms   together  with  constants  corresponding  to  the
-constructors    $\tmfalse$,   $\tmtrue$,    $\tmzero$,   $\tmsucc$,   $\tmpred$,
-$\tmiszero$,  etc.   More   precisely   we   use   the   logical   framework  LF
+constructors    $\tmtrue$,   $\tmfalse$,    $\tmzero$,   $\tmsucc{\!}$,   $\tmpred{\!}$,
+$\tmiszero{\!}$,  etc.   More   precisely   we   use   the   logical   framework  LF
 \citep{Harper93jacm} for introducing new types such as \lstinline!term! together
 with constants  \lstinline!true!,  \lstinline!false!, etc.  that  can be used to
 construct terms. All constants are used as prefix operators by default.
@@ -54,8 +53,8 @@ LF term : type =
 ;
 \end{lstlisting}
 
-To illustrate consider a few examples. We write in sanserif font what
-we would write on paper and use type writer font for its equivalent
+To illustrate, consider a few examples. We write in sans-serif font what
+we would write on paper and use typewriter font for its equivalent
 representation in \beluga.
 
 \begin{center}
@@ -74,12 +73,12 @@ $\tmiszero (\tmpred (\tmsucc \tmzero))$ & \lstinline!iszero (pred (succ z))!.
 Next, we define how to evaluate and execute a given term. Following
 \cite{TAPL}, we define  a small-step semantics  for our  little language. To give  a  deterministic evaluation
 strategy,  it is convenient to first define the values of our language.  In
-\cite{TAPL}, we distinguished between terms and values in the grammar itself and
-we think of values  as a sub-class of terms; moreover, we further
+\cite{TAPL}, we distinguish between terms and values in the grammar itself and
+think of values  as a sub-class of terms; moreover, we further
 distinguish between numerical values and boolean values. Here we take  a slightly different
 approach and define explicitly  what it means  to be a value using the judgment
 $M \Value$.  We can think of these judgments  as predicates on
-terms which are defined  {\em via}  axioms and inference rules.  A term $M$ is a
+terms which are defined  via  axioms and inference rules.  A term $M$ is a
 a value iff we can give a derivation for $M \Value$. We also do not further
 distinguish between numerical values and  booleans. Although this can
 be done, such a distinction makes many of the theoretical properties
@@ -87,7 +86,7 @@ needlessly more complex.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$V \Value$}: \mbox{Expression $V$ is a value}}\\[1em]
+\multicolumn{1}{l}{\fbox{$V \Value$}: \mbox{Term $V$ is a value}}\\[1em]
 \infer[\VZero]{\tmzero \Value}{} \quad
 \infer[\VSucc]{(\tmsucc V) \Value}{V \Value} \quad
 \infer[\VTrue]{\tmtrue \Value}{} \quad
@@ -97,10 +96,10 @@ needlessly more complex.
 
 Here, we identify $\tmzero$ as a value; in addition, $\tmsucc V$ is a value
 provided that $V$ is a value. We also identify $\tmtrue$ and $\tmfalse$ as
-values, and say that every numeric value is a value.
+values. %, and say that every numeric value is a value.
 
-We are now ready to define when a term $M$ steps to another term $N$ using the
-judgment $M \Steps N$ using congruence rules and reduction rules.
+We are now ready to define when a term $M$ steps to another term $N$ (using the
+judgment $M \Steps N$) using congruence rules and reduction rules.
 
 \[
 \begin{array}{c}
@@ -135,9 +134,9 @@ also must be able to construct derivation trees that prove that a given term is
 a value.  Clearly, inductively defined terms can be easily translated into objects of
 type \lstinline!term! using the constants \lstinline!true!,
 \lstinline!false!, \lstinline!if_then_else!, \lstinline!z!,
-\lstinline!suc!, \lstinline!pred!, and \lstinline!iszero!.
+\lstinline!succ!, \lstinline!pred!, and \lstinline!iszero!.
 However, we also defined inductively what it means for a
-term to be a value:  we use the  axioms $\VZero$, $\VTrue$,
+term to be a value:  we use the  axioms $\VZero$, $\VTrue$, and
 $\VFalse$ together with the inference rule $\VSucc$. Similarly, we can
 translate derivation trees that prove $V \Value$ and derivation trees
 that show $M \Steps N$.
@@ -151,7 +150,7 @@ corresponds to an expression formed by these constructors.
 
 \begin{lstlisting}
 LF value : term -> type =
-| v_zero     : value z
+| v_z        : value z
 | v_succ     : value V -> value (succ V)
 | v_true     : value true
 | v_false    : value false
@@ -159,26 +158,26 @@ LF value : term -> type =
 \end{lstlisting}
 
 In our definition of the constructor \lstinline!v_succ!, the capital letter
-\lstinline!V! describes values and is thought to be universally quantified at
+\lstinline!V! describes values and is thought of as being universally quantified on
 the outside. We can hence read the constructor \lstinline!v_succ! as follows:
 
 \begin{center}
 \begin{tabular}{p{12cm}}
-``For all term \lstinline$V$, if \lstinline!D! is a derivation for
+``For all terms \lstinline$V$, if \lstinline!D! is a derivation for
 \lstinline!value V!, then we can form a derivation \lstinline!(v_succ <<V>> D)!
 for \lstinline!value (succ V)!.''
 \end{tabular}
 \end{center}
 
-We mark here the term \lstinline!<<V>>! in green since in practice programmers
-can omit writing it and \beluga will infer it. The recipe is ``if we do not
+We mark the term \lstinline!<<V>>! here in green since in practice programmers
+can omit writing it and \beluga will infer it. The recipe is, ``if we do not
 explicitly quantify over variables in the definition of a constructor, we do not
-need to pass instantiations  for them when constructing objects  using the said
+need to pass instantiations  for them when constructing objects  using said
 constructor.''\index{Type reconstruction}\index{Implicit Arguments}
 
-To illustrate consider the following concrete example of proving that
+To illustrate, consider the following concrete example of proving that
 $\tmsucc (\tmsucc \tmzero)$ is a value and constructing a derivation
-for $\tmsucc (\tmsucc \tmzero) \Value$.
+for $(\tmsucc (\tmsucc \tmzero)) \Value$.
 \begin{center}
   \[
      \infera{\VSucc} { (\tmsucc (\tmsucc \tmzero)) \Value }
@@ -186,28 +185,28 @@ for $\tmsucc (\tmsucc \tmzero) \Value$.
    { \infera{\VZero} { \tmzero \Value } {} } }
  \]
  is represented as
- \small{\lstinline!(v_succ <<(succ z)>> (v_succ <<z>> v_zero))!}
+ \small{\lstinline!(v_succ <<(succ z)>> (v_succ <<z>> v_z))!}
 \end{center}
 \index{Encoding derivation trees}
 
 In \beluga, we bind the derivation to the name \lstinline!v! by writing
 \begin{lstlisting}
-let v : [|- value (succ (succ z))] = [|- v_succ (v_succ v_zero)];
+let v : [|- value (succ (succ z))] = [|- v_succ (v_succ v_z)];
 \end{lstlisting}
-Note,  we write derivations using \lstinline!|-!.  On the left hand
-side  of this symbol  we can list assumptions and the right hand side
-describes  what we claim can be derived from these assumptions.  For example, we might say:
+Note that we write derivations using \lstinline!|-!.  On the left hand
+side  of this symbol  we list assumptions, and on the right hand side
+we describe what we claim can be derived from these assumptions.  For example, we might say:
 
 \begin{lstlisting}
-let w:[x: term, v: value x |- value (succ (succ x))] =
-      [x: term, v: value x |- v_succ (v_succ v)];
+let w : [x: term, v: value x |- value (succ (succ x))] =
+        [x: term, v: value x |- v_succ (v_succ v)];
 \end{lstlisting}
 
 The right hand side can be read as: Assuming \lstinline!x: term! and
-\lstinline!v: value x!, i.e. \lstinline!v! is the derivation that states that
-\lstinline!x! is a value, then \lstinline!v_succ (v_succ v)! is the witness for
-the fact that \lstinline!succ (succ x)! is a value. On paper we usually omit
-$\vdash$, if there are no assumptions, i.e. the objects or derivations we
+\lstinline!v: value x! (i.e. \lstinline!v! is a derivation that states that
+\lstinline!x! is a value), then \lstinline!v_succ (v_succ v)! is the witness for
+the fact that \lstinline!succ (succ x)! is a value. On paper, we usually omit
+$\vdash$ if there are no assumptions, i.e. the objects or derivations we
 describe are closed.
 
 We can similarly encode the small-step relation $M \Steps N$  between the terms
@@ -241,7 +240,7 @@ concrete term steps to another.
 let e1 : [|- step (pred (succ (pred z))) (pred (succ z))] =
          [|- e_pred (e_succ e_pred_zero)] ;
 
-let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ v_zero] ;
+let e2 : [|- step (pred (succ z)) z] = [|- e_pred_succ v_z] ;
 \end{lstlisting}
 
 Here \lstinline!e1! stands for the derivation
@@ -261,10 +260,9 @@ the rule $\EPredSucc$.
 \section{Typing}\label{sec:types-basic}
 
 Types allow us to approximate the runtime behaviour of programs. Types classify
-expressions according to their values, i.e. the value they compute. In our
+expressions according to their values, i.e. the values they compute. In our
 simple language with arithmetic and boolean expressions, we have only two types,
 namely $\Bool$ and $\Nat$, corresponding to the two kinds of values.
-
 \[
 \begin{array}{lll}
 \mbox{Types} & T \bnfas & \Bool \mid \Nat
@@ -282,7 +280,7 @@ LF tp : type =
 \end{lstlisting}
 
 Typing rules relate terms to types and are described by the typing judgment
-$M : T$. We recall here simply the typing rules from \cite{TAPL}.
+$M : T$. We recall here the typing rules from \cite{TAPL}.
 
 \[
 \begin{array}{c}
@@ -327,7 +325,7 @@ LF hastype : term -> tp -> type =
 \chapter{Proofs by Induction}\label{chap:proofs-basic}
 
 We now discuss some standard properties about languages which are also discussed
-in \cite{TAPL} and show how we can represent such proofs as total functions that
+in \cite{TAPL} and show how we can represent proofs of such properties as total functions that
 manipulate and analyze derivation trees. In particular, we illustrate:
 
 \begin{itemize}
@@ -343,9 +341,9 @@ We develop each example step-wise using the interactive programming features in
 
 \section{Type Preservation}
 
-The first property we re-visit is type preservation. In particular, we write
+The first property we revisit is type preservation. In particular, we write
 $M : T$ and $M \Steps N$ to clearly state that we only consider closed terms.
-We label here derivations with $\D$ and $\S$ writing $\proofderiv{\D}{M : T}$
+Uere we label derivations with $\D$ and $\S$ by writing $\proofderiv{\D}{M : T}$
 and $\proofderiv{\S}{M \Steps N}$ respectively.
 
 \begin{theorem}
@@ -367,32 +365,32 @@ and $\proofderiv{\S}{M \Steps N}$ respectively.
     $\proofderiv{\F~}{N : \Nat}$ \hfill by IH using $\D'$ and $\S'$\\
     $\proofderiv{~~~~}{\tmpred N : \Nat}$ \hfill by rule $\TPred$.
   \end{case}
+
 \end{proof}
 
 
 An inductive proof as the one here can be interpreted as recursive function
-where case-analysis in the proof corresponds to case analysis in the program and
+where case analysis in the proof corresponds to case analysis in the program and
 the appeal to the IH corresponds to making a recursive call. We also note that
 we wrote $M : T$ (or $M \Steps N$ resp.), but to emphasize that both the typing
 derivation and the stepping derivation are closed and do not depend on any
-assumptions we write $\vdash M : T$ and $\vdash M \Steps N$ respectively. This
+assumptions, we will write $\vdash M : T$ and $\vdash M \Steps N$ respectively. This
 will scale as we generalize our language in Chapter \ref{chap:binders} to
-include also variables, functions, recursion, and other constructs
-variable-binding constructs.
+include variables, functions, recursion, and other variable-binding constructs.
 
 From a program point of view, we can read the type preservation theorem as:
-Given a typing derivation $\vdash M : T$ and a derivation for
-$\vdash M \Steps N$, we return a typing derivation $\vdash N : T$.
+``Given a typing derivation $\vdash M : T$ and a derivation for
+$\vdash M \Steps N$, we return a typing derivation $\vdash N : T$.''
 
 We begin by translating and representing the actual theorem statement
-in \beluga. This is straightforward keeping in mind that
+in \beluga. This is straightforward keeping in mind that:
 
 \begin{center}
 \begin{tabular}{l|l}
 On paper judgment~~ & ~~Type in \beluga \\
 \hline
 $\vdash M : T$      & \lstinline![|- hastype M T]! \\
-$\vdash M \Steps N$ & \lstinline![|- steps M N]! \\
+$\vdash M \Steps N$ & \lstinline![|- step M N]! \\
 \end{tabular}
 \end{center}
 
@@ -403,40 +401,40 @@ rec tps: [|- hastype M T] -> [|- step M N] -> [|- hastype N T] = ? ;
 Note that \lstinline!->! is overloaded. We have used it so far in defining the
 type families \lstinline!hastype!, \lstinline!step!, \lstinline!value!, and the
 type \lstinline!term!. The arrow in these definitions corresponded to
-the line we draw, when we draw an inference rule to distinguish between the
-premises and the conclusions. We merely were using the arrow to define syntactic
+the line we draw when we write an inference rule to distinguish between the
+premises and the conclusion. We were merely using the arrow to define syntactic
 structures.
 
 In \beluga, we strictly separate between the objects we are
-constructing (such as derivation trees, terms, etc.) from proofs about
+constructing (such as derivation trees, terms, etc.) and proofs about
 them. The type preservation statement \emph{makes a claim about the type of
 the term we obtain when taking a single step}. In the type of the function \lstinline!tps! the
 function type \lstinline!->! is much stronger; it for example allows us to write
 recursive functions which analyze objects of type \lstinline![|-hastype M T]! and
 \lstinline![|-step M M']! by pattern matching.
 
-Last, we wrote \lstinline!?!. This is very useful when developing and
+Lastly, note how we wrote \lstinline!?!. This is very useful when developing and
 debugging proofs/programs, since it allows us to describe incomplete
-proofs/programs and \beluga will print back to you the assumptions at
+proofs/programs and have \beluga print back to us the assumptions at
 that given point and the goal which needs to be proven.
 Let's fill in some of the details.
 
 \paragraph{Introducing assumptions - Writing functions} Since we are proving an
-implication, we introduce two assumptions \lstinline!d:[|-hastype M T]! and
-\lstinline!s:[|-step M N]! and try to establish \lstinline![|-hastype N T]!.
+implication, we introduce two assumptions \lstinline!d: [|-hastype M T]! and
+\lstinline!s: [|-step M N]! and try to establish \lstinline![|-hastype N T]!.
 From a programmer's point of view, we need to build a function that when given
-\lstinline!d:[|-hastype M T]! and \lstinline!s:[|-step M N]! returns a
+\lstinline!d: [|-hastype M T]! and \lstinline!s: [|-step M N]! returns a
 derivation of type \lstinline![|-hastype N T]!. We use a concrete syntax similar
-to ML-like languages writing
+to ML-like languages, writing:
 
 \begin{lstlisting}
 rec tps: [|- hastype M T] -> [|- step M N] -> [|- hastype N T] =
-fn d => fn s = ? ;
+fn d => fn s => ? ;
 \end{lstlisting}
 
 \paragraph{Case analysis - Pattern matching} Next, we split the proof into
 different cases analyzing $\proofderiv{\S}{M \Steps N}$. This corresponds to
-pattern matching on \lstinline!s:[|-step M N]! in our program.
+pattern matching on \lstinline!s: [|-step M N]! in our program.
 
 \begin{lstlisting}
 fn d => fn s => case s of
@@ -454,14 +452,14 @@ fn d => fn s => case s of
 \end{lstlisting}
 
 \index{Underscore}
-We sometimes use \lstinline!_! (underscore) for an argument, if we do not need a
+We sometimes use \lstinline!_! (underscore) for an argument if we do not need a
 name for it, since it does not play a role in the proof. For example, when
 representing $\S = \infera{\EPredSucc}{V \Value}{\tmpred ({\tmsucc V}) \Steps V}$
-we simply write \lstinline![|-e_pred_suc _]! since the sub-derivation
+we simply write \lstinline![|-e_pred_succ _]! since the sub-derivation
 representing $V \Value$ is not used in proving that types are preserved.
 \\[1em]
 \emph{Convention:} Variables describing sub-derivations, i.e. variables
-occurring inside \lstinline![]! must be upper-case. Variables describing
+occurring inside \lstinline![],! must be upper-case. Variables describing
 proper assumptions in the proof, i.e. variables introduced by
 \lstinline!fn!-abstraction, must be lower case.
 
@@ -472,7 +470,7 @@ Pattern matching in \lstinline!s! has not only generated all the cases, but more
 importantly it has refined what \lstinline!M! and \lstinline!N! stand for. In
 this particular case, \lstinline!M = (pred z)! and \lstinline!N = z!. As a first
 step in the proof, we analyzed the assumption
-\lstinline!d:[|-hastype (pred z) T]! further. We case-analyzed this assumption
+\lstinline!d: [|-hastype (pred z) T]! further. We case-analyzed this assumption
 and we stated ``by inversion on $\TPred$'' which indicated that there was
 exactly one case.
 
@@ -481,8 +479,8 @@ While we can write another case-expression analyzing \lstinline!d! in the proof,
 writing
 
 \noindent
-\lstinline!case d of [ |-t_pred D'] => ? ! we simply write
-\lstinline!let [ |-t_pred D'] = d in ?!.
+\lstinline!case d of [ |- t_pred D'] => ? ! we simply write
+\lstinline!let [ |- t_pred D'] = d in ?!.
 
 \noindent
 We now have learned that \lstinline!T = nat!.
@@ -508,32 +506,32 @@ fn d => fn s => case s of
 
 \begin{lstlisting}
 ________________________________________________________________________________
-- Meta-Context: .
+- Meta-context: .
 ________________________________________________________________________________
 - Context:
-tps: [ |-hastype M T] -> [ |-step M N] -> [ |-hastype N T]
-d: [ |-hastype (pred z) nat]
-s: [ |-step (pred z) z]
+          tps: [ |-hastype M T] -> [ |-step M N] -> [ |-hastype N T]
+          d: [ |-hastype (pred z) nat]
+          s: [ |-step (pred z) z]
 
 ================================================================================
- - Goal Type: [ |-hastype z nat]
+ - Goal: [ |-hastype z nat]
 \end{lstlisting}
 
 We now need to build an object that has type \lstinline![|- hastype z nat]!.
 This can simply be achieved by providing \lstinline![|- t_zero]!.
 
-For the step case where we are considering the case \lstinline![|- e_pred S']!,
-we also proceeded by analyzing \lstinline!d:[|- hastype (pred M') T]! by pattern
+For the step case where we considered \lstinline!s: [|- e_pred S']!,
+we also proceeded by analyzing \lstinline!d: [|- hastype (pred M') T]! by pattern
 matching. There is only one constructor that could have been used to build
 \lstinline!d! and we hence know that it must be of the form
 \lstinline![ |-t_pred D']! where \lstinline!D'! stands for a derivation
-\lstinline![|- hastype N' nat]! and we learn that \lstinline!T=nat!.
+\lstinline![|- hastype N' nat]!, and we learn that \lstinline!T = nat!.
 
-We then appeal to the induction hypothesis in the proof using \lstinline!S!
+We then appeal to the induction hypothesis in the proof using \lstinline!S'!
 and \lstinline!D'!. This corresponds to making a recursive call
-\lstinline!tps [|-D'] [|-S']! and we name the resulting derivation
-\lstinline![|-F]!. Finally, we construct our derivation
-\lstinline![ |-t_pred F]! for \lstinline![ |-hastype (pred N') nat]!.
+\lstinline!tps [|- D'] [|- S']! and we name the resulting derivation
+\lstinline![|- F]!. Finally, we construct our derivation
+\lstinline![|- t_pred F]! for \lstinline![|- hastype (pred N') nat]!.
 
 \begin{lstlisting}
 rec tps: [|- hastype M T] -> [|- step M N] -> [|- hastype N T] =
@@ -558,33 +556,35 @@ fn d => fn s => case s of
 \paragraph{When is a program a proof?} So far we have just written a functional
 program; for it to be a proof it needs to be a total function, i.e. it must be
 defined on all inputs and it must be terminating. We can check that the function
-is total in \beluga by writing the following annotation before we start writing
-the body of the function:\lstinline!/ total s (tps m t n d s) /!. This
+is total in \beluga by writing the following annotation before
+the function body: \lstinline!/ total s (tps m t n d s) /!. This
 annotation states that we claim to implement program \lstinline!tps! that is
-recursive in \lstinline!s!. Since in the statement we implicitly quantify over
-term \lstinline!M! and \lstinline!M'! as well as the type \lstinline!T! at the
+recursive in \lstinline!s!. Since in the theorem statement we implicitly quantify over
+terms \lstinline!M! and \lstinline!N! as well as the type \lstinline!T! at the
 outside, we write in the totality\index{Totality} declaration
-\lstinline!(tps m t n d s)! indicating that we are recursively analyzing the 4th
-argument (three of them are passed implicitly) passed to \lstinline!tps!. The
+\lstinline!(tps m t n d s)! indicating that we are recursively analyzing the fifth
+argument (the first three are implicit) passed to \lstinline!tps!. The
 order in which the implicit arguments are listed is irrelevant; what is
 important is that their number is correct. The full proof is then written as
 follows:
 \todo{I'm not really sure I would have understood the part with the implicit
 arguments. Maybe we should explain a little bit more about what these implicit
-arguments are? -nj}
+arguments are? -nj
+I thought it seemed clear the first reading (having never really used a proof
+assistant before). -ah}
 
 \begin{lstlisting}
 rec tps: [|- hastype M T] -> [|- step M N] -> [|- hastype N T] =
 / total s (tps m t n d s) /
 fn d => fn s => case s of
 | [|- e_if_true] =>
-  let [|- t_if_then_else D D1 D2] = d in [|-D1]
+  let [|- t_if D D1 D2] = d in [|-D1]
 | [|- e_if_false] =>
-  let [|- t_if_then_else D D1 D2] = d in [|-D2]
+  let [|- t_if D D1 D2] = d in [|-D2]
 | [|- e_if_then_else S] =>
-  let [|-t_if_then_else D D1 D2] = d in
+  let [|- t_if D D1 D2] = d in
   let [|-D'] = tps [|-D] [|-S] in
-  [|- t_if_then_else D' D1 D2]
+  [|- t_if D' D1 D2]
 | [|- e_pred_zero] =>
   let [|-t_pred _ ] = d in  [|-t_zero]
 | [|- e_pred_succ _ ] =>
@@ -615,10 +615,10 @@ this chapter (see \verb|Part1/type-preservation.bel|).
 
 Next, we consider the proof that evaluation using the small-step rules yields a
 unique value. This is an interesting proof because we must argue that values do
-not step, i.e. there are no rules that apply. For \lstinline!zero!,
+not step, i.e. there are no rules that apply. For \lstinline!z!,
 \lstinline!true! and \lstinline!false! this should be easy, since there is no
 rule that applies. But how do we argue that \emph{every number} that is a value
-does not step? - We prove a contradiction. We show inductively that if $M$ is a
+does not step? We prove a contradiction. We show inductively that if $M$ is a
 value and $M \Steps N$ then we can derive falsehood\index{Falsehood}
 (written as $\bot$).
 
@@ -630,7 +630,7 @@ By structural induction on the derivation $\proofderiv{\V}{M \Value}$.
 
 \begin{basecase}{$\V = \ianc{}{\tmzero \Value}{}$}
 $\proofderiv{\S}{\tmzero \Steps N}$ \hfill by assumption \\
-By inspecting all the existing rules, there exists no $M'$. Therefore, this
+By inspecting all the existing rules, there exists no $N$. Therefore, this
 assumption is false, and from false we can derive anything; in particular, we
 can conclude $\bot$.
 \end{basecase}
@@ -643,13 +643,13 @@ $\bot$ \hfill by i.h. using $\S'$ and $\V'$
 
 \end{proof}
 
-How do we model in a programming environment $\bot$ (falsehood)? - In a
-dependently typed language, we are modelling $\bot$ indirectly. Recall that
-there is no way to for example construct an element of the type
-\lstinline!step zero zero!.  If we think of the set of elements belonging to the
-type \lstinline!step M M'!, then \lstinline!step zero zero! is not in it, but
-for example \lstinline!step (pred zero) zero! is; so is
-\lstinline!step (succ (pred zero)) (succ zero)!. Generally speaking, if we
+How do we model in a programming environment $\bot$ (falsehood)? In a
+dependently typed language, we model $\bot$ indirectly. Recall that
+there is no way to, for example, construct an element of the type
+\lstinline!step z z!.  If we think of the set of elements belonging to the
+type \lstinline!step M N!, then \lstinline!step z z! is not in it, but
+for example \lstinline!step (pred z) z! is; so is
+\lstinline!step (succ (pred z)) (succ z)!. Generally speaking, if we
 define no elements belonging to a type, then the type is guaranteed to be empty
 and models false. In \beluga, we can define types without elements simply by
 declaring a type.
@@ -660,55 +660,56 @@ not_possible: type.
 
 We then can translate the theorem directly into a computation-level type in
 \beluga; we have also included the totality \index{Totality} declaration,
-stating that this function is recursively defined on values, i.e. object of type
-\lstinline![ |-value M]!.
+stating that this function is recursively defined on values, i.e. objects of type
+\lstinline![|- value M]!.
 
 \begin{lstlisting}
-rec values_dont_step : [ |-step M N] -> [ |-value M] -> [ |-not_possible] =
+rec values_dont_step : [|- step M N] -> [|- value M] -> [|- not_possible] =
 / total v (values_dont_step m n s v) /
 ?
 ;
 \end{lstlisting}
 
 As before, we introduce the assumption \lstinline!s! for
-\lstinline![|-step M N]! and \lstinline!v! for
-\lstinline![|-value M]!. Then we case-analyze \lstinline!v!.
+\lstinline![|- step M N]! and \lstinline!v! for
+\lstinline![|- value M]!. Then we case-analyze \lstinline!v!.
 
 \begin{lstlisting}
-rec values_dont_step : [ |-step M N] -> [ |-value M] -> [ |-not_possible] =
+rec values_dont_step : [|- step M N] -> [|- value M] -> [|- not_possible] =
 / total v (values_dont_step m n s v) /
 fn s => fn v => case v of
-| [ |-v_true]   => ?
-| [ |-v_false]  => ?
-| [ |-v_z ]     => ?
-| [ |-v_s V']   => ?
+| [|- v_true]    => ?
+| [|- v_false]   => ?
+| [|- v_z ]      => ?
+| [|- v_succ V'] => ?
 ;
 \end{lstlisting}
 
-Let's consider the case \lstinline![|-v_z] : [|-value zero]!. We argued in the
-proof by ``By inspecting all the existing rules, there exists no $N$.'' This
+Let's consider the case \lstinline![|- v_z] : [|- value zero]!. We argued in the
+proof: ``By inspecting all the existing rules, there exists no $N$.'' This
 corresponds to case-analyzing \lstinline!s!; however, there are no cases. In
 \beluga, we write \lstinline!impossible s! for splitting \lstinline!s! in
 the empty context. It is effectively a case-expression without branches.
 
 For the step-case, the translation of the proof to a program is more
 straightforward: the inversion in the proof is translated to analyzing
-\lstinline!s!; the appeal to the induction hypothesis corresponds to making a
+\lstinline!s!, and the appeal to the induction hypothesis corresponds to making a
 recursive call.
 
 \begin{lstlisting}
-rec values_dont_step : [ |-step M N] -> [ |-value M] -> [ |-not_possible] =
-/ total v (values_dont_step m m' s v) /
+rec values_dont_step : [|- step M N] -> [|- value M] -> [|- not_possible] =
+/ total v (values_dont_step m n s v) /
 fn s => fn v => case v of
-| [ |-v_true]   => impossible s
-| [ |-v_false]  => impossible s
-| [ |-v_z ]     => impossible s
-| [ |-v_s V']   => let [ |-e_succ S'] = s in values_dont_step [ |-S'] [ |-V'];
+| [|- v_true]    => impossible s
+| [|- v_false]   => impossible s
+| [|- v_z ]      => impossible s
+| [|- v_succ V'] => let [|- e_succ S'] = s in values_dont_step [|- S'] [|- V']
+;
 \end{lstlisting}
 
-One may wonder whether we can actually ever execute and run this program; the
+One may wonder whether we can ever actually execute and run this program; the
 answer is no, since there is no way to provide a derivation
-\lstinline![|-step M N]! and at the same time a proof \lstinline![|-value M]!.
+\lstinline![|- step M N]! and at the same time a proof \lstinline![|- value M]!.
 
 We are now ready to prove that evaluation yields a unique result given the
 small-step semantics. This will illustrate how we can use the lemma
@@ -721,59 +722,59 @@ LF equal: term -> term -> type =
 | ref: equal T T;
 
 
-rec unique : [|-step M M1] -> [|-step M M2] -> [ |-equal M1 M2] =
-/ total s (unique m m1 m2 s)/
+rec unique : [|- step M M1] -> [|- step M M2] -> [|- equal M1 M2] =
+/ total s1 (unique m m1 m2 s1 s2) /
 fn s1 => fn s2 => case s1 of
-| [ |-e_if_true]  =>
+| [|- e_if_true] =>
   (case s2 of
-   | [|-e_if_true]        => [|-ref]
-   | [|-e_if_then_else D] => impossible values_dont_step [|-D] [|-v_true] )
+   | [|- e_if_true]        => [|- ref]
+   | [|- e_if_then_else D] => impossible values_dont_step [|- D] [|- v_true] )
 
-| [ |-e_if_false] =>
+| [|- e_if_false] =>
   (case s2 of
-   | [|-e_if_false]       => [|-ref]
-   | [|-e_if_then_else D] => impossible values_dont_step [|-D] [|-v_false] )
+   | [|- e_if_false]       => [|- ref]
+   | [|- e_if_then_else D] => impossible values_dont_step [|- D] [|- v_false] )
 
-| [ |-e_if_then_else D] =>
+| [|- e_if_then_else D] =>
   (case s2 of
-  | [|-e_if_true]        => impossible values_dont_step [|-D] [|-v_true]
-  | [|-e_if_false]       => impossible values_dont_step [|-D] [|-v_false]
-  | [|-e_if_then_else E] => let [ |-ref] = unique [|-D] [|-E] in  [|-ref] )
+  | [|- e_if_true]        => impossible values_dont_step [|- D] [|- v_true]
+  | [|- e_if_false]       => impossible values_dont_step [|- D] [|- v_false]
+  | [|- e_if_then_else E] => let [|- ref] = unique [|- D] [|- E] in  [|- ref] )
 
-| [ |-e_succ D]        => ?
-| [ |-e_pred_zero]     => ?
-| [ |-e_pred_succ V]   => ?
-| [ |-e_pred D]        => ?
-| [ |-e_iszero_zero]   => ?
-| [ |-e_iszero_succ V] => ?
-| [ |-e_iszero D]      => ?
+| [|- e_succ D]        => ?
+| [|- e_pred_zero]     => ?
+| [|- e_pred_succ V]   => ?
+| [|- e_pred D]        => ?
+| [|- e_iszero_zero]   => ?
+| [|- e_iszero_succ V] => ?
+| [|- e_iszero D]      => ?
 ;
 \end{lstlisting}
 
 Let us consider the case where \lstinline!s1! is a derivation ending in
-\lstinline![|-e_if_true]!, i.e. \lstinline!s1! stands for a derivation of
-\lstinline![|-step (if_then_else true N1 N2) N1]!. At this point we know that \lstinline!s2! stands
-for a derivation \lstinline![|-step (if_then_else true N1 N2) M2]!. Splitting
+\lstinline![|- e_if_true]!, i.e. \lstinline!s1! stands for a derivation of
+\lstinline![|- step (if_then_else true N1 N2) N1]!. At this point we know that \lstinline!s2! stands
+for a derivation of \lstinline![|- step (if_then_else true N1 N2) M2]!. Splitting
 \lstinline!s2! into cases gives us two sub-cases:
 \begin{enumerate}
 \item We have used the rule
 \lstinline!e_if_true!. In this case, we learn that
-\lstinline!M2 = N1!. Clearly, we can conclude \lstinline![|-equal N1 N1]! by
-using \lstinline![ |-ref]! as a witness.
+\lstinline!M2 = N1!. Clearly, we can conclude \lstinline![|- equal N1 N1]! by
+using \lstinline![|- ref]! as a witness.
 
 \item We have used the rule \lstinline!e_if_then_else!. In this case, we have a
-  sub-derivation \lstinline!D! that stands for \lstinline![ |-step true N']! and \lstinline!M2 = (if_then_else N' N1 N2)!.
-We now use the lemma \lstinline!values_dont_step! passing \lstinline![|-D]! and \lstinline![|-v_true]! (a witness
-for \lstinline![|-value true]!.
-We therefore obtain an object of type \lstinline![|-not_possible]!; but no
+  sub-derivation \lstinline!D! that stands for \lstinline![|- step true N']! and \lstinline!M2 = (if_then_else N' N1 N2)!.
+We now use the lemma \lstinline!values_dont_step!, passing \lstinline![|- D]! and \lstinline![|- v_true]! (a witness
+for \lstinline![|- value true]!).
+We therefore obtain an object of type \lstinline![|- not_possible]!; but no
 elements of this type exist. This case is hence impossible.
 \end{enumerate}
 
 Next, consider the case where \lstinline!s1! is a derivation ending in
-\lstinline![|-e_if_then_else D]!, i.e. \lstinline!s1! has type
-\lstinline![|-step (if_then_else N N1 N2) (if_then_else N' N1 N2)]!. Hence \lstinline!D! stands for the sub-derivation
-\lstinline![|-step N N']!. At this point we know that \lstinline!s2! stands
-for a derivation \lstinline![|-step (if_then_else N N1 N2) M2]!. Splitting
+\lstinline![|- e_if_then_else D]!, i.e. \lstinline!s1! has type
+\lstinline![|- step (if_then_else N N1 N2) (if_then_else N' N1 N2)]!. Hence \lstinline!D! stands for the sub-derivation
+\lstinline![|- step N N']!. At this point we know that \lstinline!s2! stands
+for a derivation \lstinline![|- step (if_then_else N N1 N2) M2]!. Splitting
 \lstinline!s2! into cases gives us three sub-cases:
 
 \begin{enumerate}
@@ -787,35 +788,35 @@ for a derivation \lstinline![|-step (if_then_else N N1 N2) M2]!. Splitting
 
 \item We have used the rule \lstinline!e_if_then_else! and
   \lstinline!s2! stands for the derivation tree
-\mbox{\lstinline![|-e_if_then_else E]!} where \lstinline!E! stands for a sub-derivation
-\lstinline![|-step N N'']! and \lstinline!M2 = (if_then_else N' N1 N2)!.
+\mbox{\lstinline![|- e_if_then_else E]!} where \lstinline!E! stands for a sub-derivation
+\lstinline![|- step N N'']! and \lstinline!M2 = (if_then_else N'' N1 N2)!.
 We now make a recursive call on the sub-derivations \lstinline!D! and
-\lstinline!E!, i.e. \lstinline!unique [|-D] [|-E]!, which gives us a
+\lstinline!E!, i.e. \lstinline!unique [|- D] [|- E]!, which gives us a
 witness for
-\mbox{\lstinline![|-equal N N']!}. By inversion using \lstinline!ref!, we learn that
-\lstinline!N = N'!. To conclude the proof we need to provide a witness for
-\lstinline![|-equal (if_then_else N N1 N2) (if_then_else N N1 N2)]!. This is easily
-accomplished by \lstinline![|-ref]!. \\[0.5em]
+\mbox{\lstinline![|- equal N' N'']!}. By inversion using \lstinline!ref!, we learn that
+\lstinline!N' = N''!. To conclude the proof we thus need to provide a witness for
+\lstinline![|- equal (if_then_else N' N1 N2) (if_then_else N' N1 N2)]!. This is easily
+accomplished by \lstinline![|- ref]!. \\[0.5em]
 It might look like we should be able to simply make a recursive call
 and be done. This is
 however a fallacy, since the type is incorrect. Recall that \lstinline!ref!
 takes in an implicit argument for the term we are actually comparing; therefore
-in the first occurrence \lstinline![|-ref]! stands actually for
-\lstinline![|-ref <<N>>]!, while in the second occurrence it
-stands for \lstinline![|-ref <<(if_then_else N N1 N2)>>]!.\index{Implicit Arguments}
+in the first occurrence \lstinline![|- ref]! actually stands for
+\lstinline![|- ref <<N'>>]!, while in the second occurrence it
+stands for \lstinline![|- ref <<(if_then_else N' N1 N2)>>]!.\index{Implicit Arguments}
 \end{enumerate}
 
 
 
 \section{Termination of Well-Typed Terms}\label{sec:termination}
 
-Our goal is to prove that the evaluation of well-typed terms halts. In
-fact we already proved progress, i.e. evaluation cannot get stuck on
-well-typed terms, i.e. either a well-typed term yields a value or we
+Our goal is to prove that the evaluation of well-typed terms always halts. In
+fact we haven already proven progress, i.e. evaluation cannot get stuck on
+well-typed terms: either a well-typed term yields a value or we
 can take another step. In this section we prove that we can always
 evaluate a well-typed term to a final value.
 
-\begin{theorem}
+\begin{theorem}\label{halts}
 If $\proofderiv{\D}{M : T}$ then $M \Halts$, i.e.~there exists a value $V$ s.t. $M
 \MSteps V$.
 \end{theorem}
@@ -831,7 +832,17 @@ reflexive, transitive closure over the single step relation.
 \end{array}
 \]
 
-Evaluation of a term $M$ may clearly not yield a value in one step; in fact we may need to chain multiple steps together.
+\begin{lstlisting}
+LF multi_step : term -> term -> type =
+| ms_ref  : multi_step M M
+| ms_tr   : multi_step M N -> multi_step N M'
+            -> multi_step M M'
+| ms_step : step M M'
+            -> multi_step M M'
+;
+\end{lstlisting}
+
+Clearly evaluation of a term $M$ may not yield a value in a single step; in fact we may need to chain multiple steps together.
 In the proof for showing that well-typed terms terminate, we will see the need for lemmas that justify bigger steps when we evaluate a term.
 
 \begin{lemma}[Multi Step Lemmas]~\label{lem:multi-step}
@@ -843,27 +854,28 @@ In the proof for showing that well-typed terms terminate, we will see the need f
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-By structural induction  on $\proofderiv{\S}{M \MSteps M'}$.  We'll only the last
+By structural induction  on $\proofderiv{\S}{M \MSteps M'}$.  We'll only
+show the proof of the last
 proposition. By definition of $\MSteps$, we consider three cases:
 
 \begin{basecase}{$\S = \ianc{M \Steps M'}{M \MSteps M'}{\MStep}$}
-$\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\EIf$ \\
-$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\MStep$
+$\tmif{M}{M_1}{M_2} \Steps \tmif{M'}{M_1}{M_2}$ \hfill by rule $\EIf$ \\
+$\tmif{M}{M_1}{M_2} \MSteps \tmif{M'}{M_1}{M_2}$ \hfill by rule $\MStep$
 \end{basecase}
 
-\begin{basecase}{$\S = \ianc{}{M_1 \MSteps M_1}{\MRef}$}
-$\tmif{M_1}{M_2}{M_3} \longrightarrow^* \tmif{M_1'}{M_2}{M_3}$ \hfill
+\begin{basecase}{$\S = \ianc{}{M \MSteps M}{\MRef}$}
+$\tmif{M}{M_1}{M_2} \longrightarrow^* \tmif{M'}{M_1}{M_2}$ \hfill
 by rule $\MRef$
 \end{basecase}
 
-\begin{stepcase}{$\S = \ibnc{\above{\S_1}{M_1 \MSteps N}}{\above{\S_2}{s \MSteps M_1'}}{M_1 \MSteps M_1'}{\MTr}$}
-$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{N}{M_2}{M_3}$ \hfill by I.H. on $\S_1$\\
-$\tmif{s}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by I.H. on $\S_2$\\
-$\tmif{M_1}{M_2}{M_3} \MSteps \tmif{M_1'}{M_2}{M_3}$ \hfill by rule $\MTr$  \\
+\begin{stepcase}{$\S = \ibnc{\above{\S_1}{M \MSteps N}}{\above{\S_2}{N \MSteps M'}}{M \MSteps M'}{\MTr}$}
+$\tmif{M}{M_1}{M_2} \MSteps \tmif{N}{M_1}{M_2}$ \hfill by I.H. on $\S_1$\\
+$\tmif{N}{M_1}{M_2} \MSteps \tmif{M'}{M_1}{M_2}$ \hfill by I.H. on $\S_2$\\
+$\tmif{M}{M_1}{M_2} \MSteps \tmif{M'}{M_1}{M_2}$ \hfill by rule $\MTr$  \\
 \end{stepcase}
 \end{proof}
 
-How would we mechanize this proof in \beluga? - This may seem
+How would we mechanize this proof in \beluga? This may seem
 straightforward, but there are some subtleties. In the last statement,
 we say
 
@@ -873,52 +885,52 @@ If $M \MSteps M'$ then $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
 
 It is important to realize that $M$, $M'$, $M_1$, and $M_2$ are all
 universally quantified.  When we appeal to the induction hypothesis on
-$\S_1$ we in fact instantiate and choose the appropriate $M_2$ and
-$M_3$. It might be more precise to rewrite the statement to make this clearer.
+$\S_1$ we in fact instantiate and choose the appropriate $M_1$ and
+$M_2$. It might be more precise to rewrite the statement to make this clearer.
 
 \begin{center}
-If $t \MSteps M'$ then for all $M_1$ and $M_2$, $(\tmif t {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
+If $M \MSteps M'$, then for all $M_1$ and $M_2$, $(\tmif M {M_1} {M_2}) \MSteps (\tmif {M'} {M_1} {M_2})$.
 \end{center}
 
 Mechanizing proofs highlights such subtleties and forces us to
 understand them and be more precise than in the on paper proof. We can
 now translate the statement and the proof into
-\beluga straitforwardly. We make explicit the quantification in the
-statement writing \lstinline!{M2:[|- term}{M3:[|- term}!. In the
+\beluga straightforwardly. We make the quantification in the
+statement explicit by writing \lstinline!{M1: [|- term}{M2: [|- term}!. In the
 program, we use \lstinline!mlam!-abstraction as the corresponding
 proof term for introducing a universal quantifier.\index{Universal
   quantification}\index{Explicit Arguments}
 
 \begin{lstlisting}
-rec mstep_if_then_else :  [ |- multi_step M M'] ->
-   {M1:[ |- term]}{M2:[ |- term]}
-   [ |- multi_step (if_then_else M M1 M2) (if_then_else M' M1 M2)] =
-/ total ms (mstep_if_then_else _ _ ms)/
+rec mstep_if_then_else : [|- multi_step M M'] ->
+   {M1: [|- term]}{M2: [|- term]}
+   [|- multi_step (if_then_else M M1 M2) (if_then_else M' M1 M2)] =
+/ total ms (mstep_if_then_else m m' ms m1 m2)/
 fn ms => case ms of
-| [ |- ms_ref]      => mlam M1 => mlam M2 => [ |- ms_ref]
-| [ |- ms_step S]   => mlam M1 => mlam M2 => [ |- ms_step (e_if_then_else S)]
-| [ |- ms_tr S1 S2] => mlam M1 => mlam M2 =>
-  let [ |- S1'] = mstep_if_then_else [ |- S1] [ |- M1 ] [ |- M2 ] in
-  let [ |- S2'] = mstep_if_then_else [ |- S2] [ |- M1 ] [ |- M2 ] in
-    [ |- ms_tr S1' S2']
+| [|- ms_ref ]     => mlam M1 => mlam M2 => [|- ms_ref]
+| [|- ms_step S]   => mlam M1 => mlam M2 => [|- ms_step (e_if_then_else S)]
+| [|- ms_tr S1 S2] => mlam M1 => mlam M2 =>
+  let [|- S1'] = mstep_if_then_else [|- S1] [|- M1] [|- M2] in
+  let [|- S2'] = mstep_if_then_else [|- S2] [|- M1] [|- M2] in
+  [|- ms_tr S1' S2']
 ;
 \end{lstlisting}
 
 
 Let us return to the goal of this section, namely of proving that the
-evaluation of well-typed terms terminates. To prove this statement, we
-need an additional lemma which justifies that multi-step relations
-preserve types.
+evaluation of a well-typed term always terminates. To prove this statement, we
+need an additional lemma which justifies that the multi-step relation
+preserves types.
 
 \begin{lemma}[Type preservation for multi-step relation]
 If $M : T$ and $M \MSteps M'$ then $M':T$.
 \end{lemma}
 \begin{proof}
-By structural induction on $M \MSteps M'$.
+By structural induction on $M \MSteps M'$, using type preservation for the single-step relation.
 \end{proof}
 
-Finally, we are ready to consider the proof that evaluation of well-typed terms
-terminates. We first define $M \Halts$ as follows:
+Finally, we are ready to consider the proof that the evaluation of a well-typed term
+always terminates. We first define $M \Halts$ as follows:
 
 \[
 \begin{array}{c}
@@ -927,10 +939,12 @@ terminates. We first define $M \Halts$ as follows:
 \]
 
 Note that we are encoding existential quantification \index{Existential quantification} in the proposition ``there exists a value
-$V$ s.t. $M \MSteps V$  in the theorem by defining a separate judgment
+$V$ s.t. $M \MSteps V$'' in the theorem by defining a separate judgment
 $M \Halts$. This trick allows us to turn an existential into a
 universal quantifier, as the rule can be read as: For all $M$, $V$, if
 $M \MSteps V$ and $V \Value$ then $M \Halts$.
+
+We can now proceed with a proof of Theorem \ref{halts}.
 
 
 \begin{proof}
@@ -938,36 +952,35 @@ By structural induction on $\proofderiv{\D}{M : T}$. We show a few
 representative cases.
 
 \begin{case}{$\D = \ianc{}{ \tmzero :\Nat}{\TZero}$}
-$\tmzero \Value$ \hfill by $\VZero$ rule \\
 $\tmzero \MSteps \tmzero$ \hfill by $\MRef$\\
-$\tmzero \Value$ \hfill by definition $\VZero$\\
+$\tmzero \Value$ \hfill by $\VZero$ rule \\
 $\tmzero \Halts$ \hfill by definition of $\Halts$
 \end{case}
 
 \begin{case}{$\D = \ianc{\above{\D'}{ N : \Nat}}{ (\tmpred N) : \Nat}{\TPred}$}
-$N \Halts$, i.e. $\exists V.$ s.t.$~\V':V\Value$ ~~and~~ $\S':N \MSteps V$ \hfill by I.H. $\D'$\\[1em]
+$N \Halts$, i.e. $\exists V.$ s.t.$~\V'::V\Value$ ~~and~~ $\S'::N \MSteps V$ \hfill by I.H. $\D'$\\[1em]
 %
-\fbox{To Prove: ~~~$M\Halts$, i.e.$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$}\\[1em]
+\fbox{To Prove: ~~~$M\Halts$, i.e. $\exists W.$ s.t. $W \Value$ ~~and~~ $\S :: \tmpred N \MSteps W$}\\[1em]
 %
 \begin{subcase}{$\V' = \ianc{}{\tmzero \Value}{\VZero}$ \quad and \quad $V = \tmzero$}
 $\proofderiv{\S'}{N \MSteps \tmzero}$ \hfill restating assumption $\S'$\\
-$\proofderiv{\S_0}{(\tmpred N) \MSteps (\tmpred \tmzero)}$ \hfill by lemma mstep-pred \\
-$\proofderiv{\S_1}{(\tmpred \tmzero) \MSteps \tmzero}$ \hfill by $\MStep$ using $\EPredZ$\\
-$\proofderiv{\S}{(\tmpred N) \MSteps \tmzero}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
-$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
+$\proofderiv{\S_0}{\tmpred N \MSteps \tmpred \tmzero}$ \hfill by lemma mstep-pred \\
+$\proofderiv{\S_1}{\tmpred \tmzero \MSteps \tmzero}$ \hfill by $\MStep$ using $\EPredZ$\\
+$\proofderiv{\S}{\tmpred N \MSteps \tmzero}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\exists W$.s.t.$W \Value$ ~~and~~ $\S::~\tmpred N \MSteps W$ \hfill by choosing
 $W = \tmzero$\\
-$(\tmpred N)\Halts$ \hfill by definition of $\Halts$\\[1em]
+$(\tmpred N)\Halts$ \hfill by definition of ${\!}\Halts$\\[1em]
 \end{subcase}
 %
 \noindent
 \begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSucc}$ \quad and \quad $V = \tmsucc V'$}
-$\proofderiv{\S'}{N \MSteps (\tmsucc V')}$ \hfill restating assumption $\S'$\\
-$\proofderiv{\S_0}{(\tmpred N) \MSteps (\tmpred (\tmsucc V'))}$ \hfill by lemma mstep-pred \\
-$\proofderiv{\S_1}{(\tmpred (\tmsucc V')) \MSteps V'}$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
-$\proofderiv{\S}{(\tmpred N) \MSteps V'}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
-$\exists W$.s.t.$W \Value$~~~and~~~$\S:~(\tmpred N) \MSteps W$ \hfill by choosing
+$\proofderiv{\S'}{N \MSteps \tmsucc V'}$ \hfill restating assumption $\S'$\\
+$\proofderiv{\S_0}{\tmpred N \MSteps \tmpred (\tmsucc V')}$ \hfill by lemma mstep-pred \\
+$\proofderiv{\S_1}{\tmpred (\tmsucc V') \MSteps V'}$ \hfill by $\MStep$ using $\EPredSucc$ and $\W$\\
+$\proofderiv{\S}{\tmpred N \MSteps V'}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$\\
+$\exists W$.s.t.$W \Value$ ~~and~ ~$\S::~\tmpred N \MSteps W$ \hfill by choosing
 $W = V'$\\
-$(\tmpred N)\Halts$ \hfill by definition of $\Halts$\\[1em]
+$\tmpred N\Halts$ \hfill by definition of ${\!}\Halts$\\[1em]
 \end{subcase}
 %
 \noindent
@@ -983,6 +996,36 @@ Similar to the case where $V = \tmtrue$.
 \end{subcase}
 \end{case}
 
+\begin{case}{$\D = \icnc{\above{\D_1}{M_1 \hastype \Bool}}{\above{\D_2}{M_2 \hastype T}}{\above{\D_3}{M_3 \hastype T}}{\tmif{M_1}{M_2}{M_3} \hastype T}{\TIf}$}
+$M_1 \Halts$, i.e. $\exists V.$ s.t. $\V' :: V \Value$ ~~and~~ $\S' :: M_1 \MSteps V$ \hfill by I.H. $\D_1$ \\[1em]
+%
+\fbox{To Prove: ~~~$M\Halts$, i.e. $\exists W.$ s.t. $W \Value$ ~~and~~ $\S :: (\tmif{M_1}{M_2}{M_3}) \MSteps W$} \\[1em]
+%
+\begin{subcase}{$\V' = \ianc{}{\tmtrue \Value}{\VTrue}$ \quad and \quad $V = \tmtrue$}
+$\proofderiv{\S_0}{\tmif{M_1}{M_2}{M_3} \MSteps \tmif{\tmtrue}{M_2}{M_3}}$ \hfill by lemma mstep-if \\
+$\proofderiv{\S_1}{\tmif{\tmtrue}{M_2}{M_3} \MSteps M_2}$ \hfill by $\MStep$ using $\EIfTrue$ \\
+$\proofderiv{\S_2}{\tmif{M_1}{M_2}{M_3} \MSteps M_2}$ \hfill by $\MTr$ using $\S_0$ and $\S_1$ \\
+$M_2 \Halts$, i.e. $\exists V_2.$ s.t. $\V_2 :: V_2 \Value$ ~~and~~ $\S_3 :: M_2 \MSteps V_2$ \hfill by I.H. $\D_2$ 
+$\proofderiv{\S}{\tmif{M_1}{M_2}{M_3} \MSteps V_2}$ \hfill by $\MTr$ using $\S_2$ and $\S_3$ \\
+$\exists W.$ s.t. $W \Value$ ~~and~~ $\proofderiv{\S}{\tmif{M_1}{M_2}{M_3} \MSteps W}$ \hfill by choosing $W = V_2$ \\
+$\tmif{M_1}{M_2}{M_3} \Halts$ \hfill by definition of ${\!}\Halts$
+\end{subcase}\\[1em]
+%
+\begin{subcase}{$\V' = \ianc{}{\tmfalse \Value}{\VFalse}$ \quad and \quad $V = \tmfalse$}
+Similar to the case where $V = \tmtrue$.
+\end{subcase}\\[1em]
+%
+\begin{subcase}{$\V' = \ianc{}{\tmzero \Value}{\VZero}$ \quad and \quad $V = \tmzero$}
+$\proofderiv{\S'}{M_1 \MSteps \tmzero}$ \hfill restating assumption $\S'$ \\
+$\proofderiv{\F}{\tmzero : \Bool}$ \hfill by type preservation for multi-step relations using $\D_1$ \\
+$~~~ \bot$
+\end{subcase}\\[1em]
+%
+\begin{subcase}{$\V' = \ianc{\above{\W}{V'\Value}}{(\tmsucc V') \Value}{\VSucc}$ \quad and \quad $V = \tmsucc V'$}
+Similar to the case were $V = \tmzero$.
+\end{subcase}
+\end{case}
+
 \end{proof}
 
 
@@ -994,7 +1037,7 @@ LF halts: term -> type =
 | result: multi_step M V -> value V
        -> halts M;
 
-rec terminate : [|- hastype M T] -> [ |- halts M] =
+rec terminate : [|- hastype M T] -> [|- halts M] =
 / total d (terminate m t d)/
 fn d => ? ;
 \end{lstlisting}
@@ -1002,66 +1045,135 @@ fn d => ? ;
 Again we encode the case analysis in the proof as a case analysis in the program
 splitting on the assumption \lstinline!d!. We show below the cases we discussed
 in detail above, however the full proof is implemented in the file
-\lstinline!evaluation.bel!.
+\lstinline!termination.bel!.
 
-For the case where we have \lstinline!d:[|- hastype z nat]! by
-\lstinline![|-t_zero]!, we return \lstinline![|-result ms_ref (v_zero)]! that
-stands for a proof \lstinline![|- halts z]!. For the case where we have
-\lstinline!d:[|-hastype (pred N) nat]! by \lstinline![|-t_pred D]! and
-\lstinline!D! stands for a sub-derivation \lstinline![|- hastype N nat]!. By the
+For the case where we have \lstinline!d: [|- hastype z nat]! by
+\lstinline![|- t_zero]!, we return \lstinline![|- result ms_ref (v_z)]! that
+stands for a proof \lstinline![|- halts z]!.
+
+For the case where we have
+\lstinline!d: [|- hastype (pred N) nat]! by \lstinline![|- t_pred D]! and
+\lstinline!D! stands for a sub-derivation \lstinline![|- hastype N nat]!: by the
 induction hypothesis on \lstinline!D! (i.e. modelled via the recursive call), we
-obtain a proof that \lstinline![|- halts N]!.  By inversion, we know that this
-proof has the following shape: \lstinline![|-result MS W]! where \lstinline!MS!
-stands for \lstinline![|-multistep N R]! and \lstinline!W!
-stands for a proof \lstinline![|-value R]!. We now case-analyze
-\mbox{\lstinline![|-value R]!}.
+obtain a proof of \lstinline![|- halts N]!.  By inversion, we know that this
+proof has the shape \lstinline![|- result MS W]! where \lstinline!MS!
+stands for \lstinline![|- multi_step N R]! and \lstinline!W!
+stands for a proof \lstinline![|- value R]!. We now case-analyze
+\mbox{\lstinline![|- value R]!}.
 
 If \lstinline!R=z! and we have a derivation
-\lstinline![|-v_zero]!, we call our lemma \lstinline!mstep_pred! with
+\lstinline![|- v_z]!, we call our lemma \lstinline!mstep_pred! with
 \lstinline!MS! to obtain a derivation \lstinline!MS'! for
-\lstinline![|-multi_step (pred N) (pred z)]!. What remains is to build a proof
-for \lstinline![|-halts (pred N)]!. First, we build a proof \lstinline![|-v_zero]!
-that \lstinline![|-value z]!. Second, we build a proof for
-\lstinline![|-multi_step (pred N) z]! using transitivity together with
-\lstinline!MS'! and the derivation \lstinline![|-ms_step e_pred_zero]! for
-\mbox{\lstinline![|-multi_step (pred N) z]!}.
+\lstinline![|- multi_step (pred N) (pred z)]!. What remains is to build a proof
+for \lstinline![|- halts (pred N)]!. First, we build a proof \lstinline![|- v_z]!
+that \lstinline![|- value z]!. Second, we build a proof for
+\lstinline![|- multi_step (pred N) z]! using transitivity together with
+\lstinline!MS'! and the derivation \lstinline![|- ms_step e_pred_zero]! for
+\mbox{\lstinline![|- multi_step (pred N) z]!}.
 
 If \lstinline!R=succ W! and we have a derivation
 \lstinline!(v_succ V)!, we call our lemma \lstinline!mstep_pred! with
 \lstinline!MS! to obtain a derivation \lstinline!MS'! for
-\lstinline![|-multi_step (pred N) (pred (succ W))]!. What remains is to build a proof
-for \lstinline![|-halts (pred N)]! using transitivity together with
+\lstinline![|- multi_step (pred N) (pred (succ W))]!. What remains is to build a proof
+for \lstinline![|- halts (pred N)]! using transitivity together with
 \lstinline!MS'! and the derivation
-\lstinline![|-ms_step (e_pred_succ V)]!.
+\lstinline![|- ms_step (e_pred_succ V)]!.
 %for
 %\mbox{\lstinline![|-multi_step (pred N) W]!}.
 
 If \lstinline!R=true! or \lstinline!R=false! then we know by the type
-preservation lemma for multi-step relations implemented by the
+preservation lemma for the multi-step relation implemented by the
 function \lstinline!multi_tps! that we cannot take a step.
 
+Finally we consider the case where we have
+\lstinline!d: [|- hastype (if_then_else M M1 M2) T]! by
+\lstinline![|- t_if D D1 D2]!, where
+\lstinline!D! stands for a sub-derivation \lstinline![|- hastype M bool]!,
+\lstinline!D1! stands for a sub-derivation \lstinline![|- hastype M1 T]!, and
+\lstinline!D2! stands for a sub-derivation \lstinline![|- hastype M2 T]!. By the
+induction hypothesis on \lstinline!D!, we obtain a proof for \lstinline![|- halts M]!
+which has the shape \lstinline![|- result MS W]! where \lstinline!MS! stands for
+\lstinline![|- multistep M R]! and \lstinline!W! stands for \lstinline![|- value R]!.
+We proceed by case analysis on \lstinline![|- value R]!.
 
+If \lstinline!R=true! and we have a derivation \lstinline![|- v_true]!, we call
+our multi-step lemma \lstinline!mstep_if_then_else! with \lstinline!MS!, \lstinline!M1!, and
+\lstinline!M2! to obtain a derivation \lstinline!MS0! that stands for
+\lstinline![|- multi_step (if_then_else M M1 M2) (if_then_else true M1 M2)]!. By a recursive
+call on \lstinline!D1!, we obtain a proof of \lstinline![|- halts M1]! that has the shape
+\lstinline![|- result MS1 W']!, where \lstinline!MS1! stands for
+\lstinline![|- multi_step M1 R']! and \lstinline!W'! stands for \lstinline![|- value R']!.
+We build a proof for \lstinline![|- multi_step (if_then_else M M1 M2) R']! using
+transitivity (along with \lstinline![|- ms_step e_if_true]!)
+and combine that with \lstinline!W'! to build our proof of
+\lstinline![|- halts (if_then_else M M1 M2)]!.
+
+The case where \lstinline!R=false! proceeds similarly.
+
+If \lstinline!R=z! or \lstinline!R=succ W!, then by the type preservation
+lemma for the multi-step relation (\lstinline!multi_tps!) we cannot take a step
+and so this case is impossible.
+
+\todo{The cases for t_if are more complicated than I'd like them to be
+	because the multi-step derivations like (ms_tr MS0 (ms_step e_if_true)) can't
+	be factored out (presumably because M1 and M2 aren't specified in e_if_true)
+	so everything needs to be done at once in the last line.
+	It would be nice to make this simpler for the reader. -ah}
 
 \begin{lstlisting}
 rec terminate : [|-hastype M T] -> [ |-halts M] =
 / total d (terminate m t d)/
 fn d => case d of
-| [ |-t_true]  => ?
-| [ |-t_false] => ?
-| [ |-t_if_then_else D D1 D2] => ?
-| [ |-t_zero] => [ |-result ms_ref v_zero]
-| [ |-t_succ D] => ?
-| [ |-t_pred D] => (case terminate [ |-D ] of
-   | [ |-result MS (v_zero)] =>
-     let [ |-MS']         = mstep_pred [ |-MS] in
-       [ |-result (ms_tr MS' (ms_step e_pred_zero)) v_zero]
-   | [ |-result MS (v_succ V)] =>
-     let [ |-MS']         = mstep_pred [ |-MS] in
-       [ |-result (ms_tr MS' (ms_step (e_pred_succ V)))  V]
-   | [ |-result MS v_true] => impossible multi_tps [|-D] [|-MS]
-   | [|-result MS v_false] => impossible multi_tps [|-D] [|-MS]
+| [|- t_true]  => ?
+| [|- t_false] => ?
+| [|- t_if D D1 D2] : [|- hastype (if_then_else M M1 M2) T] =>
+  (case terminate [|- D] of
+  | [|- result MS v_true] =>
+    let [|- MS0] = mstep_if_then_else [|- MS] [|- M1] [|- M2] in
+    let [|- result MS1 W'] = terminate [|- D1] in
+      [|- result (ms_tr (ms_tr MS0 (ms_step e_if_true)) MS1) W']
+  | [|- result MS v_false] =>
+    let [|- MS0] = mstep_if_then_else [|- MS] [|- M1] [|- M2] in
+    let [|- result MS1 W'] = terminate [|- D2] in
+      [|- result (ms_tr (ms_tr MS0 (ms_step e_if_false)) MS1) W']
+  | [|- result MS v_z] => impossible multi_tps [|- D] [|- MS]
+  | [|- result MS (v_succ V)] => impossible multi_tps [|- D] [|- MS] )
+| [|- t_zero]   => [|- result ms_ref v_z]
+| [|- t_succ D] => ?
+| [|- t_pred D] => (case terminate [|- D] of
+   | [|- result MS v_z] =>
+     let [|- MS'] = mstep_pred [|- MS] in
+       [|- result (ms_tr MS' (ms_step e_pred_zero)) v_z]
+   | [|- result MS (v_succ V)] =>
+     let [|- MS'] = mstep_pred [ |-MS] in
+       [|- result (ms_tr MS' (ms_step (e_pred_succ V))) V]
+   | [|- result MS v_true]  => impossible multi_tps [|- D] [|- MS]
+   | [|- result MS v_false] => impossible multi_tps [|- D] [|- MS]
  )
-| [|-t_iszero D] => ? ;
+| [|- t_iszero D] => ?
+;
+\end{lstlisting}
+
+There is one very interesting aspect that arises in the
+translation of the on-paper proof into the program. Revisit the line
+
+\begin{center}
+	\lstinline!| [|- t_if D D1 D2] : [|- hastype (if_then_else M M1 M2) T] =>!
+\end{center}
+
+We give a type annotation to the pattern. This is not necessary for
+type reconstruction, but rather we want to be able to name the terms
+\lstinline!M1! and \lstinline!M2! as we must pass them explicitly
+when we use the lemma \lstinline!mstep_if_then_else!. Type annotations
+can also be used in let-expressions and alternatively, we could have
+written the following:
+
+\begin{lstlisting}
+| [|- t_if D D1 D2] : [|- hastype (if_then_else M M1 M2) T] =>
+  let d : [|- hastype (if_then_else M M1 M2) T] = d in
+  (case terminate [|- D] of
+   . . .
+  )
 \end{lstlisting}
 
 % \chapter{Exercise 3.5.17}
@@ -1157,6 +1269,11 @@ rec bstep_value : [|- bigstep M V] -> [|- value V] =
 ;
 \end{lstlisting}
 
+(Note that in the totality declaration for \lstinline!bstep_value!, we
+use underscores instead of naming the variables that the function
+is not recursively defined on. We will continue to do this in the
+future.)
+
 Second, we  prove that evaluation yields a unique value. Note that
 this is {\bf not} equivalent to saying that only the \BValue rule can
 apply. For example there are two different ways of proving that
@@ -1186,16 +1303,16 @@ evaluate to themselves.
 
 \begin{lstlisting}
 rec bstep_value_stagnate : [|- bigstep V1 V2] -> [|- value V1] -> [|- equal V1 V2] =
-/ total e (bstep_unique_stagnate _ _ _ e) /
+/ total e (bstep_value_stagnate _ _ _ e) /
   fn b => fn e => case e of
-  | [|- v_zero]    => let [|- b_value _] = b in [|- ref]
+  | [|- v_z]       => let [|- b_value _] = b in [|- ref]
   | [|- v_true]    => let [|- b_value _] = b in [|- ref]
   | [|- v_false]   => let [|- b_value _] = b in [|- ref]
   | [|- v_succ E'] =>
     (case b of
      | [|- b_value _] => [|- ref]
      | [|- b_succ B'] =>
-       let [|- ref] = bstep_unique_stagnate [|- B'] [|- E'] in [|- ref]
+       let [|- ref] = bstep_value_stagnate [|- B'] [|- E'] in [|- ref]
     )
 ;
 \end{lstlisting}
@@ -1213,7 +1330,7 @@ property for free.
 This part of the proof follows exactly the one described in \cite{TAPL}. In the
 proof, we rely on the Multi Step Lemmas (Lemma~\ref{lem:multi-step}) which we
 proved in the last section. These lemmas justify bigger steps when evaluating a
-term with the small-steps semantics which will be useful when we translate a
+term with the small-step semantics, which will be useful when we translate a
 sequence of steps to a derivation tree in our big-step semantics. Let us now
 write the actual proof:
 
@@ -1223,7 +1340,8 @@ write the actual proof:
 \end{proposition}
 
 \begin{proof}
-  By induction on the proof $\proofderiv{\mathcal{B}}{M \BSteps V}$:
+  By induction on the proof $\proofderiv{\mathcal{B}}{M \BSteps V}$.
+  We show a few representative cases.
 
 \begin{case}{$\B = \ianc{V \Value}{V \BSteps V}{\BValue}$}
 $V \MSteps V$ \hfill by reflexivity of $\MSteps$, i.e. $\MRef$
@@ -1231,7 +1349,7 @@ $V \MSteps V$ \hfill by reflexivity of $\MSteps$, i.e. $\MRef$
 
 \begin{case}{$\B = \ianc{\above{\B'}{M \BSteps \tmzero}}{\tmpred M
   \BSteps \tmzero}{\BPredZero}$}
-$M \MSteps \tmzero$ \hfill by i.h. on $\B'$\\
+$M \MSteps \tmzero$ \hfill by I.H. on $\B'$\\
 $\tmpred M \MSteps \tmpred z$ \hfill by lemma~\ref{lem:multi-step}\\
 $\tmpred \tmzero \Steps \tmzero$ \hfill by $\EPredZero$\\
 $\tmpred \tmzero \MSteps \tmzero$ \hfill by $\MStep$\\
@@ -1239,13 +1357,14 @@ $\tmpred M \MSteps \tmzero$ \hfill by $\MTr$
 \end{case}
 
 \begin{case}{$\B = \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{\above{\B_1}{M_1 \BSteps \tmtrue}}{\above{\B_2}{M_2 \BSteps V}}$}
-$M_1 \MSteps \tmtrue$ \hfill by i.h. using $\B_1$ \\
-$M_2 \MSteps V$ \hfill by i.h. using $\B_2$ \\
+$M_1 \MSteps \tmtrue$ \hfill by I.H. using $\B_1$ \\
+$M_2 \MSteps V$ \hfill by I.H. using $\B_2$ \\
 $\tmif{M_1}{M_2}{M_3} \MSteps \tmif{\tmtrue}{M_2}{M_3}$ \hfill by lemma~\ref{lem:multi-step}\\
 $\tmif{\tmtrue}{M_2}{M_3} \Steps M_2$ \hfill by $\EIfTrue$ \\
 $\tmif{\tmtrue}{M_2}{M_3} \MSteps M_2$ \hfill by $\MStep$ \\
 $\tmif{M_1}{M_2}{M_3} \MSteps V$ \hfill by $\MTr$
 \end{case}
+
 \end{proof}
 
 
@@ -1258,45 +1377,26 @@ program.
 rec bstep_to_mstep : [|- bigstep M V] -> [|- multi_step M V] =
 / total b (bstep_to_mstep _ _ b) /
   fn b => case b of
-
   | [|- b_value _] => [|- ms_ref]
+  | [|- b_succ  B] => ?
 
   | [|- b_pred_zero B] =>
     let [|- S] = bstep_to_mstep [|- B] in
     let [|- S'] = mstep_pred [|- S] in
-    [|- ms_tr S' (ms_step e_pred_zero)]
+      [|- ms_tr S' (ms_step e_pred_zero)]
+  | [|- b_pred_succ B] => ?
+
+  | [|- b_iszero_zero B] => ?
+  | [|- b_iszero_succ B] => ?
 
   | [|- b_if_true  B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>
     let [|- S1] = bstep_to_mstep [|- B1] in
     let [|- S2] = bstep_to_mstep [|- B2] in
     let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
-    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
+      [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
+  | [|- b_if_false B1 B2] => ?
+;
   \end{lstlisting}
-
-There is however one very interesting aspect that arises in the
-translation of the on-paper proof into the program. Revisit the line
-
-\begin{center}
-\lstinline!| [|- b_if_true  B1 B2] : [|- bigstep (if_then_else _ M2 M3) _] =>!
-\end{center}
-
-We give a type annotation to the pattern. This is not necessary for
-type reconstruction, but rather we want to be able to name the term
-\lstinline!M2! and \lstinline!M3! as we want to and must pass them explicitly
-when we use the lemma \lstinline!mstep_if_then_else!. Type annotations
-can also be used in let-expressions and alternatively, we could have
-written the following:
-\todo{To be checked in Beluga}
-
-\begin{lstlisting}
- | [|- b_if_true  B1 B2] =>
-    let [|- B1] : [|- bigstep M2 V] = [|- B1] in
-    let [|- B]  : [|- bigstep (if_then_else _ M2 M3) _]  = b in
-    let [|- S1] = bstep_to_mstep [|- B1] in
-    let [|- S2] = bstep_to_mstep [|- B2] in
-    let [|- S1'] = mstep_if_then_else [|- S1] [|- M2] [|- M3] in
-    [|- ms_tr (ms_tr S1' (ms_step e_if_true)) S2]
-\end{lstlisting}
 
 
 
@@ -1306,8 +1406,8 @@ This direction is not as immediate as the first one. This comes essentially from
 the fact that the big-step semantics relates a term and a value, while the
 small step semantics relates two terms. In this proof, we
 exploit the fact that eventually we also reach a value using the
-small-step semantics and moreover that in both, the small step and big
-step semantics, values evaluates to itself.
+small step semantics and moreover that in both the small step (with multi-step)
+and big step semantics, values evaluate to themselves.
 
 % This is the reason why we will need to say that $V$ is a value (we didn't need
 % it in the Part~1), and this is the reason why we will have to use lemmas that
@@ -1331,7 +1431,7 @@ The proof of this lemma is the hardest part. Indeed, once we have this lemma, we
 have to iterate over the $\Steps$ to get the same property for $\MSteps$:
 
 \begin{lemma}\label{lem:mstep-bstep-to-bstep}
-  If $M \MSteps N \BSteps V$ then $M \Downarrow V$.
+  If $M \MSteps N$ and $N \BSteps V$ then $M \Downarrow V$.
 \end{lemma}
 
 This lemma is translated into \beluga directly as
@@ -1355,97 +1455,108 @@ Or in \beluga:
 \begin{lstlisting}
 rec mstep_to_bstep : [|- multi_step M V] -> [|- value V] -> [|- bigstep M V] =
 / total s (mstep_to_bstep _ _ s _) /
-  fn s => fn v => ? ;
+  fn s => fn v => ?;
 \end{lstlisting}
 
 
-Let us now return to the proof of Lemma \ref{lem:step-bstep-to-bstep}:
+Let us now return to the proof of Lemma \ref{lem:step-bstep-to-bstep}.
 
 \begin{proof}[Proof of lemma~\ref{lem:step-bstep-to-bstep}]
 
-By induction on the proof $\proofderiv{\mathcal{S}}{M \Steps N}$.
+By induction on the proof $\proofderiv{\mathcal{S}}{M \Steps N}$. We show a few representative cases.
 
 \begin{case}{$\S = \ianc{}{\tmif{\tmtrue}{M_2}{M_3} \Steps  M_2}{\EIfTrue}$}
+$\tmtrue \BSteps \tmtrue$ \hfill by $\VTrue$ and $\BValue$\\
 $M_2 \BSteps V$ \hfill by assumption \\
-$\tmtrue \BSteps \tmtrue$ \hfill by $\BValue$\\
-
-    \[ \inferaa{\BIfTrue}{\tmif{\tmtrue}{M_2}{M_3} \BSteps V}{\infera{\BValue}{\tmtrue \BSteps \tmtrue}{\infera{\VTrue}{\tmtrue \Value}{}}}{M_2 \BSteps V} \]
+$\tmif{\tmtrue}{M_2}{M_3} \BSteps V$ \hfill by $\BIfTrue$
 \end{case}
 
-\begin{case}{$\S = \infera{\EPredSucc}{\tmpred \tmsucc V \Steps V}{V \Value}$}
+\begin{case}{$\S = \infera{\EPredSucc}{\tmpred (\tmsucc V) \Steps V}{V \Value}$}
 $V \BSteps V'$ \hfill by assumption \\
 $V = V'$ \hfill by Lemma \ref{lem:bstep-values-stagnate} \\
-
-    \[ \infera{\BPredSucc}{\tmpred (\tmsucc V) \BSteps V}{\infera{\BValue}{\tmsucc V \BSteps \tmsucc V}{\infera{\VSucc}{\tmsucc V \Value}{V \Value}}} \]
+$(\tmsucc V) \Value$ \hfill by $\VSucc$ \\
+$\tmsucc V \BSteps \tmsucc V$ \hfill by $\BValue$ \\
+$\tmpred (\tmsucc V) \BSteps V$ \hfill by $\BPredSucc$
 \end{case}
 
-\begin{case}{$\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{M_1 \Steps M_1'}$}
-    Let's notice that after such a step, there can be three big-step rules:
-    \begin{itemize}
-      \item A \BValue rule, but this is not possible since a $\tmif{M_1'}{M_2}{M_3}$ cannot be a
-        value.
-      \item A \BIfTrue rule. In that case, we have a proof for
-        $M_1' \BSteps \tmtrue$ and an other one for $M_2 \BSteps V$. We can then
-        apply our induction hypothesis on $M_1 \Steps M_1' \BSteps \tmtrue$,
-        obtain a proof for $M_1 \BSteps \tmtrue$ and conclude:
-        \[ \inferaa{\BIfTrue}{\tmif{M_1}{M_2}{M_3} \BSteps V}{M_1 \BSteps \tmtrue}{M_2 \BSteps V} \]
-      \item A \BIfFalse rule, which is exactly the same thing.
-    \end{itemize}
+\begin{case}{$\S = \infera{\EIf}{\tmif{M_1}{M_2}{M_3} \Steps \tmif{M_1'}{M_2}{M_3}}{\above{\S'}{M_1 \Steps M_1'}}$}
+We case-analyze $\proofderiv{\mathcal{B}}{\tmif{M_1'}{M_2}{M_3} \BSteps V}$. \\[1em]
+%
+\begin{subcase}{$\mathcal{B} = \ianc{V \Value}{V \BSteps V}{\BValue}$ ~~and~~ $V = \tmif{M_1'}{M_2}{M_3}$}
+Impossible, since $\tmif{M_1'}{M_2}{M_3}$ cannot be a value.
+\end{subcase} \\[1em]
+%
+\begin{subcase}{$\mathcal{B} = \ibnc{\above{\mathcal{B}_1}{M_1' \BSteps \tmtrue}}{\above{\mathcal{B}_2}{M_2 \BSteps V}}{\tmif{M_1'}{M_2}{M_3} \BSteps V}{\BIfTrue}$}
+$\proofderiv{\S'}{M_1 \Steps M_1'}$ \hfill restating assumption $\S'$ \\
+$M_1 \BSteps \tmtrue$ \hfill by I.H. on $\S'$ and $\mathcal{B}_1$ \\
+$\tmif{M_1}{M_2}{M_3} \BSteps V$ \hfill by $\mathcal{B}_2$ and $\BIfTrue$
+\end{subcase} \\[1em]
+%
+\begin{subcase}{$\mathcal{B} = \ibnc{\above{\mathcal{B}_1}{M_1' \BSteps \tmfalse}}{\above{\mathcal{B}_2}{M_3 \BSteps V}}{\tmif{M_1'}{M_2}{M_3} \BSteps V}{\BIfFalse}$}
+Similar to the case using $\BIfTrue$.
+\end{subcase}
 \end{case}
 
-\begin{case}{$\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{M \Steps N}$}
-    Once again, after this step, we can have two different big-step rules:
-    \begin{itemize}
-    \item A \BValue rule. Which means that $\tmsucc N$ is a value, which means
-      that $N$ is a value. We can then use the induction hypothesis on
-      $M \Steps N \BSteps N$ and get a proof of $M \BSteps N$. And then
-      conclude:
-      \[ \infera{\BSucc}{\tmsucc M \BSteps \tmsucc N}{M \BSteps N} \]
-    \item A \BSucc rule. Which means we have something like that:
-      \[ \infera{\ESucc and \BSucc}{\tmsucc M \Steps \tmsucc N \BSteps \tmsucc V'}{M \Steps N \BSteps V'} \]
-      We apply the induction hypothesis, obtain a proof of $M \BSteps V'$ and we
-      can conclude:
-      \[ \infera{\BSucc}{\tmsucc M \BSteps \tmsucc V'}{M \BSteps V'} \]
-    \end{itemize}
+\begin{case}{$\S = \infera{\ESucc}{\tmsucc M \Steps \tmsucc N}{\above{\S'}{M \Steps N}}$}
+We case-analyze $\proofderiv{\mathcal{B}}{\tmsucc N \BSteps V}$. \\[1em]
+%
+\begin{subcase}{$\mathcal{B} = \ianc{V \Value}{V \BSteps V}{\BValue}$ ~~and~~ $V = \tmsucc N$}
+$\proofderiv{\S'}{M \Steps N}$ \hfill restating assumption $\S'$ \\
+$N \Value$ \hfill by inversion on $\VSucc$ \\
+$\proofderiv{\mathcal{B}'}{N \BSteps N}$ \hfill by $\BValue$ \\
+$M \BSteps N$ \hfill by I.H. on $\S'$ and $\mathcal{B}'$ \\
+$\tmsucc M \BSteps \tmsucc N$ \hfill by $\BSucc$
+\end{subcase} \\[1em]
+%
+\begin{subcase}{$\mathcal{B} = \ianc{\above{\mathcal{B}'}{N \BSteps V'}}{\tmsucc N \BSteps \tmsucc V'}{\BSucc}$ ~~and~~ $V = \tmsucc V'$}
+$\proofderiv{\S'}{M \Steps N}$ \hfill restating assumption $\S'$ \\
+$M \BSteps V'$ \hfill by I.H. on $\S'$ and $\mathcal{B}'$ \\
+$\tmsucc M \BSteps \tmsucc V'$ \hfill by $\BSucc$
+\end{subcase}
 \end{case}
+
 \end{proof}
 
-  \begin{lstlisting}
+\begin{lstlisting}
 rec step_bstep_to_bstep : [|- step M N] -> [|- bigstep N V] -> [|- bigstep M V] =
 / total s (step_bstep_to_bstep _ _ _ s _) /
   fn s => fn b =>
   let [|- B] = b in
   case s of
+  | [|- e_if_true]  => [|- b_if_true (b_value v_true) B]
+  | [|- e_if_false] => ?
 
-  | [|- e_if_true] =>
-    [|- b_if_true (b_value v_true) B]
-
+  | [|- e_pred_zero]   => ?
   | [|- e_pred_succ E] =>
-    let [|- ref] = bstep_values_stagnate [|- B] [|- E] in
-    [|- b_pred_succ (b_value (v_succ E))]
+    let [|- ref] = bstep_value_stagnate [|- B] [|- E] in
+      [|- b_pred_succ (b_value (v_succ E))]
+
+  | [|- e_iszero_zero]   => ?
+  | [|- e_iszero_succ V] => ?
 
   | [|- e_if_then_else S] =>
     (case [|- B] of
      | [|- b_value E] => impossible [|- E]
      | [|- b_if_true  B1' B2'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
-       [|- b_if_true  B1 B2']
+         [|- b_if_true  B1 B2']
      | [|- b_if_false B1' B3'] =>
        let [|- B1] = step_bstep_to_bstep [|- S] [|- B1'] in
-       [|- b_if_false B1 B3']
-    )
+         [|- b_if_false B1 B3'] )
 
-  | [|- e_succ S] =>
+  | [|- e_succ S]   =>
     (case [|- B] of
      | [|- b_value E] =>
        let [|- v_succ E'] = [|- E] in
        let [|- B'] = step_bstep_to_bstep [|- S] [|- b_value E'] in
-       [|- b_succ B']
-     | [|- b_succ B] =>
+         [|- b_succ B']
+     | [|- b_succ B]  =>
        let [|- B'] = step_bstep_to_bstep [|- S] [|- B] in
-       [|- b_succ B']
-    )
-  \end{lstlisting}
+         [|- b_succ B'] )
+  | [|- e_pred S]   => ?
+  | [|- e_iszero S] => ?
+;
+\end{lstlisting}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "book"

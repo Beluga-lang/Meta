@@ -1,15 +1,15 @@
 \chapter*{Preface}
-This book provides an introduction to mechanizing the meta-theory of programming languages. Mechanizing formal systems and proofs about them plays an increasingly important role in this area and being literate in mechanizing formal systems and proofs about them  has become essential for students and researchers in programming languages and type systems. More importantly, mechanizing programming language theory will provide a deeper understanding, allows easy  exploration of variations and extensions, and provides immediate feedback.
+This book provides an introduction to mechanizing the meta-theory of programming languages. Mechanizing formal systems and proofs about them plays an increasingly important role in this area, and being literate in mechanizing formal systems and proofs about them  has become essential for students and researchers in programming languages and type systems. More importantly, mechanizing programming language theory will provide a deeper understanding, allows easy  exploration of variations and extensions, and provides immediate feedback.
 
 This exposition is intended for a broad range of readers, from
 advanced undergraduates to PhD students and researchers.  It is
 written as a companion to B. Pierce's book ``Types and Programming
-Languages (TAPL)'' that provides an introduction to how to mechanize
+Languages'' (TAPL) that provides an introduction to how to mechanize
 the meta-theory of types and programming languages. While it is meant
 to be read  at the same time as TAPL, we provide enough context and
 background that it should also be easily accessible to a reader who
-has read TAPL in the past or has already basic knowledge of types and
-programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}. The material from the core covers about one semester's worth of material and has been used at McGill University for teaching the course ``Language-based security'', a course open to advanced undergraduates and beginning graduate students and leaves room to either explore more in depth some mechanizations or explore extensions.
+has read TAPL in the past or already has basic knowledge of types and
+programming languages. We give a roadmap in Fig.~\ref{fig:roadmap}. The material from the core covers about one semester's worth of material and has been used at McGill University for teaching the course ``Language-based security'', a course open to advanced undergraduates and beginning graduate students, and leaves room to either explore more in depth some mechanizations or explore extensions.
 
 
 
@@ -42,7 +42,7 @@ Normalization & CH 12 & CH \ref{chap:normalization}\\
   \caption{Roadmap}
   \label{fig:roadmap}
 \end{figure}
-There are also interesting further extensions to explore; for most of those only Beluga code exists at this point without a detailled explanation.
+There are also interesting further extensions to explore (Fig. \ref{fig:extensions}); for most of those only Beluga code exists at this point without a detailed explanation.
 
 \begin{figure}
 % \begin{center}
@@ -62,7 +62,7 @@ Bounded Quantification & CH 26 & Beluga Code \\
 \end{figure}
 
 
-A key question when mechanizing formal systems and proofs is the choice of proof environment.  We have chosen here Beluga, a dependently typed programming and proof environment as it directly supports key and common concepts that frequently arise when describing formal systems and derivations within them; in particular it provides infrastructure for modelling variable binders and their scope, it supports first-class contexts to abstract, manage, and manipulate a set of assumptions, it support modelling derivations that depend on assumptions, and has built-in first-class (simultaneous) substitutions.  As such it provides one of the most advanced infrastructures for such an endeavor. As we will show,  the theory of programming languages does
+A key question when mechanizing formal systems and proofs is the choice of proof environment.  Here we have chosen Beluga, a dependently typed programming and proof environment, as it directly supports key and common concepts that frequently arise when describing formal systems and derivations within them; in particular it provides infrastructure for modelling variable binders and their scope; it supports first-class contexts to abstract, manage, and manipulate a set of assumptions; it supports modelling derivations that depend on assumptions; and it has built-in first-class (simultaneous) substitutions.  As such, it provides one of the most advanced infrastructures for such an endeavor. As we will show,  the theory of programming languages does
 not require a deep and complicated mathematical apparatus, but can be carried out in a concrete, intuitive, and computational way, when the right abstractions are provided.
 
 % This allows hands-on experimentation w
