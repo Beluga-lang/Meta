@@ -213,7 +213,7 @@ We can similarly encode the small-step relation $M \Steps N$  between the terms
 $M$ and $N$ using the type family/relation \lstinline!step!.
 
 \begin{lstlisting}
-LF step: term -> term -> type =
+LF step : term -> term -> type =
 | e_if_true      : step (if_then_else true M2 M3) M2
 | e_if_false     : step (if_then_else false M2 M3) M3
 | e_pred_zero    : step (pred z) z
