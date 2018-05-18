@@ -30,7 +30,7 @@ Multi-step relation is the reflexive transitive closure over the
 single step relation.
 }%
 
-LF multi_step: term -> term -> type = 
+LF multi_step: term -> term -> type =
 | ms_tr: multi_step M N' -> multi_step N' N
        -> multi_step M N
 | ms_ref: multi_step M M
@@ -65,7 +65,7 @@ let e1 : [ |- step (pred (succ (pred z))) (pred (succ z))]
 
 
 let e2 : [ |- step (pred (succ z)) z]
-= [ |- e_pred_succ v_zero] ;
+= [ |- e_pred_succ v_z] ;
 
 
 

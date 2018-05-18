@@ -8,15 +8,15 @@
 
 % ----------------------------------------------------------------------------
 % LEMMAS
-% Type preservation for multi-steps 
-rec multi_tps : [|- hastype M T] -> [|- multi_step M M'] -> [|- hastype M' T] = 
+% Type preservation for multi-steps
+rec multi_tps : [|- hastype M T] -> [|- multi_step M M'] -> [|- hastype M' T] =
 / total s (multi_tps m t m' d s)/
-fn d => fn s => case s of 
+fn d => fn s => case s of
 | [|- ms_ref] => d
 | [|- ms_tr S1 S2] =>
-  let d1 = multi_tps d  [|- S1] in 
+  let d1 = multi_tps d  [|- S1] in
    multi_tps d1 [|- S2]
-| [|- ms_step S] => tps d [|- S] 
+| [|- ms_step S] => tps d [|- S]
 ;
 
 
@@ -34,8 +34,8 @@ fn ms => case ms of
 | [ |- ms_step S] =>
   mlam M2 => mlam M3 => [ |- ms_step (e_if_then_else S)]
 
-| [ |- ms_tr S1 S2] => 
-  mlam M2 => mlam M3 => 
+| [ |- ms_tr S1 S2] =>
+  mlam M2 => mlam M3 =>
   let [ |- S1'] = mstep_if_then_else [ |- S1] [ |- M2 ] [ |- M3 ] in
   let [ |- S2'] = mstep_if_then_else [ |- S2] [ |- M2 ] [ |- M3 ] in
     [ |- ms_tr S1' S2']
@@ -105,68 +105,69 @@ fn ms => case ms of
 
 }%
 
-LF halts: term -> type = 
+LF halts: term -> type =
 | result: multi_step M M' -> value M'
        -> halts M;
 
 
 rec terminate : [|- hastype M T] -> [ |- halts M] =
 / total d (terminate m t d)/
-fn d => case d of 
+fn d => case d of
 | [ |- t_true] => [ |- result ms_ref v_true]
 
 | [ |- t_false] => [ |- result ms_ref v_false]
 
-| [ |- t_if D D1 D2] =>
-  let d : [|- hastype (if_then_else M M1 M2) T] = d in
-  (case terminate [ |- D ] of 
-   | [ |- result MS v_true] =>
-       let [ |- result MS1 V1] = terminate [ |- D1 ] in
-       let [ |- MS']           = mstep_if_then_else [ |- MS] [ |- M1 ] [ |- M2 ] in
-       [ |- result (ms_tr MS' (ms_tr (ms_step e_if_true) MS1)) V1]
+| [ |- t_if D D1 D2] : [|- hastype (if_then_else M M1 M2) T] =>
+  (case terminate [|- D] of
+   | [|- result MS v_true] =>
+     let [|- MS0] = mstep_if_then_else [|- MS] [|- M1] [|- M2] in
+     let [|- result MS1 W'] = terminate [|- D1] in
+       [|- result (ms_tr (ms_tr MS0 (ms_step e_if_true)) MS1) W']
+   | [|- result MS v_false] =>
+     let [|- MS0] = mstep_if_then_else [|- MS] [|- M1] [|- M2] in
+     let [|- result MS1 W'] = terminate [|- D2] in
+       [|- result (ms_tr (ms_tr MS0 (ms_step e_if_false)) MS1) W']
 
-   | [ |- result MS v_false] =>
-       let [ |- result MS2 V2] = terminate [ |- D2 ] in
-       let [ |- MS']           = mstep_if_then_else [ |- MS]  [ |- M1 ] [ |- M2 ] in
-       [ |- result (ms_tr MS' (ms_tr (ms_step e_if_false) MS2)) V2]
-   | [ |- result MS v_zero]      => impossible multi_tps [|- D] [|- MS] in []
-   | [ |- result MS (v_succ V)] => impossible multi_tps [|- D] [|- MS] in []
-  )
+   | [|- result MS v_z] => impossible multi_tps [|- D] [|- MS]
+   | [|- result MS (v_succ V)] => impossible multi_tps [|- D] [|- MS]
+ )
 
-| [ |- t_zero] => [ |- result ms_ref v_zero]
+| [ |- t_zero] => [ |- result ms_ref v_z]
 
 | [ |- t_succ D] =>
-  (case terminate [ |- D] of 
-   | [|- result MS v_true]  => impossible multi_tps [|- D] [|- MS] in []
-   | [|- result MS v_false] => impossible multi_tps [|- D] [|- MS] in [] 
-   | [ |- result MS V] => 
+  (case terminate [ |- D] of
+   | [|- result MS v_true]  => impossible multi_tps [|- D] [|- MS]
+   | [|- result MS v_false] => impossible multi_tps [|- D] [|- MS]
+
+   | [ |- result MS V] =>
      let [ |- MS']         = mstep_succ [ |- MS] in
-     [ |- result MS' (v_succ V)]    
+     [ |- result MS' (v_succ V)]
  )
 
-| [ |- t_pred D]       =>
+| [ |- t_pred D] =>
   (case terminate [ |- D ] of
-   | [ |- result MS v_zero] =>
-     let [ |- MS']         = mstep_pred [ |- MS] in
-       [ |- result (ms_tr MS' (ms_step (e_pred_zero))) v_zero]
+   | [ |- result MS v_z] =>
+     let [ |- MS'] = mstep_pred [ |- MS] in
+       [ |- result (ms_tr MS' (ms_step (e_pred_zero))) v_z]
    | [ |- result MS (v_succ V)] =>
-     let [ |- MS']         = mstep_pred [ |- MS] in
+     let [ |- MS'] = mstep_pred [ |- MS] in
        [ |- result (ms_tr MS' (ms_step (e_pred_succ V))) V]
-   | [ |- result MS v_true] => impossible multi_tps [|- D] [|- MS] in []
-   | [|- result MS v_false] => impossible multi_tps [|- D] [|- MS] in []
+
+   | [ |- result MS v_true]  => impossible multi_tps [|- D] [|- MS]
+   | [ |- result MS v_false] => impossible multi_tps [|- D] [|- MS]
  )
 
-| [|- t_iszero D] => 
-  (case terminate [|- D] of 
-   | [ |- result MS v_zero] =>
-     let [ |- MS']         = mstep_iszero [ |- MS] in
+| [|- t_iszero D] =>
+  (case terminate [|- D] of
+   | [ |- result MS v_z] =>
+     let [ |- MS'] = mstep_iszero [ |- MS] in
        [ |- result (ms_tr MS' (ms_step (e_iszero_zero))) v_true]
    | [ |- result MS (v_succ V)] =>
-     let [ |- MS']         = mstep_iszero [ |- MS] in
+     let [ |- MS'] = mstep_iszero [ |- MS] in
        [ |- result (ms_tr MS' (ms_step (e_iszero_succ V))) v_false]
 
-   | [ |- result MS v_true] => impossible multi_tps [|- D] [|- MS] in []
-   | [|- result MS v_false] => impossible multi_tps [|- D] [|- MS] in []
+   | [ |- result MS v_true]  => impossible multi_tps [|- D] [|- MS]
+   | [ |- result MS v_false] => impossible multi_tps [|- D] [|- MS]
   )
 ;
 

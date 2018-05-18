@@ -24,7 +24,7 @@ rec values_dont_step : [ |- step M M'] -> [ |- value M ] -> [ |- not_possible]=
 fn s => fn v =>  case v of
 | [ |- v_false]  => impossible s
 | [ |- v_true]   => impossible s
-| [ |- v_zero]   => impossible s
+| [ |- v_z]      => impossible s
 | [ |- v_succ V] =>
   let [ |- e_succ D] = s in values_dont_step [ |- D] [ |- V]
 ;
@@ -33,57 +33,57 @@ fn s => fn v =>  case v of
 rec unique : [|- step M M1] -> [|- step M M2] -> [ |- equal M1 M2] =
 / total s (unique m m1 m2 s) /
 fn s1 => fn s2 => case s1 of
-| [ |- e_succ D] => 
-  let [|- e_succ F] = s2 in 
+| [ |- e_succ D] =>
+  let [|- e_succ F] = s2 in
   let [ |- ref] = unique [ |- D] [|- F] in [ |- ref]
 
-| [ |- e_pred_zero] => 
-   (case s2 of 
+| [ |- e_pred_zero] =>
+   (case s2 of
     | [|- e_pred_zero] => [ |- ref]
     | [|- e_pred D] => impossible [|- D])
 
-| [ |- e_pred_succ V ] => 
-   (case s2 of 
+| [ |- e_pred_succ V ] =>
+   (case s2 of
     | [|- e_pred_succ _ ] => [ |- ref]
     | [|- e_pred D ] =>  impossible (values_dont_step [ |- D] [ |- v_succ V] ))
 
-| [ |- e_pred D] => 
+| [ |- e_pred D] =>
   (case  s2 of
-   | [|- e_pred F]   => 
+   | [|- e_pred F]   =>
     let [ |- ref] = unique [ |- D] [|- F] in [ |- ref]
    | [|- e_pred_zero] => impossible [|- D]
    | [|- e_pred_succ V] => impossible (values_dont_step [ |- D] [ |- v_succ V] ))
 
-| [|- e_iszero D] => 
- (case s2 of 
+| [|- e_iszero D] =>
+ (case s2 of
   | [|- e_iszero F] => let [|- ref] = unique [|- D] [|- F] in [|- ref]
-  | [|- e_iszero_zero] => impossible (values_dont_step [|- D] [|- v_zero])
+  | [|- e_iszero_zero] => impossible (values_dont_step [|- D] [|- v_z])
   | [|- e_iszero_succ V] => impossible (values_dont_step [|- D] [|- v_succ V])
   )
-| [|- e_iszero_zero] => 
-  (case s2 of 
-  | [|- e_iszero F] => impossible (values_dont_step [|- F] [|- v_zero])
-  | [|- e_iszero_zero] => [|- ref] 
+| [|- e_iszero_zero] =>
+  (case s2 of
+  | [|- e_iszero F] => impossible (values_dont_step [|- F] [|- v_z])
+  | [|- e_iszero_zero] => [|- ref]
   )
-| [|- e_iszero_succ V] => 
-  (case s2 of 
+| [|- e_iszero_succ V] =>
+  (case s2 of
    | [|- e_iszero F] => impossible (values_dont_step [|- F] [|- v_succ V])
    | [|- e_iszero_succ _ ] => [ |- ref]
    )
-| [|- e_if_false] => 
-  (case s2 of 
+| [|- e_if_false] =>
+  (case s2 of
    | [|- e_if_false ] => [|- ref]
    | [|- e_if_then_else F] => impossible (values_dont_step [|- F] [|- v_false])
-   ) 
+   )
 | [|- e_if_true] =>
-  (case s2 of 
+  (case s2 of
    | [|- e_if_true ] => [|- ref]
    | [|- e_if_then_else F] => impossible (values_dont_step [|- F] [|- v_true])
-   ) 
-| [|- e_if_then_else D] => 
-  (case s2 of 
+   )
+| [|- e_if_then_else D] =>
+  (case s2 of
    | [|- e_if_true ] => impossible (values_dont_step [|- D] [|- v_true])
    | [|- e_if_false ] => impossible (values_dont_step [|- D] [|- v_false])
    | [|- e_if_then_else F] => let [|- ref] = unique [|- D] [|- F] in [|- ref]
-   ) 
+   )
 ;

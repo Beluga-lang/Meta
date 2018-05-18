@@ -31,6 +31,8 @@
 \usepackage[answerdelayed,lastexercise]{exercise}
 \usepackage{appendix}
 \usepackage{makeidx}
+\usepackage[light]{zlmtt}
+
 
 \makeindex
 
@@ -113,7 +115,7 @@
                  {?}{\bf{?}}1,
         columns=[l]fullflexible,
         basicstyle=\ttfamily\lst@ifdisplaystyle\footnotesize\fi,
-        keywordstyle=\bf,
+        keywordstyle=\textbf,
         identifierstyle=\relax,
         stringstyle=\relax,
         commentstyle=\slshape\color{DimGrey},
@@ -281,7 +283,7 @@
 \newcommand {\EIfT}          {\EIfTrue}                          % to be deleted
 \newcommand {\EIfFalse}      {\ruleName{E-IfFalse}}
 \newcommand {\EIfF}          {\EIfFalse}                         % to be deleted
-\newcommand {\EIf}           {\ruleName{E-If}}
+\newcommand {\EIf}           {\ruleName{E-IfThenElse}}
 \newcommand {\ESucc}         {\ruleName{E-Succ}}
 \newcommand {\ESuc}          {\ESucc}                            % to be deleted
 \newcommand {\EPred}         {\ruleName{E-Pred}}
@@ -375,6 +377,8 @@
 \bibpunct{[}{]}{;}{a}{}{,} % citations style
 
 \newcommand{\bel}{\lstinline}
+
+\def\!{\mskip-\thickmuskip} % negative space for referring to succ, etc. without an argument
 
 \newcommand{\rc}[2]{\ensuremath{\mathcal{R}_{#1}(#2)}} % reducibility canadidate
 

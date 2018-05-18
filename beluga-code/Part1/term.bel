@@ -6,7 +6,7 @@
 }%
 
 
-LF term  : type = 
+LF term  : type =
 | true         : term
 | false        : term
 | if_then_else : term -> term -> term -> term
@@ -17,7 +17,7 @@ LF term  : type =
 ;
 
 LF value : term -> type =
-| v_zero     : value z
+| v_z        : value z
 | v_succ     : value V -> value (succ V)
 | v_true     : value true
 | v_false    : value false
@@ -36,10 +36,10 @@ let v2 = [ |- iszero (pred (succ z))]  ;
 let v3 = [ |- if_then_else (succ z) (succ z) false ] ;
 
 % Examples : Invalid Terms
-% (use keyword %not to say that the subsequent line is not true)
+% (use keyword --not to say that the subsequent line is not true)
 
-%not
+--not
 let w1 = [ |- iszero] ;
 
-%not
+--not
 let w2 = [ |- if_then_else z z] ;
