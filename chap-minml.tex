@@ -1035,7 +1035,7 @@ must encode the statement of the theorem as a type.
 \begin{lstlisting}
 LF halts: term -> type =
 | result: multi_step M V -> value V
-       -> halts M;
+          -> halts M;
 
 rec terminate : [|- hastype M T] -> [|- halts M] =
 / total d (terminate m t d)/
