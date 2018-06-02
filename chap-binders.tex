@@ -15,9 +15,9 @@ example \citep[Ch 5, Ch 9]{TAPL} for a more detailed introduction.
 \end{array}
 \]
 
-The main question we are interested here in is the following: How do we
-represent this grammar in an proof assistant or programming environment? -- Clearly, we need to
-face the issue of how to represent variables.
+The main question we are interested in here is the following: how do we
+represent this grammar in an proof assistant or programming environment? Clearly, we need to
+face the issue of representing variables.
 
 The most straightforward answer to this question is to use a standard "named" representation of
 $\lambda$-terms, where variables are treated as labels or strings. In
@@ -34,11 +34,11 @@ that:
 
 In practice this approach is cumbersome, inefficient, and often error-prone. It
 has therefore led to the search for different representations of such
-terms. Many such approaches exist (see \cite{Aydemir:TechReport09} for
-a good overview), here we will focus on two of them:
+terms. Many such approaches exist; see \cite{Aydemir:TechReport09} for
+a good overview. Here we will focus on two of them:
 
 \begin{itemize}
-\item De Bruijn indices: As the name already indicates, this approach
+\item De Bruijn indices: As the name indicates, this approach
   goes back to Nicolaas Govert de Bruijn who used it in the
   implementation of Automath. Automath was a formal language in the
   60s, developed for expressing complete mathematical theories in such a way
@@ -57,11 +57,15 @@ a good overview), here we will focus on two of them:
   same operations in a meta-logic.
 \end{itemize}
 
+\todo{I don't think these descriptions would mean much, if anything at all, to
+	the desired audience reading this book. They certainly didn't make much sense
+	to me on the first read. -ah}
+
 It is worth pointing out that although we may prefer one of these two
 representations for modelling binders in a proof and programming environment, the named
 representation of $\lambda$-terms has one important advantage: it can be
 immediately understood by others because the variables can be
-given descriptive names. Thus, even if a system uses De Bruijn indexes
+given descriptive names. Thus, even if a system uses de Bruijn indexes
 internally, it will present a user interface with names.
 
 
@@ -89,9 +93,9 @@ De Bruijn's idea was that we can represent terms more
 straightforwardly and avoid issues related to $\alpha$-renaming by
 choosing a canonical representation of variables. Variable occurrences
 point directly to their binders rather than referring to them by
-name. This is accomplished by replacing named variable by a natural
-number where the number $k$ stands for ``the variable bound by the
-$k$'th enclosing $\lambda$.
+name. This is accomplished by replacing named variables by natural
+numbers where the number $k$ stands for ``the variable bound by the
+$k$th enclosing $\lambda$''.
 
 Here are some examples:
 
@@ -119,8 +123,8 @@ We can define a grammar for de Bruijn terms more formally as
 \]
 
 The index $3$ is represented as $\shift (\shift 1)$. The distinction
-between indices and de Bruijn Terms is not really necessary; often we
-see the following definition
+between indices and de Bruijn terms is not really necessary; often we
+see the following definition:
 \[
 \begin{array}{ll@{\bnfas}l}
 \mbox{De Bruijn Terms} & T, S & 1 \bnfalt \shift T \bnfalt \lamdb T \bnfalt T \app S
@@ -166,7 +170,7 @@ i.e. it does not contain any variables declared from $\Gamma$.
 \unsure{This is unclear: translating x |- x gives 1, which is not
 closed, is it? -am It is, since 1 is a number. -bp}
 
-To translate a de Bruijn term to a lambda-term, we accummulate
+To translate a de Bruijn term to a lambda-term, we accumulate
 variables in a context and we look up the position of a variable in
 it.
 
@@ -213,10 +217,10 @@ several alternatives have been and are being developed.
 
 \subsection{Representing variables}\label{sec:HOAS-var}
 In Beluga (as in Twelf and Delphin), we support higher-order abstract
-syntax \index{Higher-order abstract
+syntax\index{Higher-order abstract
 syntax}: our foundation, called the logical framework LF
-\citep{Harper93jacm} allows us to represent binders via binders in our
-data-language.
+\citep{Harper93jacm}, allows us to represent binders via binders in our
+meta-language.
 
 For example, we can declare a type \lstinline!term! in Beluga,
 which has two constructors.
@@ -229,7 +233,7 @@ LF term : type =
 \end{lstlisting}
 
 The constructor \lstinline!app! takes in two arguments; both of them
-must be expressions. The constructor \lstinline!lam! takes in one
+must be terms. The constructor \lstinline!lam! takes in one
 argument which is in fact a function! Note that for simplicity, we do
 not represent the type annotation on the function which is present in
 our grammar.
@@ -262,21 +266,21 @@ Let's look at a few examples:
 \end{tabular}
 \end{center}
 
-Note that the type of \lstinline!\x.x! is \lstinline!exp -> exp!. So,
+Note that the type of \lstinline!\x. x! is \lstinline!term -> term!. So,
 we represent binders  via lambda-abstractions in our
 meta-language. This idea goes back to Church. One major advantage is
 that we push all $\alpha$-renaming issues to the Beluga developer. It
 is not the user's business anymore to manipulate indices or
 $\alpha$-convert terms manually; instead, the user inherits these
 properties directly from the meta-language. Of course, Beluga developers and
-implementors have to still battle with de Bruijn indices and all the issues
+implementors still have to battle with de Bruijn indices and all the issues
 around variables.
 
-Why is this great for the user of Beluga (or any other such system such as Twelf, Delphin, Hybrid, etc): not only does this higher-order representation support $\alpha$-renaming, but we also get substitution for free! Why?  - The meta-language is itself a lambda-calculus, and as every lambda-calculus it comes with some core properties such as $\alpha$-renaming and $\beta$-reduction. So, if we
+Why is this great for the user of Beluga (or any other such system such as Twelf, Delphin, Hybrid, etc.)? Not only does this higher-order representation support $\alpha$-renaming, but we also get substitution for free! Why?  The meta-language is itself a lambda-calculus, and like every lambda-calculus it comes with some core properties such as $\alpha$-renaming and $\beta$-reduction. So, if we
 have \lstinline!lam \x. lam \y. app x y! and we would like to replace
 \lstinline!x! in \lstinline!lam \y. app x y! with the term
-\lstinline!lam \z.z!, then we simply say
-\lstinline!(\y. lam \y. app x y) (lam \z.z)!, i.e. we apply the
+\lstinline!lam \z. z!, then we simply say
+\lstinline!(\y. lam \y. app x y) (lam \z. z)!, i.e. we apply the
 LF-abstraction \lstinline!(\y. lam \y. app x y)! to an argument.
 
 This will come in particularly handy when we are representing our small-step
@@ -284,7 +288,10 @@ evaluation rules. Let us recall our rules for evaluating function application.
 
 \[
 \begin{array}{c}
-\multicolumn{1}{l}{\fbox{$M \Steps M'$}: \mbox{Term $M$ steps to term $M'$}}
+\multicolumn{1}{l}{\fbox{$V \Value$}: \mbox{Term $V$ is a value}}\\[1em]
+\infer[\VLam]{(\lam x.M) \Value}{}
+\\[1em]
+\multicolumn{1}{l}{\fbox{$M \Steps N$}: \mbox{Term $M$ steps to term $N$}}
 \\[1em]
 \infer[\EAppFnStep]{M \app N \Steps M'\;N}{M \Steps M'} \qquad
 \infer[\EAppArgStep]{V \app N \Steps V\;N'}{N \Steps N' & V \Value}
@@ -293,9 +300,9 @@ evaluation rules. Let us recall our rules for evaluating function application.
 \end{array}
 \]
 
-To represent evaluation, we revisit our type family
-\lstinline!step! and define three constructors, each one corresponding to one of
-the rules in the operational semantics. The representation for $\EAppArgStep$
+To represent evaluation, we revisit our type families \lstinline!value! and
+\lstinline!step! and define four constructors, each one corresponding to one of
+the rules in the operational semantics. The representation for $\VLam$, $\EAppArgStep$,
 and $\EAppFnStep$ follows the previous ideas and is straightforward. For
 representing the rule $\EAppBeta$, we take advantage of the fact that
 LF-functions (i.e. \lstinline!M! in \lstinline!lam M! has type
@@ -304,7 +311,11 @@ argument. Hence, we can model the substitution $[V/x]M$ by simply writing
 \lstinline!M V!.
 
 \begin{lstlisting}
-LF step: term -> term -> type =
+LF value : term -> type =
+| v_lam : value (lam M)
+;
+
+LF step : term -> term -> type =
 | e_app_1    : step M M'
              -> step (app M N) (app M' N)
 | e_app_2    : step N N' -> value V
@@ -314,9 +325,9 @@ LF step: term -> term -> type =
 ;
 \end{lstlisting}
 
-We can then use these constructors \lstinline!e_app_1!,
+We can then use these constructors \lstinline!v_lam!, \lstinline!e_app_1!,
 \lstinline!e_app_2!, and \lstinline!e_app_abs! to build objects that
-correspond directly to derivations using the rules $\EAppArgStep$,
+correspond directly to derivations using the rules $\VLam$, $\EAppArgStep$,
 $\EAppFnStep$, and  $\EAppBeta$. This follows the same principles as in the
 previous chapter.
 
@@ -393,17 +404,17 @@ assumptions.
 
 As an alternative, we can re-state the rules using an explicit context for
 book-keeping; this also is often useful when we want to state properties about
-our system and about contexts in particular. To make also the
+our system and about contexts in particular. To make the
 relationship between the term $M$ and the type $T$ more explicit, we
-re-formulate the previous typing rules using the judgment: $\Gamma
-\vdash \tmhastype M T$ which can be read as: ``term $M$ has type $T$
+re-formulate the previous typing rules using the judgment $\Gamma
+\vdash \tmhastype M T$, which can be read as ``term $M$ has type $T$
 in the context $\Gamma$.''
 
 \[
 \begin{array}{c}
 \multicolumn{1}{l}{\fbox{$\Gamma \vdash \tmhastype M
     T$}\quad\mbox{Term $M$ has type $T$ in the context $\Gamma$
-    (explicit context)} }
+    (explicit contexts)} }
 \\[1em]
 \infer[u]{\Gamma \vdash \tmhastype x T}{u:\tmhastype x T \in \Gamma} \qquad
 \infer[\TFn^{x,u}]{\Gamma \vdash \tmhastype {(\lam x.M)} {(T \arrow S)}}
@@ -416,55 +427,61 @@ in the context $\Gamma$.''
 \]
 
 It should be intuitively clear that these two formulations of the typing rules
-are essentially identical; while the first set of rules use a two-dimensional
-representation the second set of rules makes the context of
+are essentially identical; while the first set of rules uses a two-dimensional
+representation, the second set of rules makes the context of
 assumptions explicit and provides an explicit rule for looking up variables.
 
 When we encode typing rules as a data-type, the first formulation with implicit
-contexts is particularly interesting and elegant. Why? - Because, we can read the
+contexts is particularly interesting and elegant. Why? Because we can read the
 rule $\TFn$ in the implicit context formulation as follows: $\lam x.M$ has type $T \arrow S$, if given a variable
 $x$ and an assumption $u$ that stands for $x:T$ we can show that $M$ has type
 $S$, i.e. we can construct a derivation for $M:S$.
 
-Note that ``Given $x$ and $u$, we can construct a derivation $M:S$'' is our
+Note that ``given $x$ and $u$, we can construct a derivation $M:S$'' is our
 informal description of a function that takes $x$ and $u$ as input and returns a
 derivation $M:S$. This is a powerful idea, since viewing it as a function
 directly enforces that the scope of $x$ and $u$ is only in the derivation for
-$M:S$. It also means that if we prove a term $N$ for $x$ and $N:T$ for $u$, we
+$M:S$. It also means that if we provide a term $N$ for $x$ and $N:T$ for $u$, we
 should be able to return a derivation $M:S$ where every $x$ has been replaced
 by $N$ and every use of $u$ has been replaced by the proof that $N:T$. As a
 consequence, the substitution lemma that we have proved for typing derivations
-can be obtained for free by simply applying the function that stands for `Given
-$x$ and $u$, we can construct a derivation $M:S$''
+can be obtained for free by simply applying the function that stands for ``given
+$x$ and $u$, we can construct a derivation $M:S$''.
 
 
-Let's make this idea concrete. We define the relation \lstinline!hastype! as
-a type in LF follows:
+Let's make this idea concrete. We define a type \lstinline!tp! consisting of the
+natural numbers and functions type, and then define the relation \lstinline!hastype! as
+a type in LF as follows:
 
 \begin{lstlisting}
-LF hastype: term -> tp -> type =
+LF tp : type = 
+| nat : tp
+| arr : tp -> tp -> tp
+;
+
+LF hastype : term -> tp -> type =
 | t_lam : ({x:term} hastype x T -> hastype (M x) S)
-	-> hastype (lam M) (arr T S)
-| t_app:  hastype M1 (arr T S) -> hastype M2 T
-	-> hastype (app M1 M2) S
+          -> hastype (lam M) (arr T S)
+| t_app : hastype M1 (arr T S) -> hastype M2 T
+          -> hastype (app M1 M2) S
 ;
 \end{lstlisting}
 
 Note that the argument to the constructor \lstinline!t_lam! must be of type
-\lstinline!({x:term} hastype x T -> hastype (M x) S)!. We write here curly braces
-for universal quantification expressing directly more formally the sentence
+\lstinline!({x:term} hastype x T -> hastype (M x) S)!. We write curly braces
+for universal quantification, to more formally express the sentence:
 ``Given a variable \lstinline!x! and an assumption \lstinline!hastype x T!, we can
 construct \lstinline!hastype (M x) S!.''
 
 One might ask, why do we have to write \lstinline!hastype (M x) S! and why can
-we not write \lstinline!hastype M S!? - Let's look carefully at the types for
+we not write \lstinline!hastype M S!? Let's look carefully at the types for
 each of the arguments. We note that we wrote \lstinline!(lam M)! and we also
 know that \lstinline!lam! takes in one argument that has type
 \lstinline!term -> term!, i.e. it is an LF-function. Hence writing \lstinline!hastype M S! would be
 giving you a type-error, since the relation \lstinline!hastype! expects an
 object of type \lstinline!term!, not of type \lstinline!term -> term!.
-But is \lstinline!(M x)!? What does it correspond to in the informal rule? - In the
-informal rule, we required that $x$ is new. It might have been clearer to not
+But is \lstinline!(M x)!? What does it correspond to in the informal rule? In the
+informal rule, we required that $x$ is new. It might have been clearer not to
 re-use the variable name $x$ that was occurring bound in $\lam
 x.M$. We restate our previous rule $\TFn$ where we make the possibly necessary
 renaming explicit below.
@@ -492,7 +509,7 @@ Let us revisit the typing derivation for $\lam x.\lam y.x~y : (\Nat \arrow
                   }
 \]
 
-How would we encode it? - First we translate the
+How would we encode it? First we translate the
 typing judgment to representation;
 % \lstinline![|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))]!.
 then we construct an object of this type that will correspond to the typing
@@ -500,8 +517,8 @@ derivation. % for  $\lam x.\lam y.x~y : (\Nat \arrow \Nat) \arrow \Nat \arrow \N
 %
 
 \begin{lstlisting}
-let d:[|-hastype (lam \x.lam \y.app x y) (arrow (arrow nat nat) (arrow nat nat))] =
-  [|-t_lam \x.\u. t_lam \y.\v. t_app u v]
+let d : [|- hastype (lam \x.lam \y.app x y) (arr (arr nat nat) (arr nat nat))] =
+        [|- t_lam \x.\u.t_lam \y.\v.t_app u v];
 \end{lstlisting}
 
 
