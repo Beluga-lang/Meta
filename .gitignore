@@ -1,0 +1,16 @@
+*.aux
+*.bbl
+*.blg
+*.fls
+*.idx
+*.ilg
+*.ind
+*.log
+*.out
+*.toc
+*.pdf
+
+# From Chris Monson's makefile
+*.d
+*.*.cookie
+*.*.make
